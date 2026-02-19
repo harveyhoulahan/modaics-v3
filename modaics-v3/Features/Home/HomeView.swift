@@ -27,8 +27,8 @@ struct HomeView: View {
                 .frame(height: 0)
                 
                 VStack(spacing: 32) {
-                    // Spacer for fixed header + greeting area (reduced from 140)
-                    Spacer().frame(height: 110)
+                    // Spacer for fixed header area only
+                    Spacer().frame(height: 90)
                     
                     // Header Content (greeting + title) - this scrolls away
                     headerContent
@@ -50,7 +50,9 @@ struct HomeView: View {
             }
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
                 scrollOffset = value
-                showCompactHeader = value < -60
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showCompactHeader = value < -40
+                }
             }
             
             // Fixed Header (always visible)
@@ -111,15 +113,16 @@ struct HomeView: View {
         }
         .background(
             showCompactHeader ? 
-                Color.modaicsBackground.opacity(0.98) :
+                Color.modaicsBackground.opacity(0.95) :
                 Color.clear
         )
+        .animation(.easeInOut(duration: 0.2), value: showCompactHeader)
         .ignoresSafeArea(edges: .top)
     }
     
     // MARK: - Header Content (scrolls away)
     private var headerContent: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(viewModel.greeting.uppercased())
                 .font(.forestCaptionLarge)
                 .foregroundColor(.sageMuted)
@@ -128,13 +131,13 @@ struct HomeView: View {
             Text("Discover pieces\nwith stories")
                 .font(.forestDisplayMedium)
                 .foregroundColor(.sageWhite)
-                .lineSpacing(4)
+                .lineSpacing(2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
-        .padding(.top, showCompactHeader ? 0 : 8)
         .opacity(showCompactHeader ? 0 : 1)
-        .animation(.easeInOut(duration: 0.2), value: showCompactHeader)
+        .offset(y: showCompactHeader ? -10 : 0)
+        .animation(.easeInOut(duration: 0.25), value: showCompactHeader)
     }
     
     // MARK: - Stats Section
