@@ -28,7 +28,7 @@ public struct DiscoverView: View {
             ScrollView(showsIndicators: false) {
                 GeometryReader { proxy in
                     Color.clear
-                        .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("scroll")).minY)
+                        .preference(key: DiscoverScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("scroll")).minY)
                 }
                 .frame(height: 0)
                 
@@ -44,7 +44,7 @@ public struct DiscoverView: View {
                 }
             }
             .coordinateSpace(name: "scroll")
-            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+            .onPreferenceChange(DiscoverScrollOffsetPreferenceKey.self) { value in
                 scrollOffset = -value
             }
         }
@@ -492,7 +492,7 @@ public struct DiscoverView: View {
 }
 
 // MARK: - Scroll Offset Preference Key
-struct ScrollOffsetPreferenceKey: PreferenceKey {
+struct DiscoverScrollOffsetPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
