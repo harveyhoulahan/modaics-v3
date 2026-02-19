@@ -59,36 +59,6 @@ public struct FlowLayout: Layout {
     }
 }
 
-// MARK: - Legacy FlowLayout (ViewBuilder version for iOS 15 compatibility)
-/// Alternative FlowLayout using ViewBuilder for broader compatibility
-public struct FlowLayoutLegacy<Content: View>: View {
-    let spacing: CGFloat
-    let content: Content
-    
-    public init(spacing: CGFloat = 8, @ViewBuilder content: () -> Content) {
-        self.spacing = spacing
-        self.content = content()
-    }
-    
-    public var body: some View {
-        _FlowLayoutContainer(spacing: spacing) {
-            content
-        }
-    }
-}
-
-// Internal container that uses the Layout protocol
-private struct _FlowLayoutContainer<Content: View>: View {
-    let spacing: CGFloat
-    let content: Content
-    
-    var body: some View {
-        FlowLayout(spacing: spacing) {
-            content
-        }
-    }
-}
-
 // MARK: - Preview
 struct FlowLayout_Previews: PreviewProvider {
     static var previews: some View {

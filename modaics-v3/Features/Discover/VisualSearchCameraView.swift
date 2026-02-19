@@ -51,8 +51,7 @@ public struct VisualSearchCameraView: View {
                             .aspectRatio(3/4, contentMode: .fit)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color.luxeGold.opacity(0.3), lineWidth: 2)
-                                    .stroke(style: StrokeStyle(lineWidth: 2, dash: [8]))
+                                    .stroke(Color.luxeGold.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [8]))
                             )
                         
                         VStack(spacing: 12) {

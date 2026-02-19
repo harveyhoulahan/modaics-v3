@@ -490,8 +490,8 @@ struct DescriptionSection: View {
                 title: "Description",
                 placeholder: "Tell buyers about your item...",
                 text: $viewModel.form.description,
-                isRequired: true,
-                minHeight: 120
+                minHeight: 120,
+                isRequired: true
             )
         }
     }
