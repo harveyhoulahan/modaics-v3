@@ -279,20 +279,19 @@ public struct BrandTrend: Codable, Hashable, Identifiable, Sendable {
     }
 }
 
-// MARK: - Placeholder Types
-
-public struct User: Identifiable, Codable, Hashable, Sendable {
-    public let id: UUID
-    
-    public init(id: UUID = UUID()) {
-        self.id = id
-    }
-}
-
+// MARK: - Wardrobe Type
 public struct Wardrobe: Identifiable, Codable, Hashable, Sendable {
     public let id: UUID
+    public var name: String
+    public var ownerId: UUID
+    public var garmentIds: [UUID]
+    public var isPublic: Bool
     
-    public init(id: UUID = UUID()) {
+    public init(id: UUID = UUID(), name: String, ownerId: UUID, garmentIds: [UUID] = [], isPublic: Bool = false) {
         self.id = id
+        self.name = name
+        self.ownerId = ownerId
+        self.garmentIds = garmentIds
+        self.isPublic = isPublic
     }
 }

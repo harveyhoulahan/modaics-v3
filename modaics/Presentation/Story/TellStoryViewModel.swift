@@ -74,7 +74,7 @@ public class TellStoryViewModel: ObservableObject {
     @Published public var selectedCondition: Condition = .good
     @Published public var selectedSizeSystem: SizeSystem = .us
     @Published public var sizeLabel: String = ""
-    @Published public var selectedColors: [Color] = []
+    @Published public var selectedColors: [ModaicsColor] = []
     @Published public var brand: String = ""
     @Published public var currency: Currency = .gbp // v3.5: Multi-currency support
     
@@ -99,7 +99,7 @@ public class TellStoryViewModel: ObservableObject {
     @Published public var aiGeneratedDescription: String?
     @Published public var aiGeneratedStory: String?
     @Published public var aiDetectedCategory: Category?
-    @Published public var aiDetectedColors: [Color] = []
+    @Published public var aiDetectedColors: [ModaicsColor] = []
     @Published public var aiDetectedBrand: String?
     @Published public var aiDetectedCondition: Condition?
     @Published public var aiSuggestedPrice: PriceSuggestion?
@@ -313,7 +313,7 @@ public class TellStoryViewModel: ObservableObject {
         
         // Apply detected colors
         if !analysis.detectedColors.isEmpty {
-            let colors = analysis.detectedColors.map { Color(name: $0) }
+            let colors = analysis.detectedColors.map { ModaicsColor(name: $0) }
             aiDetectedColors = colors
             if selectedColors.isEmpty {
                 selectedColors = colors
@@ -388,7 +388,7 @@ public class TellStoryViewModel: ObservableObject {
         aiSuggestedTitle = "Vintage Leather Jacket"
         aiGeneratedStory = "This classic leather jacket features a rich patina that tells stories of adventures past. The buttery-soft leather has been well-loved, developing unique creases and character that only come with time."
         aiDetectedCategory = .outerwear
-        aiDetectedColors = [Color(name: "Black", hex: "#1a1a1a")]
+        aiDetectedColors = [ModaicsColor(name: "Black", hex: "#1a1a1a")]
         aiDetectedBrand = "Schott NYC"
         aiDetectedCondition = .vintage
         aiStyleTags = ["vintage", "biker", "classic", "leather", "edgy"]
@@ -593,7 +593,7 @@ extension TellStoryViewModel {
         vm.aiSuggestedTitle = "Vintage Leather Biker Jacket"
         vm.aiGeneratedStory = "This authentic vintage leather jacket carries decades of character in every crease. The rich patina tells stories of open roads and adventures."
         vm.aiDetectedCategory = .outerwear
-        vm.aiDetectedColors = [Color(name: "Black", hex: "#1a1a1a")]
+        vm.aiDetectedColors = [ModaicsColor(name: "Black", hex: "#1a1a1a")]
         vm.aiDetectedBrand = "Schott NYC"
         vm.aiDetectedCondition = .vintage
         vm.aiSuggestedPrice = PriceSuggestion(
@@ -613,14 +613,14 @@ extension TellStoryViewModel {
 public struct CreateStoryInput: Sendable {
     public var narrative: String
     public var provenance: String
-    public var memories: [Memory]
+    public var memories: [StoryMemory]
     public var whySelling: String?
     public var careNotes: String?
     
     public init(
         narrative: String,
         provenance: String = "",
-        memories: [Memory] = [],
+        memories: [StoryMemory] = [],
         whySelling: String? = nil,
         careNotes: String? = nil
     ) {
@@ -650,7 +650,7 @@ public enum StoryAction: Sendable {
     case generateFromPhotos([URL])
 }
 
-public struct Memory: Identifiable, Sendable {
+public struct StoryMemory: Identifiable, Sendable {
     public let id: UUID
     public var description: String
     public var date: Date?

@@ -51,7 +51,7 @@ class GarmentRepository: GarmentRepositoryProtocol {
     }
     
     func updateGarment(_ garment: Garment) async throws -> Garment {
-        let updated: Garment = try await apiClient.put("/garments/\(garment.id)", body: garment)
+        let updated: Garment = try await apiClient.put("/garments/\(garment.id.uuidString)", body: garment)
         try? await offlineStorage.saveGarment(updated)
         return updated
     }
@@ -153,13 +153,31 @@ class DiscoveryRepository: DiscoveryRepositoryProtocol {
         return garments
     }
     
-    func getCollections() async throws -> [Collection] {
-        let collections: [Collection] = try await apiClient.get("/discover/collections")
+    func getCollections() async throws -> [ModaicsCollection] {
+        let collections: [ModaicsCollection] = try await apiClient.get("/discover/collections")
         return collections
     }
     
     func search(query: String) async throws -> SearchResults {
         let results: SearchResults = try await apiClient.get("/search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
         return results
+    }
+}
+
+// MARK: - Collection Type for App Layer
+/// Collection type for the App layer (matches the DiscoveryFeed expectation)
+struct ModaicsCollection: Identifiable, Codable, Sendable {
+    let id: String
+    var title: String
+    var description: String
+    var imageUrl: String
+    var garmentCount: Int
+    
+    init(id: String = UUID().uuidString, title: String, description: String, imageUrl: String, garmentCount: Int = 0) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.imageUrl = imageUrl
+        self.garmentCount = garmentCount
     }
 }

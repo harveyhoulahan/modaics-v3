@@ -236,10 +236,10 @@ class MockExchangeGarmentUseCase: ExchangeGarmentUseCaseProtocol {
         try await Task.sleep(nanoseconds: 300_000_000)
         
         return [
-            Garment(name: "Cashmere Sweater", brand: "Everlane", size: "M", imageUrl: nil),
-            Garment(name: "Denim Jacket", brand: "Levi's", size: "L", imageUrl: nil),
-            Garment(name: "Pleated Skirt", brand: "COS", size: "S", imageUrl: nil),
-            Garment(name: "Wool Trousers", brand: "ARKET", size: "32", imageUrl: nil)
+            Garment(title: "Cashmere Sweater", description: "Soft cashmere", story: Story(narrative: "Cozy favorite", provenance: "Everlane"), condition: .excellent, category: .tops, size: Size(label: "M", system: .us), ownerId: UUID(), brand: Brand(name: "Everlane")),
+            Garment(title: "Denim Jacket", description: "Classic denim", story: Story(narrative: "Thrift find", provenance: "Levi's"), condition: .vintage, category: .outerwear, size: Size(label: "L", system: .us), ownerId: UUID(), brand: Brand(name: "Levi's")),
+            Garment(title: "Pleated Skirt", description: "Elegant pleats", story: Story(narrative: "Office wear", provenance: "COS"), condition: .excellent, category: .bottoms, size: Size(label: "S", system: .us), ownerId: UUID(), brand: Brand(name: "COS")),
+            Garment(title: "Wool Trousers", description: "Warm wool", story: Story(narrative: "Winter essential", provenance: "ARKET"), condition: .veryGood, category: .bottoms, size: Size(label: "32", system: .us), ownerId: UUID(), brand: Brand(name: "ARKET"))
         ]
     }
     
@@ -247,10 +247,10 @@ class MockExchangeGarmentUseCase: ExchangeGarmentUseCaseProtocol {
         try await Task.sleep(nanoseconds: 300_000_000)
         
         return [
-            Garment(name: "Trench Coat", brand: "Burberry", size: "M", imageUrl: nil),
-            Garment(name: "Knit Cardigan", brand: "Acne Studios", size: "S", imageUrl: nil),
-            Garment(name: "Leather Boots", brand: "Common Projects", size: "42", imageUrl: nil),
-            Garment(name: "Canvas Tote", brand: "Baggu", size: nil, imageUrl: nil)
+            Garment(title: "Trench Coat", description: "Classic trench", story: Story(narrative: "Timeless piece", provenance: "Burberry"), condition: .excellent, category: .outerwear, size: Size(label: "M", system: .us), ownerId: UUID(), brand: Brand(name: "Burberry")),
+            Garment(title: "Knit Cardigan", description: "Cozy knit", story: Story(narrative: "Layering piece", provenance: "Acne Studios"), condition: .excellent, category: .tops, size: Size(label: "S", system: .us), ownerId: UUID(), brand: Brand(name: "Acne Studios")),
+            Garment(title: "Leather Boots", description: "Quality leather", story: Story(narrative: "Investment boots", provenance: "Common Projects"), condition: .veryGood, category: .shoes, size: Size(label: "42", system: .eu), ownerId: UUID(), brand: Brand(name: "Common Projects")),
+            Garment(title: "Canvas Tote", description: "Everyday bag", story: Story(narrative: "Practical carryall", provenance: "Baggu"), condition: .good, category: .accessories, size: Size(label: "OS", system: .oneSize), ownerId: UUID(), brand: Brand(name: "Baggu"))
         ]
     }
     

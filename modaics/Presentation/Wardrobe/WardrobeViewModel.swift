@@ -8,7 +8,7 @@ class WardrobeViewModel: ObservableObject {
     
     // MARK: - Published Properties
     @Published var garments: [Garment] = []
-    @Published var collections: [Collection] = []
+    @Published var collections: [WardrobeCollection] = []
     @Published var communityConnections: [CommunityConnection] = []
     @Published var sustainabilityScore: SustainabilityScore = SustainabilityScore(rating: 0, level: .seedling)
     @Published var isLoading = false
@@ -19,7 +19,7 @@ class WardrobeViewModel: ObservableObject {
     var totalGarments: Int { garments.count }
     
     var uniqueBrands: Int {
-        Set(garments.map(\.brand)).count
+        Set(garments.compactMap { $0.brand?.name }).count
     }
     
     var waterSaved: Int {
@@ -33,8 +33,8 @@ class WardrobeViewModel: ObservableObject {
     }
     
     var garmentsRecirculated: Int {
-        // Garments that were previously owned
-        garments.filter { $0.provenance != nil }.count
+        // Garments that were previously owned or from external sources
+        garments.filter { !$0.previousOwnerIds.isEmpty || $0.source != .modaics }.count
     }
     
     // MARK: - Private Properties
@@ -100,7 +100,7 @@ class WardrobeViewModel: ObservableObject {
     }
     
     /// Create a new collection
-    func createCollection(name: String, garments: [String]) async throws -> Collection {
+    func createCollection(name: String, garments: [String]) async throws -> WardrobeCollection {
         let collection = try await wardrobeUseCase.createCollection(name: name, garmentIds: garments)
         collections.append(collection)
         return collection
@@ -169,12 +169,12 @@ class WardrobeViewModel: ObservableObject {
     private func sortGarments() {
         switch sortBy {
         case .recent:
-            // Sort by date added (mock - would use actual dates)
-            break
+            // Sort by date added
+            garments.sort { $0.createdAt > $1.createdAt }
         case .alphabetical:
-            garments.sort { $0.name < $1.name }
+            garments.sort { $0.title < $1.title }
         case .brand:
-            garments.sort { $0.brand < $1.brand }
+            garments.sort { ($0.brand?.name ?? "") < ($1.brand?.name ?? "") }
         case .mostWorn:
             // Would sort by wear count
             break
@@ -222,15 +222,55 @@ enum WardrobeError: LocalizedError {
     }
 }
 
+// MARK: - Sort Options
+enum SortOption {
+    case recent
+    case alphabetical
+    case brand
+    case mostWorn
+}
+
+// MARK: - Wardrobe Collection
+struct WardrobeCollection: Identifiable {
+    let id = UUID()
+    let name: String
+    let garmentCount: Int
+    let previewGarments: [Garment]
+    let createdAt: Date
+}
+
+// MARK: - Community Connection
+struct CommunityConnection: Identifiable {
+    let id = UUID()
+    let userName: String
+    let initials: String
+    let avatarColor: Color
+    let description: String
+    let date: Date
+}
+
+// MARK: - Sustainability Score
+struct SustainabilityScore {
+    let rating: Int // 0-100
+    let level: SustainabilityLevel
+}
+
+enum SustainabilityLevel: String {
+    case seedling = "Seedling"
+    case growing = "Growing"
+    case blooming = "Blooming"
+    case thriving = "Thriving"
+}
+
 // MARK: - Use Case Protocol
 protocol BuildWardrobeUseCaseProtocol {
     func getGarments() async throws -> [Garment]
-    func getCollections() async throws -> [Collection]
+    func getCollections() async throws -> [WardrobeCollection]
     func getCommunityConnections() async throws -> [CommunityConnection]
     func getSustainabilityScore() async throws -> SustainabilityScore
     func addGarment(_ garment: Garment) async throws -> Garment
     func removeGarment(_ garmentId: String) async throws
-    func createCollection(name: String, garmentIds: [String]) async throws -> Collection
+    func createCollection(name: String, garmentIds: [String]) async throws -> WardrobeCollection
     func addToCollection(garmentId: String, collectionId: String) async throws
 }
 
@@ -240,24 +280,24 @@ class MockBuildWardrobeUseCase: BuildWardrobeUseCaseProtocol {
         try await Task.sleep(nanoseconds: 800_000_000)
         
         return [
-            Garment(name: "Cashmere Sweater", brand: "Everlane", size: "M", imageUrl: nil),
-            Garment(name: "Wool Coat", brand: "COS", size: "M", imageUrl: nil),
-            Garment(name: "Silk Blouse", brand: "Reformation", size: "S", imageUrl: nil),
-            Garment(name: "Linen Trousers", brand: "ARKET", size: "32", imageUrl: nil),
-            Garment(name: "Denim Jacket", brand: "Levi's", size: "L", imageUrl: nil),
-            Garment(name: "Cotton T-Shirt", brand: "Organic Basics", size: "M", imageUrl: nil),
-            Garment(name: "Pleated Skirt", brand: "Uniqlo", size: "M", imageUrl: nil),
-            Garment(name: "Knit Cardigan", brand: "& Other Stories", size: "S", imageUrl: nil)
+            Garment(title: "Cashmere Sweater", description: "Soft cashmere", story: Story(narrative: "A gift from my mother", provenance: "Everlane"), condition: .excellent, category: .tops, size: Size(label: "M", system: .us), ownerId: UUID(), brand: Brand(name: "Everlane")),
+            Garment(title: "Wool Coat", description: "Classic wool coat", story: Story(narrative: "Found in London", provenance: "COS"), condition: .excellent, category: .outerwear, size: Size(label: "M", system: .us), ownerId: UUID(), brand: Brand(name: "COS")),
+            Garment(title: "Silk Blouse", description: "Elegant silk", story: Story(narrative: "Wedding outfit", provenance: "Reformation"), condition: .excellent, category: .tops, size: Size(label: "S", system: .us), ownerId: UUID(), brand: Brand(name: "Reformation")),
+            Garment(title: "Linen Trousers", description: "Summer essential", story: Story(narrative: "Holiday purchase", provenance: "ARKET"), condition: .veryGood, category: .bottoms, size: Size(label: "32", system: .us), ownerId: UUID(), brand: Brand(name: "ARKET")),
+            Garment(title: "Denim Jacket", description: "Vintage style", story: Story(narrative: "Thrift find", provenance: "Levi's"), condition: .vintage, category: .outerwear, size: Size(label: "L", system: .us), ownerId: UUID(), brand: Brand(name: "Levi's")),
+            Garment(title: "Cotton T-Shirt", description: "Basic tee", story: Story(narrative: "Staple piece", provenance: "Organic Basics"), condition: .good, category: .tops, size: Size(label: "M", system: .us), ownerId: UUID(), brand: Brand(name: "Organic Basics")),
+            Garment(title: "Pleated Skirt", description: "Classic pleats", story: Story(narrative: "Office wear", provenance: "Uniqlo"), condition: .excellent, category: .bottoms, size: Size(label: "M", system: .us), ownerId: UUID(), brand: Brand(name: "Uniqlo")),
+            Garment(title: "Knit Cardigan", description: "Cozy knit", story: Story(narrative: "Autumn favorite", provenance: "& Other Stories"), condition: .veryGood, category: .tops, size: Size(label: "S", system: .us), ownerId: UUID(), brand: Brand(name: "& Other Stories"))
         ]
     }
     
-    func getCollections() async throws -> [Collection] {
+    func getCollections() async throws -> [WardrobeCollection] {
         try await Task.sleep(nanoseconds: 500_000_000)
         
         return [
-            Collection(name: "Work Essentials", garmentCount: 8, previewGarments: [], createdAt: Date().addingTimeInterval(-2592000)),
-            Collection(name: "Weekend Casual", garmentCount: 5, previewGarments: [], createdAt: Date().addingTimeInterval(-1728000)),
-            Collection(name: "Special Occasions", garmentCount: 3, previewGarments: [], createdAt: Date().addingTimeInterval(-864000))
+            WardrobeCollection(name: "Work Essentials", garmentCount: 8, previewGarments: [], createdAt: Date().addingTimeInterval(-2592000)),
+            WardrobeCollection(name: "Weekend Casual", garmentCount: 5, previewGarments: [], createdAt: Date().addingTimeInterval(-1728000)),
+            WardrobeCollection(name: "Special Occasions", garmentCount: 3, previewGarments: [], createdAt: Date().addingTimeInterval(-864000))
         ]
     }
     
@@ -268,7 +308,7 @@ class MockBuildWardrobeUseCase: BuildWardrobeUseCaseProtocol {
             CommunityConnection(
                 userName: "Sarah Mitchell",
                 initials: "SM",
-                avatarColor: .modaicsTerracotta,
+                avatarColor: .orange,
                 description: "Sarah shared a handoff note with her vintage wool coat",
                 date: Date().addingTimeInterval(-86400)
             ),
@@ -296,7 +336,7 @@ class MockBuildWardrobeUseCase: BuildWardrobeUseCaseProtocol {
             CommunityConnection(
                 userName: "Maya Patel",
                 initials: "MP",
-                avatarColor: .orange,
+                avatarColor: .pink,
                 description: "You and Maya have exchanged 3 pieces now!",
                 date: Date().addingTimeInterval(-432000)
             )
@@ -318,9 +358,9 @@ class MockBuildWardrobeUseCase: BuildWardrobeUseCaseProtocol {
         try await Task.sleep(nanoseconds: 400_000_000)
     }
     
-    func createCollection(name: String, garmentIds: [String]) async throws -> Collection {
+    func createCollection(name: String, garmentIds: [String]) async throws -> WardrobeCollection {
         try await Task.sleep(nanoseconds: 500_000_000)
-        return Collection(name: name, garmentCount: garmentIds.count, previewGarments: [], createdAt: Date())
+        return WardrobeCollection(name: name, garmentCount: garmentIds.count, previewGarments: [], createdAt: Date())
     }
     
     func addToCollection(garmentId: String, collectionId: String) async throws {

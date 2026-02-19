@@ -6,6 +6,10 @@ import FirebaseAuth
 import UIKit
 #endif
 
+// MARK: - Type Aliases
+/// Type alias for backward compatibility with Color type
+public typealias Color = ModaicsColor
+
 // MARK: - Environment
 /// App environment configuration
 public enum Environment: String, Sendable {
@@ -121,6 +125,21 @@ class FirebaseAuthTokenProvider: AuthTokenProvider {
     
     func clearToken() {
         // Token is managed by Firebase
+    }
+}
+#else
+// Mock implementation for builds without Firebase
+class FirebaseAuthTokenProvider: AuthTokenProvider {
+    func getToken() async throws -> String {
+        return "mock-token"
+    }
+    
+    func refreshToken() async throws -> String {
+        return "mock-token-refreshed"
+    }
+    
+    func clearToken() {
+        // No-op for mock
     }
 }
 #endif
@@ -495,97 +514,80 @@ class Services {
     }
 }
 
-// MARK: - Protocol Definitions
+// MARK: - API Errors
 
-protocol AuthServiceProtocol {
-    var currentUser: User? { get }
-    func signIn(email: String, password: String) async throws
-    func signUp(email: String, password: String) async throws
-    func signInWithApple() async throws
-    func signInWithGoogle() async throws
-    func signOut() throws
-    func resetPassword(email: String) async throws
+enum APIError: Error {
+    case invalidURL
+    case unauthorized
+    case notFound
+    case serverError
+    case decodingError
 }
 
-protocol APIClientProtocol {
-    func get<T: Decodable>(_ path: String) async throws -> T
-    func post<T: Decodable, B: Encodable>(_ path: String, body: B) async throws -> T
-    func put<T: Decodable, B: Encodable>(_ path: String, body: B) async throws -> T
-    func delete(_ path: String) async throws
-    func upload(_ path: String, data: Data, filename: String) async throws -> String
-    func clearCache()
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let authStateChanged = Notification.Name("authStateChanged")
 }
 
-protocol ImageServiceProtocol {
-    func uploadImage(_ image: UIImage, path: String) async throws -> String
-    func downloadImage(url: String) async throws -> UIImage
-    func cacheImage(_ image: UIImage, for key: String)
-    func getCachedImage(for key: String) -> UIImage?
+// MARK: - Embedding Response
+/// Response type for embedding generation requests
+public struct EmbeddingResponse: Codable, Sendable {
+    public let embedding: [Float]
+    public let dimensions: Int
+    public let model: String
+    
+    public init(embedding: [Float], dimensions: Int, model: String) {
+        self.embedding = embedding
+        self.dimensions = dimensions
+        self.model = model
+    }
 }
 
-protocol OfflineStorageProtocol {
-    func configure()
-    func saveGarment(_ garment: Garment) async throws
-    func getGarments() async throws -> [Garment]
-    func getGarment(id: String) async throws -> Garment?
-    func deleteGarment(id: String) async throws
-    func saveStory(_ story: Story) async throws
-    func getStories(for garmentId: String) async throws -> [Story]
-    func syncPendingChanges() async throws
+// MARK: - Discovery Feed
+/// Feed response from discovery endpoint
+public struct DiscoveryFeed: Codable, Sendable {
+    public var trendingStories: [Story]
+    public var recentGarments: [Garment]
+    public var collections: [Collection]
+    
+    public init(trendingStories: [Story] = [], recentGarments: [Garment] = [], collections: [Collection] = []) {
+        self.trendingStories = trendingStories
+        self.recentGarments = recentGarments
+        self.collections = collections
+    }
 }
 
-protocol LoggerProtocol {
-    func log(_ message: String, level: LogLevel)
+// MARK: - Collection
+/// Curated collection for discovery
+public struct Collection: Identifiable, Codable, Sendable {
+    public let id: String
+    public var title: String
+    public var description: String
+    public var imageUrl: String
+    public var garmentCount: Int
+    
+    public init(id: String = UUID().uuidString, title: String, description: String, imageUrl: String, garmentCount: Int = 0) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.imageUrl = imageUrl
+        self.garmentCount = garmentCount
+    }
 }
 
-enum LogLevel {
-    case debug, info, warning, error
-}
-
-// MARK: - Repository Protocols
-
-protocol GarmentRepositoryProtocol {
-    func get(by id: UUID) async throws -> Garment
-    func get(ids: [UUID]) async throws -> [Garment]
-    func create(_ garment: Garment) async throws -> Garment
-    func update(_ garment: Garment) async throws -> Garment
-    func delete(id: UUID) async throws
-    func exists(id: UUID) async throws -> Bool
-    func getByOwner(userId: UUID) async throws -> [Garment]
-    func getByOwner(userId: UUID, page: Int, limit: Int) async throws -> PaginatedResult<Garment>
-    func getByOwner(userId: UUID, isListed: Bool) async throws -> [Garment]
-    func listGarment(id: UUID, exchangeType: ExchangeType, price: Decimal?) async throws -> Garment
-    func delistGarment(id: UUID) async throws -> Garment
-    func updatePrice(id: UUID, newPrice: Decimal?) async throws -> Garment
-    func createBatch(_ garments: [Garment]) async throws -> [Garment]
-    func updateBatch(_ garments: [Garment]) async throws -> [Garment]
-    func deleteBatch(ids: [UUID]) async throws
-    func search(query: String) async throws -> [Garment]
-    func search(query: String, ownerId: UUID) async throws -> [Garment]
-    func filter(_ criteria: GarmentFilterCriteria) async throws -> [Garment]
-    func filter(_ criteria: GarmentFilterCriteria, page: Int, limit: Int) async throws -> PaginatedResult<Garment>
-    func countByOwner(userId: UUID) async throws -> Int
-    func countListedByOwner(userId: UUID) async throws -> Int
-    func totalValueByOwner(userId: UUID) async throws -> Decimal
-}
-
-protocol StoryRepositoryProtocol {
-    func getStories(for garmentId: String) async throws -> [Story]
-    func createStory(_ story: Story) async throws -> Story
-    func deleteStory(id: String) async throws
-}
-
-protocol UserRepositoryProtocol {
-    func getCurrentUser() async throws -> User
-    func updateUser(_ user: User) async throws -> User
-    func getUser(id: String) async throws -> User
-}
-
-protocol DiscoveryRepositoryProtocol {
-    func getTrendingStories() async throws -> [Story]
-    func getRecentGarments() async throws -> [Garment]
-    func getCollections() async throws -> [Collection]
-    func search(query: String) async throws -> SearchResults
+// MARK: - Search Results
+/// Combined search results
+public struct SearchResults: Codable, Sendable {
+    public var garments: [Garment]
+    public var stories: [Story]
+    public var users: [User]
+    
+    public init(garments: [Garment] = [], stories: [Story] = [], users: [User] = []) {
+        self.garments = garments
+        self.stories = stories
+        self.users = users
+    }
 }
 
 // MARK: - Story Repository Implementation
@@ -692,53 +694,4 @@ class DiscoveryRepository: DiscoveryRepositoryProtocol {
         let results: SearchResults = try await apiClient.get("/discovery/search?q=\(encodedQuery)")
         return results
     }
-}
-
-// MARK: - API Errors
-
-enum APIError: Error {
-    case invalidURL
-    case unauthorized
-    case notFound
-    case serverError
-    case decodingError
-}
-
-// MARK: - Notification Names
-
-extension Notification.Name {
-    static let authStateChanged = Notification.Name("authStateChanged")
-}
-
-// MARK: - Legacy Model Types (for backward compatibility)
-
-struct User: Identifiable, Codable, Sendable {
-    let id: String
-    var email: String
-    var displayName: String
-    var avatarUrl: String?
-    var bio: String?
-    var garmentCount: Int
-    var storyCount: Int
-    var followerCount: Int
-}
-
-struct Collection: Identifiable, Codable, Sendable {
-    let id: String
-    var title: String
-    var description: String
-    var imageUrl: String
-    var garmentCount: Int
-}
-
-struct SearchResults: Codable, Sendable {
-    var garments: [Garment]
-    var stories: [Story]
-    var users: [User]
-}
-
-struct DiscoveryFeed: Codable, Sendable {
-    var trendingStories: [Story]
-    var recentGarments: [Garment]
-    var collections: [Collection]
 }

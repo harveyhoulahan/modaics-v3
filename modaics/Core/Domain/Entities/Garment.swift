@@ -106,7 +106,7 @@ public struct Garment: Identifiable, Codable, Hashable, Sendable {
     public var styleTags: [String]
     
     /// Colors present in the garment
-    public var colors: [Color]
+    public var colors: [ModaicsColor]
     
     /// Materials and fabric composition
     public var materials: [Material]
@@ -192,7 +192,7 @@ public struct Garment: Identifiable, Codable, Hashable, Sendable {
         category: Category,
         subcategory: String? = nil,
         styleTags: [String] = [],
-        colors: [Color] = [],
+        colors: [ModaicsColor] = [],
         materials: [Material] = [],
         brand: Brand? = nil,
         size: Size,
@@ -287,7 +287,7 @@ public enum Category: String, Codable, CaseIterable, Hashable, Sendable {
     case other = "other"
 }
 
-public struct Color: Codable, Hashable, Identifiable, Sendable {
+public struct ModaicsColor: Codable, Hashable, Identifiable, Sendable {
     public let id: UUID
     public var name: String
     public var hex: String?
@@ -499,7 +499,7 @@ public extension Garment {
         category: .outerwear,
         subcategory: "Leather Jacket",
         styleTags: ["vintage", "biker", "edgy", "classic", "timeless"],
-        colors: [Color(name: "Black", hex: "#1a1a1a")],
+        colors: [ModaicsColor(name: "Black", hex: "#1a1a1a")],
         materials: [Material(name: "Leather", percentage: 100)],
         brand: Brand(name: "Schott NYC", isLuxury: false),
         size: Size(label: "M", system: .us, measurements: [
@@ -528,7 +528,7 @@ public extension Garment {
         currency: .gbp,
         category: .dresses,
         styleTags: ["elegant", "minimal", "special-occasion"],
-        colors: [Color(name: "Emerald", hex: "#50C878")],
+        colors: [ModaicsColor(name: "Emerald", hex: "#50C878")],
         materials: [Material(name: "Silk", percentage: 100, isSustainable: true)],
         brand: Brand(name: "Vince", isLuxury: true),
         size: Size(label: "S", system: .us),
@@ -553,7 +553,7 @@ public extension Garment {
         currency: .gbp,
         category: .outerwear,
         styleTags: ["vintage", "denim", "90s"],
-        colors: [Color(name: "Blue")],
+        colors: [ModaicsColor(name: "Blue")],
         materials: [Material(name: "Denim", percentage: 100)],
         size: Size(label: "M", system: .us),
         ownerId: UUID(),

@@ -37,7 +37,7 @@ class MockGarmentRepository: GarmentRepositoryProtocol {
     }
     
     func getGarment(id: String) async throws -> Garment {
-        return MockData.garments.first { $0.id == id } ?? MockData.garments[0]
+        return MockData.garments.first { $0.id.uuidString == id } ?? MockData.garments[0]
     }
     
     func createGarment(_ garment: Garment) async throws -> Garment {
@@ -53,7 +53,7 @@ class MockGarmentRepository: GarmentRepositoryProtocol {
 
 class MockStoryRepository: StoryRepositoryProtocol {
     func getStories(for garmentId: String) async throws -> [Story] {
-        return MockData.stories.filter { $0.garmentId == garmentId }
+        return MockData.stories.filter { $0.garmentId.uuidString == garmentId }
     }
     
     func createStory(_ story: Story) async throws -> Story {
@@ -86,7 +86,7 @@ class MockDiscoveryRepository: DiscoveryRepositoryProtocol {
         return MockData.garments
     }
     
-    func getCollections() async throws -> [Collection] {
+    func getCollections() async throws -> [ModaicsCollection] {
         return MockData.collections
     }
     
@@ -149,133 +149,148 @@ enum MockData {
     
     static let garments: [Garment] = [
         Garment(
-            id: "garment-1",
-            name: "Vintage Denim Jacket",
-            category: "Outerwear",
-            color: "Indigo",
-            brand: "Levi's",
-            size: "M",
-            images: [],
-            storyIds: ["story-1"],
-            createdAt: Date(),
-            updatedAt: Date()
+            title: "Vintage Denim Jacket",
+            description: "A beautifully worn-in denim jacket with authentic patina.",
+            story: Story(
+                narrative: "Found at a thrift store in Brooklyn",
+                provenance: "Levi's"
+            ),
+            condition: .vintage,
+            category: .outerwear,
+            size: Size(label: "M", system: .us),
+            ownerId: UUID(uuidString: "user-1") ?? UUID(),
+            brand: Brand(name: "Levi's")
         ),
         Garment(
-            id: "garment-2",
-            name: "Silk Blouse",
-            category: "Tops",
-            color: "Cream",
-            brand: "Everlane",
-            size: "S",
-            images: [],
-            storyIds: [],
-            createdAt: Date(),
-            updatedAt: Date()
+            title: "Silk Blouse",
+            description: "Elegant silk blouse in cream",
+            story: Story(
+                narrative: "Wedding outfit",
+                provenance: "Everlane"
+            ),
+            condition: .excellent,
+            category: .tops,
+            size: Size(label: "S", system: .us),
+            ownerId: UUID(uuidString: "user-1") ?? UUID(),
+            brand: Brand(name: "Everlane")
         ),
         Garment(
-            id: "garment-3",
-            name: "Wool Coat",
-            category: "Outerwear",
-            color: "Camel",
-            brand: "COS",
-            size: "M",
-            images: [],
-            storyIds: ["story-2"],
-            createdAt: Date(),
-            updatedAt: Date()
+            title: "Wool Coat",
+            description: "Classic camel wool coat",
+            story: Story(
+                narrative: "Investment piece for winter",
+                provenance: "COS"
+            ),
+            condition: .excellent,
+            category: .outerwear,
+            size: Size(label: "M", system: .us),
+            ownerId: UUID(uuidString: "user-1") ?? UUID(),
+            brand: Brand(name: "COS")
         ),
         Garment(
-            id: "garment-4",
-            name: "Linen Trousers",
-            category: "Bottoms",
-            color: "Beige",
-            brand: "Uniqlo",
-            size: "30",
-            images: [],
-            storyIds: [],
-            createdAt: Date(),
-            updatedAt: Date()
+            title: "Linen Trousers",
+            description: "Relaxed linen trousers",
+            story: Story(
+                narrative: "Summer essential",
+                provenance: "Uniqlo"
+            ),
+            condition: .veryGood,
+            category: .bottoms,
+            size: Size(label: "30", system: .us),
+            ownerId: UUID(uuidString: "user-1") ?? UUID(),
+            brand: Brand(name: "Uniqlo")
         ),
         Garment(
-            id: "garment-5",
-            name: "Cashmere Sweater",
-            category: "Knitwear",
-            color: "Heather Grey",
-            brand: "Naadam",
-            size: "M",
-            images: [],
-            storyIds: [],
-            createdAt: Date(),
-            updatedAt: Date()
+            title: "Cashmere Sweater",
+            description: "Soft cashmere knit",
+            story: Story(
+                narrative: "Cozy winter favorite",
+                provenance: "Naadam"
+            ),
+            condition: .excellent,
+            category: .tops,
+            size: Size(label: "M", system: .us),
+            ownerId: UUID(uuidString: "user-1") ?? UUID(),
+            brand: Brand(name: "Naadam")
         ),
         Garment(
-            id: "garment-6",
-            name: "Leather Ankle Boots",
-            category: "Shoes",
-            color: "Black",
-            brand: "Everlane",
-            size: "38",
-            images: [],
-            storyIds: ["story-3"],
-            createdAt: Date(),
-            updatedAt: Date()
+            title: "Leather Ankle Boots",
+            description: "Classic black leather boots",
+            story: Story(
+                narrative: "Walking through cities",
+                provenance: "Everlane"
+            ),
+            condition: .veryGood,
+            category: .shoes,
+            size: Size(label: "38", system: .us),
+            ownerId: UUID(uuidString: "user-1") ?? UUID(),
+            brand: Brand(name: "Everlane")
         )
     ]
     
     static let stories: [Story] = [
         Story(
-            id: "story-1",
-            garmentId: "garment-1",
-            authorId: "user-1",
-            title: "The Thrift Store Treasure",
-            content: "Found this vintage Levi's jacket at a small thrift store in Brooklyn. It was hidden behind a rack of oversized 80s blazers, but something about the worn-in denim caught my eye. The previous owner had patched the elbows with beautiful Japanese sashiko stitching—someone clearly loved this piece. I like to imagine where it traveled, what concerts it attended, the stories it could tell. Now it's my go-to layer for cool autumn evenings.",
-            images: [],
-            createdAt: Date(),
-            updatedAt: Date()
+            narrative: "I found this vintage jacket in a tiny shop in Tokyo's Shimokitazawa district.",
+            provenance: "Flamingo, Shimokitazawa, Tokyo",
+            whySelling: "Moving to a warmer climate",
+            careNotes: "Treat with leather conditioner every 6 months"
         ),
         Story(
-            id: "story-2",
-            garmentId: "garment-3",
-            authorId: "user-1",
-            title: "Investment Piece",
-            content: "I saved for six months to buy this coat. It was my first major fashion purchase after landing my dream job. Every time I put it on, I'm reminded of that milestone and how far I've come. Quality over quantity—this coat will last me decades.",
-            images: [],
-            createdAt: Date(),
-            updatedAt: Date()
+            narrative: "Investment piece for my first big job",
+            provenance: "COS flagship store",
+            whySelling: "Ready for a new chapter"
         ),
         Story(
-            id: "story-3",
-            garmentId: "garment-6",
-            authorId: "user-1",
-            title: "Walking Through Life",
-            content: "These boots have walked through three countries, countless city streets, and one unforgettable rainy proposal in Paris. The leather has molded to my feet perfectly—they're like old friends at this point.",
-            images: [],
-            createdAt: Date(),
-            updatedAt: Date()
+            narrative: "These boots have walked through three countries",
+            provenance: "Everlane online",
+            whySelling: "Time for someone new to make memories"
         )
     ]
     
-    static let collections: [Collection] = [
-        Collection(
-            id: "collection-1",
+    static let collections: [ModaicsCollection] = [
+        ModaicsCollection(
             title: "Summer Essentials",
             description: "Lightweight pieces for warm days",
             imageUrl: "",
             garmentCount: 12
         ),
-        Collection(
-            id: "collection-2",
+        ModaicsCollection(
             title: "Vintage Finds",
             description: "Pre-loved treasures with stories",
             imageUrl: "",
             garmentCount: 8
         ),
-        Collection(
-            id: "collection-3",
+        ModaicsCollection(
             title: "Work Wardrobe",
             description: "Professional and polished",
             imageUrl: "",
             garmentCount: 15
         )
     ]
+}
+
+// MARK: - Supporting Types for Mocks
+
+struct ModaicsCollection: Identifiable, Codable {
+    let id: String
+    var title: String
+    var description: String
+    var imageUrl: String
+    var garmentCount: Int
+    
+    init(id: String = UUID().uuidString, title: String, description: String, imageUrl: String, garmentCount: Int = 0) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.imageUrl = imageUrl
+        self.garmentCount = garmentCount
+    }
+}
+
+// Extend Story to include garmentId for mock filtering
+extension Story {
+    var garmentId: UUID {
+        // For mocks, return a predictable UUID
+        UUID()
+    }
 }

@@ -1,6 +1,45 @@
 import Foundation
 import UIKit
 
+// MARK: - Use Case Protocols
+// These are simplified protocols for the App layer use cases
+
+protocol GetGarmentsUseCaseProtocol {
+    func execute() async throws -> [Garment]
+}
+
+protocol CreateGarmentUseCaseProtocol {
+    func execute(_ garment: Garment) async throws -> Garment
+}
+
+protocol UpdateGarmentUseCaseProtocol {
+    func execute(_ garment: Garment) async throws -> Garment
+}
+
+protocol DeleteGarmentUseCaseProtocol {
+    func execute(id: String) async throws
+}
+
+protocol GetStoriesUseCaseProtocol {
+    func execute(for garmentId: String) async throws -> [Story]
+}
+
+protocol CreateStoryUseCaseProtocol {
+    func execute(_ story: Story) async throws -> Story
+}
+
+protocol GetDiscoveryFeedUseCaseProtocol {
+    func execute() async throws -> DiscoveryFeed
+}
+
+protocol GetUserProfileUseCaseProtocol {
+    func execute() async throws -> User
+}
+
+protocol UploadImageUseCaseProtocol {
+    func execute(_ image: UIImage, path: String) async throws -> String
+}
+
 // MARK: - Use Case Implementations
 
 // MARK: - Garment Use Cases
