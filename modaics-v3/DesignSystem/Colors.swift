@@ -1,52 +1,52 @@
 import SwiftUI
 
 // MARK: - Modaics Dark Green Porsche Design System
-/// Deep forest greens, gold accents, near-black backgrounds
+/// Deep forest greens, gold accents, near-black backgrounds with MORE green
 public extension Color {
     
-    // MARK: - Backgrounds (near-black with green undertones)
-    static let modaicsBackground = Color(hex: "0D120F")          // primary bg — deep void with subtle green
-    static let modaicsBackgroundSecondary = Color(hex: "141B16") // slightly lighter
-    static let modaicsBackgroundTertiary = Color(hex: "1C241F")  // cards and surfaces
-    static let modaicsElevated = Color(hex: "232B26")            // modals and sheets
+    // MARK: - Backgrounds (near-black with STRONG green undertones)
+    static let modaicsBackground = Color(hex: "0A140F")          // deeper green-black
+    static let modaicsBackgroundSecondary = Color(hex: "0F1F17") // stronger green
+    static let modaicsBackgroundTertiary = Color(hex: "152920")  // even greener
+    static let modaicsElevated = Color(hex: "1C3328")            // elevated surfaces
     
-    // MARK: - Surfaces (charcoal with green tint)
-    static let modaicsSurface = Color(hex: "1E2621")             // primary surface
-    static let modaicsSurfaceHighlight = Color(hex: "28332C")    // hover/active states
+    // MARK: - Surfaces (charcoal with STRONG green tint)
+    static let modaicsSurface = Color(hex: "162B21")             // greener surface
+    static let modaicsSurfaceHighlight = Color(hex: "1F3D2E")    // stronger green highlight
     
-    // MARK: - Primary Greens (racing green / forest)
-    static let modaicsPrimary = Color(hex: "0A1F15")             // Porsche racing green — signature
-    static let modaicsForest = Color(hex: "0F2E1C")              // primary actions
-    static let modaicsRacingGreen = Color(hex: "1A3D28")         // brighter interactive
-    static let modaicsEmerald = Color(hex: "2D5A3D")             // selected states
+    // MARK: - Primary Greens (forest green - ENHANCED)
+    static let modaicsPrimary = Color(hex: "0A2A1A")             // deeper forest
+    static let modaicsForest = Color(hex: "0D3D26")              // stronger forest green
+    static let modaicsRacingGreen = Color(hex: "145233")         // brighter racing green
+    static let modaicsEmerald = Color(hex: "1E6B45")             // more vibrant emerald
     
-    // MARK: - Secondary Greens (moss / olive)
-    static let modaicsMoss = Color(hex: "4A5D23")                // organic feel
-    static let modaicsOlive = Color(hex: "6B7B3C")               // earthy sophistication
-    static let modaicsSage = Color(hex: "8B9A6D")                // softer green
-    static let modaicsFern = Color(hex: "5A7A4A")                // sustainability
+    // MARK: - Secondary Greens (moss / olive - ENHANCED)
+    static let modaicsMoss = Color(hex: "3D5C1F")                // richer moss
+    static let modaicsOlive = Color(hex: "5A7A35")               // greener olive
+    static let modaicsSage = Color(hex: "7A9A5A")                // more vibrant sage
+    static let modaicsFern = Color(hex: "4A9A5A")                // brighter fern
     
-    // MARK: - Gold Accents (luxury — replaces red)
-    static let luxeGold = Color(hex: "D9BD6B")                   // primary accent, CTAs
+    // MARK: - Gold Accents (luxury — same)
+    static let luxeGold = Color(hex: "D9BD6B")                   // primary accent
     static let luxeGoldBright = Color(hex: "EBD185")             // highlights
-    static let luxeGoldDeep = Color(hex: "B89E4A")               // pressed states
+    static let luxeGoldDeep = Color(hex: "B89E4A")               // pressed
     
     // MARK: - Chrome / Metallic
-    static let modaicsChrome = Color(hex: "C4C4C4")              // chrome silver
-    static let modaicsAluminum = Color(hex: "A8A8A8")            // brushed aluminum
-    static let modaicsPlatinum = Color(hex: "E8E8E8")            // bright metallic
-    static let modaicsGunmetal = Color(hex: "6B7280")            // dark metallic
+    static let modaicsChrome = Color(hex: "C4C4C4")
+    static let modaicsAluminum = Color(hex: "A8A8A8")
+    static let modaicsPlatinum = Color(hex: "E8E8E8")
+    static let modaicsGunmetal = Color(hex: "6B7280")
     
     // MARK: - Text
-    static let sageWhite = Color(hex: "F5F3EE")                  // primary text — warm white
-    static let sageMuted = Color(hex: "BFC7B8")                  // secondary text
-    static let sageSubtle = Color(hex: "8C9585")                 // tertiary / placeholders
+    static let sageWhite = Color(hex: "F5F7F3")                  // slightly green-tinted white
+    static let sageMuted = Color(hex: "B8C9B0")                  // green-tinted muted
+    static let sageSubtle = Color(hex: "7A8B72")                 // green-tinted subtle
     
-    // MARK: - Semantic
-    static let modaicsEco = Color(hex: "4ADE80")                 // sustainability success
-    static let emerald = Color(hex: "33B873")                    // eco-positive actions
-    static let modaicsWarning = Color(hex: "F59E0B")             // caution
-    static let modaicsError = Color(hex: "EF4444")               // destructive only
+    // MARK: - Semantic (ENHANCED greens)
+    static let modaicsEco = Color(hex: "3DDC84")                 // brighter eco green
+    static let emerald = Color(hex: "2DD47A")                    // more vibrant emerald
+    static let modaicsWarning = Color(hex: "F59E0B")
+    static let modaicsError = Color(hex: "EF4444")
     
     // MARK: - Background Gradient
     static var forestBackground: LinearGradient {

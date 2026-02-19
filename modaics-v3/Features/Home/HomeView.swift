@@ -8,20 +8,24 @@ struct HomeView: View {
     @State private var showNavTitle = false
     
     var body: some View {
-        ZStack {
-            // Background gradient
+        ZStack(alignment: .top) {
+            // Background
             Color.modaicsBackground.ignoresSafeArea()
             
+            // Main Scroll Content
             ScrollView(showsIndicators: false) {
                 GeometryReader { proxy in
                     Color.clear
-                        .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("scroll")).minY)
+                        .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .global).minY)
                 }
                 .frame(height: 0)
                 
                 VStack(spacing: 32) {
-                    // Header
-                    headerSection
+                    // Spacer for header
+                    Spacer().frame(height: 140)
+                    
+                    // Header Content (greeting + title)
+                    headerContent
                     
                     // Stats Row
                     statsSection
@@ -37,15 +41,13 @@ struct HomeView: View {
                     
                     Spacer(minLength: 100)
                 }
-                .padding(.top, 8)
             }
-            .coordinateSpace(name: "scroll")
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
                 scrollOffset = value
-                showNavTitle = value < -10
+                showNavTitle = value < -80
             }
             
-            // Collapsing Header Overlay
+            // Fixed Collapsing Header
             collapsingHeader
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -54,14 +56,22 @@ struct HomeView: View {
         }
     }
     
-    // MARK: - Collapsing Header
+    // MARK: - Collapsing Header (Fixed at top)
     private var collapsingHeader: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("MODAICS")
-                    .font(showNavTitle ? .forestHeadlineMedium : .forestDisplaySmall)
-                    .foregroundColor(showNavTitle ? .sageWhite : .luxeGold)
-                    .animation(.easeInOut(duration: 0.2), value: showNavTitle)
+                // Logo/Title that changes on scroll
+                if showNavTitle {
+                    Text("MODAICS")
+                        .font(.forestHeadlineMedium)
+                        .foregroundColor(.sageWhite)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                } else {
+                    // Hidden but takes up space to prevent jump
+                    Text("MODAICS")
+                        .font(.forestHeadlineMedium)
+                        .foregroundColor(.clear)
+                }
                 
                 Spacer()
                 
@@ -82,24 +92,23 @@ struct HomeView: View {
             .padding(.horizontal, 20)
             .padding(.top, 60)
             .padding(.bottom, 16)
-            .background(
-                showNavTitle ? 
-                    Color.modaicsBackground.opacity(0.95) :
-                    Color.clear
-            )
             
-            // Chrome divider line
+            // Chrome divider line (only shows when collapsed)
             Rectangle()
-                .fill(Color.modaicsChrome.opacity(0.2))
+                .fill(Color.modaicsChrome.opacity(0.3))
                 .frame(height: 0.5)
                 .opacity(showNavTitle ? 1 : 0)
         }
-        .background(.ultraThinMaterial.opacity(showNavTitle ? 1 : 0))
-        .ignoresSafeArea()
+        .background(
+            showNavTitle ? 
+                Color.modaicsBackground.opacity(0.98) :
+                Color.clear
+        )
+        .ignoresSafeArea(edges: .top)
     }
     
-    // MARK: - Header Section
-    private var headerSection: some View {
+    // MARK: - Header Content (scrolls away)
+    private var headerContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(viewModel.greeting.uppercased())
                 .font(.forestCaptionLarge)
@@ -113,7 +122,8 @@ struct HomeView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
-        .padding(.top, 100)
+        .opacity(showNavTitle ? 0 : 1)
+        .offset(y: showNavTitle ? -20 : 0)
     }
     
     // MARK: - Stats Section
@@ -130,7 +140,7 @@ struct HomeView: View {
                 icon: "heart.fill",
                 value: "\(viewModel.savedCount)",
                 label: "SAVED",
-                color: .emerald
+                color: .modaicsEco
             )
             
             StatCard(
@@ -221,6 +231,9 @@ struct HomeView: View {
                 HStack(spacing: 16) {
                     ForEach(viewModel.pickedForYou) { item in
                         PickedItemCard(item: item)
+                            .onTapGesture {
+                                // Show item detail
+                            }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -252,6 +265,9 @@ struct HomeView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                 ForEach(viewModel.trendingPieces.prefix(4)) { garment in
                     TrendingItemCard(garment: garment)
+                        .onTapGesture {
+                            // Show item detail
+                        }
                 }
             }
             .padding(.horizontal, 20)
@@ -307,56 +323,50 @@ struct EventCard: View {
     let event: ModaicsEvent
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        HStack(spacing: 16) {
             // Date block
-            HStack(spacing: 12) {
-                VStack(spacing: 2) {
-                    Text(event.day)
-                        .font(.forestHeadlineMedium)
-                        .foregroundColor(.luxeGold)
-                    Text(event.month)
-                        .font(.forestCaptionSmall)
-                        .foregroundColor(.sageMuted)
-                }
-                .frame(width: 50, height: 50)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.modaicsSurface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1)
-                        )
-                )
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(event.title)
-                        .font(.forestBodyMedium)
-                        .foregroundColor(.sageWhite)
-                        .lineLimit(1)
-                    
-                    Text(event.location)
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.sageMuted)
-                        .lineLimit(1)
-                }
-                
-                Spacer()
+            VStack(spacing: 2) {
+                Text(event.day)
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.luxeGold)
+                Text(event.month)
+                    .font(.forestCaptionSmall)
+                    .foregroundColor(.sageMuted)
             }
+            .frame(width: 50, height: 50)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.modaicsSurface)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1)
+                    )
+            )
             
-            HStack {
-                Image(systemName: "person.2")
-                    .font(.system(size: 12))
-                    .foregroundColor(.modaicsFern)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(event.title)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageWhite)
+                    .lineLimit(1)
+                
+                Text(event.location)
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.sageMuted)
+                    .lineLimit(1)
                 
                 Text("\(event.attendees) attending")
                     .font(.forestCaptionSmall)
-                    .foregroundColor(.sageSubtle)
-                
-                Spacer()
+                    .foregroundColor(.modaicsFern)
             }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14))
+                .foregroundColor(.sageMuted)
         }
         .padding(16)
-        .frame(width: 280)
+        .frame(width: 300)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.modaicsSurface)
