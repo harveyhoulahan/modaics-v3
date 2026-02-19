@@ -5,7 +5,7 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @EnvironmentObject var appState: AppState
     @State private var scrollOffset: CGFloat = 0
-    @State private var showNavTitle = false
+    @State private var showCompactHeader = false
     
     // Detail sheet states
     @State private var selectedItem: ModaicsGarment?
@@ -27,10 +27,10 @@ struct HomeView: View {
                 .frame(height: 0)
                 
                 VStack(spacing: 32) {
-                    // Spacer for header
-                    Spacer().frame(height: 140)
+                    // Spacer for fixed header + greeting area (reduced from 140)
+                    Spacer().frame(height: 110)
                     
-                    // Header Content (greeting + title)
+                    // Header Content (greeting + title) - this scrolls away
                     headerContent
                     
                     // Stats Row
@@ -50,11 +50,11 @@ struct HomeView: View {
             }
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
                 scrollOffset = value
-                showNavTitle = value < -80
+                showCompactHeader = value < -60
             }
             
-            // Fixed Collapsing Header
-            collapsingHeader
+            // Fixed Header (always visible)
+            fixedHeader
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showItemDetail) {
@@ -72,25 +72,19 @@ struct HomeView: View {
         }
     }
     
-    // MARK: - Collapsing Header (Fixed at top)
-    private var collapsingHeader: some View {
+    // MARK: - Fixed Header (always at top)
+    private var fixedHeader: some View {
         VStack(spacing: 0) {
             HStack {
-                // Logo/Title that changes on scroll
-                if showNavTitle {
-                    Text("MODAICS")
-                        .font(.forestHeadlineMedium)
-                        .foregroundColor(.sageWhite)
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                } else {
-                    // Hidden but takes up space to prevent jump
-                    Text("MODAICS")
-                        .font(.forestHeadlineMedium)
-                        .foregroundColor(.clear)
-                }
+                // Gold MODAICS logo (always visible)
+                Text("MODAICS")
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.luxeGold)
+                    .tracking(2)
                 
                 Spacer()
                 
+                // Notification & Settings buttons (always visible)
                 HStack(spacing: 16) {
                     Button(action: {}) {
                         Image(systemName: "bell")
@@ -109,14 +103,14 @@ struct HomeView: View {
             .padding(.top, 60)
             .padding(.bottom, 16)
             
-            // Chrome divider line (only shows when collapsed)
+            // Chrome divider line when compact
             Rectangle()
                 .fill(Color.modaicsChrome.opacity(0.3))
                 .frame(height: 0.5)
-                .opacity(showNavTitle ? 1 : 0)
+                .opacity(showCompactHeader ? 1 : 0)
         }
         .background(
-            showNavTitle ? 
+            showCompactHeader ? 
                 Color.modaicsBackground.opacity(0.98) :
                 Color.clear
         )
@@ -138,8 +132,9 @@ struct HomeView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
-        .opacity(showNavTitle ? 0 : 1)
-        .offset(y: showNavTitle ? -20 : 0)
+        .padding(.top, showCompactHeader ? 0 : 8)
+        .opacity(showCompactHeader ? 0 : 1)
+        .animation(.easeInOut(duration: 0.2), value: showCompactHeader)
     }
     
     // MARK: - Stats Section
