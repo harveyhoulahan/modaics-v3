@@ -140,9 +140,9 @@ enum MockData {
         originalPrice: 120.00,
         listingPrice: 85.00,
         category: .outerwear,
+        colors: [ModaicsGarmentColor(name: "Blue", hex: "#2E5C8A")],
         brand: ModaicsBrand(name: "Levi's", isLuxury: false, isSustainable: false),
         size: ModaicsSize(label: "M", system: .us),
-        colors: [ModaicsGarmentColor(name: "Blue", hex: "#2E5C8A")],
         ownerId: UUID(),
         isListed: true,
         exchangeType: .sell
@@ -156,9 +156,9 @@ enum MockData {
         originalPrice: 280.00,
         listingPrice: 180.00,
         category: .tops,
+        colors: [ModaicsGarmentColor(name: "Cream", hex: "#F5F5DC")],
         brand: ModaicsBrand(name: "Zimmermann", isLuxury: true, isSustainable: false),
         size: ModaicsSize(label: "S", system: .us),
-        colors: [ModaicsGarmentColor(name: "Cream", hex: "#F5F5DC")],
         ownerId: UUID(),
         isListed: true,
         exchangeType: .sell
@@ -172,9 +172,9 @@ enum MockData {
         originalPrice: 350.00,
         listingPrice: 220.00,
         category: .bags,
+        colors: [ModaicsGarmentColor(name: "Brown", hex: "#8B4513")],
         brand: ModaicsBrand(name: "Vintage Coach", isLuxury: false, isSustainable: false),
         size: ModaicsSize(label: "OS", system: .oneSize),
-        colors: [ModaicsGarmentColor(name: "Brown", hex: "#8B4513")],
         ownerId: UUID(),
         isListed: true,
         exchangeType: .sellOrTrade
@@ -188,9 +188,9 @@ enum MockData {
         originalPrice: 89.00,
         listingPrice: 45.00,
         category: .bottoms,
+        colors: [ModaicsGarmentColor(name: "Beige", hex: "#F5F5DC")],
         brand: ModaicsBrand(name: "Zara", isLuxury: false, isSustainable: false),
         size: ModaicsSize(label: "M", system: .us),
-        colors: [ModaicsGarmentColor(name: "Beige", hex: "#F5F5DC")],
         ownerId: UUID(),
         isListed: true,
         exchangeType: .sell
