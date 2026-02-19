@@ -702,7 +702,7 @@ struct ReviewStepView: View {
                     }
                 case .sell:
                     if !listingPrice.isEmpty {
-                        DetailRow(label: "Price", value: "\u0024\(listingPrice)")
+                        DetailRow(label: "Price", value: "\u{0024}\(listingPrice)")
                     }
                 case .trade:
                     DetailRow(label: "Type", value: "Direct Exchange")
