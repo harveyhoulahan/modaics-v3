@@ -653,20 +653,6 @@ struct ItemCardSkeleton: View {
     }
 }
 
-// MARK: - TextField Placeholder Extension
-extension View {
-    func placeholder<Content: View>(
-        when shouldShow: Bool,
-        alignment: Alignment = .leading,
-        @ViewBuilder placeholder: () -> Content
-    ) -> some View {
-        ZStack(alignment: alignment) {
-            placeholder().opacity(shouldShow ? 1 : 0)
-            self
-        }
-    }
-}
-
 // MARK: - Preview
 struct DiscoverView_Previews: PreviewProvider {
     static var previews: some View {
