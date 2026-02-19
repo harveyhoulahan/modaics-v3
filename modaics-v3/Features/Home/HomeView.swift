@@ -4,7 +4,6 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @EnvironmentObject var appState: AppState
-    @State private var scrollOffset: CGFloat = 0
     @State private var showCompactHeader = false
     
     // Detail sheet states
@@ -20,18 +19,14 @@ struct HomeView: View {
             
             // Main Scroll Content
             ScrollView(showsIndicators: false) {
-                GeometryReader { proxy in
-                    Color.clear
-                        .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .global).minY)
-                }
-                .frame(height: 0)
-                
-                VStack(spacing: 32) {
-                    // Spacer for fixed header area only
-                    Spacer().frame(height: 90)
+                VStack(spacing: 24) {
+                    // Spacer for fixed header area
+                    Spacer().frame(height: 80)
                     
                     // Header Content (greeting + title) - this scrolls away
                     headerContent
+                        .opacity(showCompactHeader ? 0 : 1)
+                        .offset(y: showCompactHeader ? -20 : 0)
                     
                     // Stats Row
                     statsSection
@@ -47,15 +42,24 @@ struct HomeView: View {
                     
                     Spacer(minLength: 100)
                 }
-            }
-            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                scrollOffset = value
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    showCompactHeader = value < -40
-                }
+                .padding(.horizontal, 20)
+                .background(
+                    GeometryReader { proxy -> Color in
+                        let offset = proxy.frame(in: .global).minY
+                        DispatchQueue.main.async {
+                            let newValue = offset < 50
+                            if showCompactHeader != newValue {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    showCompactHeader = newValue
+                                }
+                            }
+                        }
+                        return Color.clear
+                    }
+                )
             }
             
-            // Fixed Header (always visible)
+            // Fixed Header (always at top)
             fixedHeader
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -86,7 +90,7 @@ struct HomeView: View {
                 
                 Spacer()
                 
-                // Notification & Settings buttons (always visible)
+                // Notification & Settings buttons
                 HStack(spacing: 16) {
                     Button(action: {}) {
                         Image(systemName: "bell")
@@ -103,17 +107,16 @@ struct HomeView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 60)
-            .padding(.bottom, 16)
+            .padding(.bottom, 12)
             
-            // Chrome divider line when compact
+            // Chrome divider line
             Rectangle()
                 .fill(Color.modaicsChrome.opacity(0.3))
                 .frame(height: 0.5)
-                .opacity(showCompactHeader ? 1 : 0)
         }
         .background(
             showCompactHeader ? 
-                Color.modaicsBackground.opacity(0.95) :
+                Color.modaicsBackground.opacity(0.98) :
                 Color.clear
         )
         .animation(.easeInOut(duration: 0.2), value: showCompactHeader)
@@ -122,7 +125,7 @@ struct HomeView: View {
     
     // MARK: - Header Content (scrolls away)
     private var headerContent: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(viewModel.greeting.uppercased())
                 .font(.forestCaptionLarge)
                 .foregroundColor(.sageMuted)
@@ -134,10 +137,6 @@ struct HomeView: View {
                 .lineSpacing(2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 20)
-        .opacity(showCompactHeader ? 0 : 1)
-        .offset(y: showCompactHeader ? -10 : 0)
-        .animation(.easeInOut(duration: 0.25), value: showCompactHeader)
     }
     
     // MARK: - Stats Section
@@ -164,7 +163,6 @@ struct HomeView: View {
                 color: .modaicsFern
             )
         }
-        .padding(.horizontal, 20)
     }
     
     // MARK: - Events Section
@@ -192,7 +190,6 @@ struct HomeView: View {
                 .foregroundColor(.luxeGold)
                 .tracking(1)
             }
-            .padding(.horizontal, 20)
             
             // Horizontal scroll
             ScrollView(.horizontal, showsIndicators: false) {
@@ -205,7 +202,6 @@ struct HomeView: View {
                             }
                     }
                 }
-                .padding(.horizontal, 20)
             }
         }
     }
@@ -242,7 +238,6 @@ struct HomeView: View {
                 .foregroundColor(.luxeGold)
                 .tracking(1)
             }
-            .padding(.horizontal, 20)
             
             // Horizontal scroll
             ScrollView(.horizontal, showsIndicators: false) {
@@ -255,7 +250,6 @@ struct HomeView: View {
                             }
                     }
                 }
-                .padding(.horizontal, 20)
             }
         }
     }
@@ -278,7 +272,6 @@ struct HomeView: View {
                 .foregroundColor(.luxeGold)
                 .tracking(1)
             }
-            .padding(.horizontal, 20)
             
             // Grid
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
@@ -290,16 +283,7 @@ struct HomeView: View {
                         }
                 }
             }
-            .padding(.horizontal, 20)
         }
-    }
-}
-
-// MARK: - Scroll Offset Preference Key
-struct ScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
     }
 }
 
