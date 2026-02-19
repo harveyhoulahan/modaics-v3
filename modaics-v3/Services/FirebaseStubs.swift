@@ -44,6 +44,9 @@ class Messaging {
 
 protocol MessagingDelegate: AnyObject {}
 
+// MARK: - Auth State Listener Handle Stub
+typealias AuthStateDidChangeListenerHandle = String
+
 // MARK: - Auth Service Protocol (existing)
 protocol AuthServiceProtocol {
     var currentUser: User? { get }

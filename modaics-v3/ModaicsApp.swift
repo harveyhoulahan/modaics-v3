@@ -1,7 +1,4 @@
 import SwiftUI
-import FirebaseCore
-import FirebaseAuth
-import FirebaseMessaging
 import UserNotifications
 
 @main
@@ -10,9 +7,6 @@ struct ModaicsApp: App {
     @StateObject private var appState = AppState()
     
     init() {
-        // Configure Firebase
-        FirebaseApp.configure()
-        
         // Configure Service Locator
         ServiceLocator.shared.configure()
         
@@ -69,19 +63,16 @@ class AppState: ObservableObject {
     @Published var selectedTab: Tab = .discovery
     @Published var deepLinkTarget: DeepLinkTarget?
     
-    private var authStateListener: AuthStateDidChangeListenerHandle?
-    
     init() {
         checkAuthenticationStatus()
         checkOnboardingStatus()
     }
     
     private func checkAuthenticationStatus() {
-        authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            DispatchQueue.main.async {
-                self?.isAuthenticated = user != nil
-                self?.isLoading = false
-            }
+        // TODO: Implement with real auth service when Firebase is added
+        DispatchQueue.main.async {
+            self.isAuthenticated = false
+            self.isLoading = false
         }
     }
     
@@ -95,13 +86,8 @@ class AppState: ObservableObject {
     }
     
     func signOut() {
-        try? Auth.auth().signOut()
-    }
-    
-    deinit {
-        if let listener = authStateListener {
-            Auth.auth().removeStateDidChangeListener(listener)
-        }
+        // TODO: Implement with real auth service when Firebase is added
+        isAuthenticated = false
     }
 }
 
