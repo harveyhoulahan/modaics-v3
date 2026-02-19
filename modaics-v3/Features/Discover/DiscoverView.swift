@@ -546,7 +546,7 @@ public struct DiscoverView: View {
     
     // MARK: - Helpers
     
-    private func suggestionIcon(for type: SearchAPIClient.SearchSuggestion.SuggestionType) -> String {
+    private func suggestionIcon(for type: SearchSuggestion.SuggestionType) -> String {
         switch type {
         case .brand:
             return "tag"

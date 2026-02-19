@@ -12,9 +12,9 @@ public class DiscoverViewModel: ObservableObject {
     
     // Search
     @Published public var searchQuery: String = ""
-    @Published public var searchSuggestions: [SearchAPIClient.SearchSuggestion] = []
+    @Published public var searchSuggestions: [SearchSuggestion] = []
     @Published public var showSearchSuggestions: Bool = false
-    @Published public var trendingSearches: [SearchAPIClient.SearchSuggestion] = []
+    @Published public var trendingSearches: [SearchSuggestion] = []
     
     // Results
     @Published public var items: [FashionItem] = []
@@ -96,7 +96,7 @@ public class DiscoverViewModel: ObservableObject {
         errorMessage = nil
         
         do {
-            let parameters = SearchAPIClient.SearchParameters(
+            let parameters = SearchParameters(
                 query: searchQuery.isEmpty ? nil : searchQuery,
                 category: selectedCategory,
                 condition: filterCriteria.condition,
@@ -170,7 +170,7 @@ public class DiscoverViewModel: ObservableObject {
         }
     }
     
-    public func selectSearchSuggestion(_ suggestion: SearchAPIClient.SearchSuggestion) {
+    public func selectSearchSuggestion(_ suggestion: SearchSuggestion) {
         searchQuery = suggestion.text
         showSearchSuggestions = false
         performSearch()
@@ -252,7 +252,7 @@ public class DiscoverViewModel: ObservableObject {
         visualSearchImage = image
         
         do {
-            let parameters = SearchAPIClient.SearchParameters(
+            let parameters = SearchParameters(
                 category: selectedCategory,
                 sortBy: sortOption,
                 page: 1,

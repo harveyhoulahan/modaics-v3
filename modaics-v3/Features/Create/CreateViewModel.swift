@@ -150,8 +150,19 @@ public enum ValidationError: Error, LocalizedError {
 public enum AIAnalysisState: Equatable {
     case idle
     case analyzing
-    case completed(AIGarmentAnalysis)
+    case completed
     case failed(String)
+    
+    public static func == (lhs: AIAnalysisState, rhs: AIAnalysisState) -> Bool {
+        switch (lhs, rhs) {
+        case (.idle, .idle), (.analyzing, .analyzing), (.completed, .completed):
+            return true
+        case (.failed(let lhsError), .failed(let rhsError)):
+            return lhsError == rhsError
+        default:
+            return false
+        }
+    }
 }
 
 // MARK: - Create ViewModel
