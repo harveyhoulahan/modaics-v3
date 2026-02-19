@@ -4,7 +4,8 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @EnvironmentObject var appState: AppState
-    @State private var showCompactHeader = false
+    @State private var showHeader = true
+    @State private var headerOffset: CGFloat = 0
     
     // Detail sheet states
     @State private var selectedItem: ModaicsGarment?
@@ -19,14 +20,12 @@ struct HomeView: View {
             
             // Main Scroll Content
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    // Spacer for fixed header area
-                    Spacer().frame(height: 80)
+                VStack(spacing: 20) {
+                    // Small spacer for initial header
+                    Spacer().frame(height: showHeader ? 60 : 16)
                     
-                    // Header Content (greeting + title) - this scrolls away
+                    // Header Content (greeting + title)
                     headerContent
-                        .opacity(showCompactHeader ? 0 : 1)
-                        .offset(y: showCompactHeader ? -20 : 0)
                     
                     // Stats Row
                     statsSection
@@ -47,10 +46,12 @@ struct HomeView: View {
                     GeometryReader { proxy -> Color in
                         let offset = proxy.frame(in: .global).minY
                         DispatchQueue.main.async {
-                            let newValue = offset < 50
-                            if showCompactHeader != newValue {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    showCompactHeader = newValue
+                            // Hide header when scrolling down past 30px
+                            let shouldShow = offset > -30
+                            if showHeader != shouldShow {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    showHeader = shouldShow
+                                    headerOffset = shouldShow ? 0 : -100
                                 }
                             }
                         }
@@ -59,8 +60,10 @@ struct HomeView: View {
                 )
             }
             
-            // Fixed Header (always at top)
-            fixedHeader
+            // Collapsing Header
+            collapsingHeader
+                .offset(y: headerOffset)
+                .opacity(showHeader ? 1 : 0)
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showItemDetail) {
@@ -78,11 +81,11 @@ struct HomeView: View {
         }
     }
     
-    // MARK: - Fixed Header (always at top)
-    private var fixedHeader: some View {
+    // MARK: - Collapsing Header
+    private var collapsingHeader: some View {
         VStack(spacing: 0) {
             HStack {
-                // Gold MODAICS logo (always visible)
+                // Gold MODAICS logo
                 Text("MODAICS")
                     .font(.forestHeadlineMedium)
                     .foregroundColor(.luxeGold)
@@ -114,16 +117,11 @@ struct HomeView: View {
                 .fill(Color.modaicsChrome.opacity(0.3))
                 .frame(height: 0.5)
         }
-        .background(
-            showCompactHeader ? 
-                Color.modaicsBackground.opacity(0.98) :
-                Color.clear
-        )
-        .animation(.easeInOut(duration: 0.2), value: showCompactHeader)
+        .background(Color.modaicsBackground.opacity(0.95))
         .ignoresSafeArea(edges: .top)
     }
     
-    // MARK: - Header Content (scrolls away)
+    // MARK: - Header Content
     private var headerContent: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(viewModel.greeting.uppercased())
@@ -168,7 +166,6 @@ struct HomeView: View {
     // MARK: - Events Section
     private var eventsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Section Header
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("HAPPENING NEAR YOU")
@@ -191,7 +188,6 @@ struct HomeView: View {
                 .tracking(1)
             }
             
-            // Horizontal scroll
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     ForEach(viewModel.nearbyEvents) { event in
@@ -209,7 +205,6 @@ struct HomeView: View {
     // MARK: - Picked For You Section
     private var pickedForYouSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Section Header with AI badge
             HStack(alignment: .center) {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles")
@@ -239,7 +234,6 @@ struct HomeView: View {
                 .tracking(1)
             }
             
-            // Horizontal scroll
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     ForEach(viewModel.pickedForYou) { item in
@@ -273,7 +267,6 @@ struct HomeView: View {
                 .tracking(1)
             }
             
-            // Grid
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                 ForEach(viewModel.trendingPieces.prefix(4)) { garment in
                     TrendingItemCard(garment: garment)
@@ -328,7 +321,6 @@ struct EventCard: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Date block
             VStack(spacing: 2) {
                 Text(event.day)
                     .font(.forestHeadlineMedium)
@@ -388,7 +380,6 @@ struct PickedItemCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Image placeholder
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.modaicsSurface)
                 .frame(width: 160, height: 200)
