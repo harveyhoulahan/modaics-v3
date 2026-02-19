@@ -433,7 +433,7 @@ struct ImpactBadge: View {
 // MARK: - Extended Models
 struct CollectionMood {
     let tags: [String]
-    let colorPalette: [Color]?
+    let colorPalette: [GarmentColor]?
     let inspiration: String?
 }
 

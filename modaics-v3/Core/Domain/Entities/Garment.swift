@@ -41,7 +41,7 @@ public struct Garment: Identifiable, Codable, Hashable {
     public var styleTags: [String]
     
     /// Colors present in the garment
-    public var colors: [Color]
+    public var colors: [GarmentColor]
     
     /// Materials and fabric composition
     public var materials: [Material]
@@ -120,7 +120,7 @@ public struct Garment: Identifiable, Codable, Hashable {
         category: Category,
         subcategory: String? = nil,
         styleTags: [String] = [],
-        colors: [Color] = [],
+        colors: [GarmentColor] = [],
         materials: [Material] = [],
         brand: Brand? = nil,
         size: Size,
@@ -210,7 +210,7 @@ public enum Category: String, Codable, CaseIterable, Hashable {
     case other = "other"
 }
 
-public struct Color: Codable, Hashable, Identifiable {
+public struct GarmentColor: Codable, Hashable, Identifiable {
     public let id: UUID
     public var name: String
     public var hex: String?

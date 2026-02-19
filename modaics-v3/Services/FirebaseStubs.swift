@@ -47,16 +47,5 @@ protocol MessagingDelegate: AnyObject {}
 // MARK: - Auth State Listener Handle Stub
 typealias AuthStateDidChangeListenerHandle = String
 
-// MARK: - Auth Service Protocol (existing)
-protocol AuthServiceProtocol {
-    var currentUser: User? { get }
-    func signIn(email: String, password: String) async throws
-    func signUp(email: String, password: String) async throws
-    func signInWithApple() async throws
-    func signOut() throws
-    func resetPassword(email: String) async throws
-}
-
-extension Notification.Name {
-    static let authStateChanged = Notification.Name("authStateChanged")
-}
+// MARK: - Firebase Auth Stub Helpers
+// AuthServiceProtocol is defined in Services.swift

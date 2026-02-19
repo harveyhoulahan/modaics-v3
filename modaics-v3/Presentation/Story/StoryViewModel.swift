@@ -28,7 +28,7 @@ public class StoryViewModel: ObservableObject {
     @Published public var selectedCondition: Condition = .good
     @Published public var selectedSizeSystem: SizeSystem = .us
     @Published public var sizeLabel: String = ""
-    @Published public var selectedColors: [Color] = []
+    @Published public var selectedColors: [GarmentColor] = []
     @Published public var brand: String = ""
     
     // MARK: - Published Properties - Step 3: Story

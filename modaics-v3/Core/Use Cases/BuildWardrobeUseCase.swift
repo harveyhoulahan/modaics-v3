@@ -63,7 +63,7 @@ public struct AddGarmentInput: Sendable {
     public var category: Category
     public var subcategory: String?
     public var styleTags: [String]
-    public var colors: [Color]
+    public var colors: [GarmentColor]
     public var materials: [Material]
     public var brand: Brand?
     public var size: Size
@@ -85,7 +85,7 @@ public struct AddGarmentInput: Sendable {
         category: Category,
         subcategory: String? = nil,
         styleTags: [String] = [],
-        colors: [Color] = [],
+        colors: [GarmentColor] = [],
         materials: [Material] = [],
         brand: Brand? = nil,
         size: Size,

@@ -117,8 +117,8 @@ class ExchangeViewModel: ObservableObject {
     }
 }
 
-// MARK: - Exchange Error
-enum ExchangeError: LocalizedError {
+// MARK: - ViewModel Exchange Error
+enum ViewModelExchangeError: LocalizedError {
     case failedToLoadActivity
     case failedToLoadGarments
     case transactionFailed
@@ -155,8 +155,8 @@ enum ExchangeError: LocalizedError {
     }
 }
 
-// MARK: - Use Case Protocol
-protocol ExchangeGarmentUseCaseProtocol {
+// MARK: - ViewModel Use Case Protocol
+protocol ExchangeViewModelUseCaseProtocol {
     func getRecentActivity() async throws -> [ExchangeActivity]
     func getUserGarments() async throws -> [Garment]
     func getAvailableGarments() async throws -> [Garment]
