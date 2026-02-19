@@ -16,22 +16,7 @@ class GarmentRepository: GarmentRepositoryProtocol {
         self.logger = logger
     }
     
-    func getGarments() async throws -> [Garment] {
-        do {
-            let garments: [Garment] = try await apiClient.get("/garments")
-            // Cache locally
-            for garment in garments {
-                try? await offlineStorage.saveGarment(garment)
-            }
-            return garments
-        } catch {
-            // Fallback to offline storage
-            logger.log("Falling back to offline storage for garments", level: .warning)
-            return try await offlineStorage.getGarments()
-        }
-    }
-    
-    func getGarment(id: UUID) async throws -> Garment {
+    func get(by id: UUID) async throws -> Garment {
         do {
             let garment: Garment = try await apiClient.get("/garments/\(id.uuidString)")
             try? await offlineStorage.saveGarment(garment)
@@ -44,21 +29,171 @@ class GarmentRepository: GarmentRepositoryProtocol {
         }
     }
     
-    func createGarment(_ garment: Garment) async throws -> Garment {
+    func get(ids: [UUID]) async throws -> [Garment] {
+        // In real implementation, would batch fetch
+        var garments: [Garment] = []
+        for id in ids {
+            if let garment = try? await get(by: id) {
+                garments.append(garment)
+            }
+        }
+        return garments
+    }
+    
+    func create(_ garment: Garment) async throws -> Garment {
         let created: Garment = try await apiClient.post("/garments", body: garment)
         try? await offlineStorage.saveGarment(created)
         return created
     }
     
-    func updateGarment(_ garment: Garment) async throws -> Garment {
+    func update(_ garment: Garment) async throws -> Garment {
         let updated: Garment = try await apiClient.put("/garments/\(garment.id.uuidString)", body: garment)
         try? await offlineStorage.saveGarment(updated)
         return updated
     }
     
-    func deleteGarment(id: UUID) async throws {
+    func delete(id: UUID) async throws {
         try await apiClient.delete("/garments/\(id.uuidString)")
         try? await offlineStorage.deleteGarment(id: id)
+    }
+    
+    func exists(id: UUID) async throws -> Bool {
+        do {
+            _ = try await get(by: id)
+            return true
+        } catch {
+            return false
+        }
+    }
+    
+    func getByOwner(userId: UUID) async throws -> [Garment] {
+        do {
+            let garments: [Garment] = try await apiClient.get("/users/\(userId.uuidString)/garments")
+            // Cache locally
+            for garment in garments {
+                try? await offlineStorage.saveGarment(garment)
+            }
+            return garments
+        } catch {
+            // Fallback to offline storage
+            logger.log("Falling back to offline storage for garments", level: .warning)
+            return try await offlineStorage.getGarments()
+        }
+    }
+    
+    func getByOwner(userId: UUID, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        let garments = try await getByOwner(userId: userId)
+        let start = (page - 1) * limit
+        let end = min(start + limit, garments.count)
+        let pageItems = Array(garments[start..<end])
+        return PaginatedResult(items: pageItems, totalCount: garments.count, page: page, limit: limit)
+    }
+    
+    func getByOwner(userId: UUID, isListed: Bool) async throws -> [Garment] {
+        let garments = try await getByOwner(userId: userId)
+        return garments.filter { $0.isListed == isListed }
+    }
+    
+    func listGarment(id: UUID, exchangeType: ExchangeType, price: Decimal?) async throws -> Garment {
+        var garment = try await get(by: id)
+        garment.isListed = true
+        garment.exchangeType = exchangeType
+        garment.listingPrice = price
+        return try await update(garment)
+    }
+    
+    func delistGarment(id: UUID) async throws -> Garment {
+        var garment = try await get(by: id)
+        garment.isListed = false
+        return try await update(garment)
+    }
+    
+    func updatePrice(id: UUID, newPrice: Decimal?) async throws -> Garment {
+        var garment = try await get(by: id)
+        garment.listingPrice = newPrice
+        return try await update(garment)
+    }
+    
+    func createBatch(_ garments: [Garment]) async throws -> [Garment] {
+        var created: [Garment] = []
+        for garment in garments {
+            let newGarment = try await create(garment)
+            created.append(newGarment)
+        }
+        return created
+    }
+    
+    func updateBatch(_ garments: [Garment]) async throws -> [Garment] {
+        var updated: [Garment] = []
+        for garment in garments {
+            let newGarment = try await update(garment)
+            updated.append(newGarment)
+        }
+        return updated
+    }
+    
+    func deleteBatch(ids: [UUID]) async throws {
+        for id in ids {
+            try await delete(id: id)
+        }
+    }
+    
+    func search(query: String) async throws -> [Garment] {
+        let garments: [Garment] = try await apiClient.get("/garments/search?q=\(query)")
+        return garments
+    }
+    
+    func search(query: String, ownerId: UUID) async throws -> [Garment] {
+        let garments = try await search(query: query)
+        return garments.filter { $0.ownerId == ownerId }
+    }
+    
+    func filter(_ criteria: GarmentFilterCriteria) async throws -> [Garment] {
+        // In real implementation, would send criteria to API
+        var garments = try await getByOwner(userId: criteria.ownerId ?? UUID())
+        
+        if let isListed = criteria.isListed {
+            garments = garments.filter { $0.isListed == isListed }
+        }
+        if let categories = criteria.categories {
+            garments = garments.filter { categories.contains($0.category) }
+        }
+        if let brands = criteria.brands {
+            garments = garments.filter { garment in
+                brands.contains(garment.brand?.name ?? "")
+            }
+        }
+        if let minPrice = criteria.minPrice {
+            garments = garments.filter { ($0.listingPrice ?? 0) >= minPrice }
+        }
+        if let maxPrice = criteria.maxPrice {
+            garments = garments.filter { ($0.listingPrice ?? 0) <= maxPrice }
+        }
+        
+        return garments
+    }
+    
+    func filter(_ criteria: GarmentFilterCriteria, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        let garments = try await filter(criteria)
+        let start = (page - 1) * limit
+        let end = min(start + limit, garments.count)
+        let pageItems = start < garments.count ? Array(garments[start..<end]) : []
+        return PaginatedResult(items: pageItems, totalCount: garments.count, page: page, limit: limit)
+    }
+    
+    func countByOwner(userId: UUID) async throws -> Int {
+        let garments = try await getByOwner(userId: userId)
+        return garments.count
+    }
+    
+    func countListedByOwner(userId: UUID) async throws -> Int {
+        let garments = try await getByOwner(userId: userId, isListed: true)
+        return garments.count
+    }
+    
+    func totalValueByOwner(userId: UUID) async throws -> Decimal {
+        let garments = try await getByOwner(userId: userId)
+        return garments.reduce(Decimal(0)) { $0 + ($0.originalPrice ?? 0) }
     }
 }
 

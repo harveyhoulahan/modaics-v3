@@ -12,7 +12,7 @@ class GetGarmentsUseCase: GetGarmentsUseCaseProtocol {
     }
     
     func execute() async throws -> [Garment] {
-        return try await repository.getGarments()
+        return try await repository.getByOwner(userId: UUID())
     }
 }
 
@@ -24,7 +24,7 @@ class CreateGarmentUseCase: CreateGarmentUseCaseProtocol {
     }
     
     func execute(_ garment: Garment) async throws -> Garment {
-        return try await repository.createGarment(garment)
+        return try await repository.create(garment)
     }
 }
 
@@ -36,7 +36,7 @@ class UpdateGarmentUseCase: UpdateGarmentUseCaseProtocol {
     }
     
     func execute(_ garment: Garment) async throws -> Garment {
-        return try await repository.updateGarment(garment)
+        return try await repository.update(garment)
     }
 }
 
@@ -48,7 +48,7 @@ class DeleteGarmentUseCase: DeleteGarmentUseCaseProtocol {
     }
     
     func execute(id: UUID) async throws {
-        try await repository.deleteGarment(id: id)
+        try await repository.delete(id: id)
     }
 }
 
@@ -122,4 +122,56 @@ class UploadImageUseCase: UploadImageUseCaseProtocol {
     func execute(_ image: UIImage, path: String) async throws -> String {
         return try await imageService.uploadImage(image, path: path)
     }
+}
+
+// MARK: - Protocol Definitions (to be imported from ServiceLocator or defined here)
+
+protocol GetGarmentsUseCaseProtocol {
+    func execute() async throws -> [Garment]
+}
+
+protocol CreateGarmentUseCaseProtocol {
+    func execute(_ garment: Garment) async throws -> Garment
+}
+
+protocol UpdateGarmentUseCaseProtocol {
+    func execute(_ garment: Garment) async throws -> Garment
+}
+
+protocol DeleteGarmentUseCaseProtocol {
+    func execute(id: UUID) async throws
+}
+
+protocol GetStoriesUseCaseProtocol {
+    func execute(for garmentId: UUID) async throws -> [Story]
+}
+
+protocol CreateStoryUseCaseProtocol {
+    func execute(_ story: Story) async throws -> Story
+}
+
+protocol GetDiscoveryFeedUseCaseProtocol {
+    func execute() async throws -> DiscoveryFeed
+}
+
+protocol GetUserProfileUseCaseProtocol {
+    func execute() async throws -> User
+}
+
+protocol UploadImageUseCaseProtocol {
+    func execute(_ image: UIImage, path: String) async throws -> String
+}
+
+// MARK: - DiscoveryFeed Model
+struct DiscoveryFeed: Codable {
+    var trendingStories: [Story]
+    var recentGarments: [Garment]
+    var collections: [WardrobeCollection]
+}
+
+// MARK: - SearchResults Model  
+struct SearchResults: Codable {
+    var garments: [Garment]
+    var stories: [Story]
+    var users: [User]
 }

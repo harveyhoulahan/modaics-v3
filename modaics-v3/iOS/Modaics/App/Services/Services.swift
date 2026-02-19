@@ -118,6 +118,25 @@ class APIClient: APIClientProtocol {
     }
 }
 
+// MARK: - APIError Definition
+enum APIError: Error {
+    case invalidURL
+    case unauthorized
+    case notFound
+    case serverError
+    case decodingError
+}
+
+// MARK: - APIClient Protocol
+protocol APIClientProtocol {
+    func get<T: Decodable>(_ path: String) async throws -> T
+    func post<T: Decodable, B: Encodable>(_ path: String, body: B) async throws -> T
+    func put<T: Decodable, B: Encodable>(_ path: String, body: B) async throws -> T
+    func delete(_ path: String) async throws
+    func upload(_ path: String, data: Data, filename: String) async throws -> String
+    func clearCache()
+}
+
 // MARK: - Image Service
 class ImageService: ImageServiceProtocol {
     private var imageCache: NSCache<NSString, UIImage> = NSCache()
@@ -167,6 +186,14 @@ enum ImageError: Error {
     case uploadFailed
 }
 
+// MARK: - ImageService Protocol
+protocol ImageServiceProtocol {
+    func uploadImage(_ image: UIImage, path: String) async throws -> String
+    func downloadImage(url: String) async throws -> UIImage
+    func cacheImage(_ image: UIImage, for key: String)
+    func getCachedImage(for key: String) -> UIImage?
+}
+
 // MARK: - Offline Storage
 class CoreDataOfflineStorage: OfflineStorageProtocol {
     func configure() {
@@ -203,6 +230,18 @@ class CoreDataOfflineStorage: OfflineStorageProtocol {
     }
 }
 
+// MARK: - OfflineStorage Protocol
+protocol OfflineStorageProtocol {
+    func configure()
+    func saveGarment(_ garment: Garment) async throws
+    func getGarments() async throws -> [Garment]
+    func getGarment(id: UUID) async throws -> Garment?
+    func deleteGarment(id: UUID) async throws
+    func saveStory(_ story: Story) async throws
+    func getStories(for garmentId: UUID) async throws -> [Story]
+    func syncPendingChanges() async throws
+}
+
 // MARK: - Logger
 class ConsoleLogger: LoggerProtocol {
     func log(_ message: String, level: LogLevel) {
@@ -215,4 +254,29 @@ class ConsoleLogger: LoggerProtocol {
         }
         print("\(prefix) [Modaics] \(message)")
     }
+}
+
+// MARK: - Logger Protocol
+protocol LoggerProtocol {
+    func log(_ message: String, level: LogLevel)
+}
+
+enum LogLevel {
+    case debug, info, warning, error
+}
+
+// MARK: - AuthService Protocol
+protocol AuthServiceProtocol {
+    var currentUser: User? { get }
+    func signIn(email: String, password: String) async throws
+    func signUp(email: String, password: String) async throws
+    func signInWithApple() async throws
+    func signInWithGoogle() async throws
+    func signOut() throws
+    func resetPassword(email: String) async throws
+}
+
+// MARK: - Notification Names
+extension Notification.Name {
+    static let authStateChanged = Notification.Name("authStateChanged")
 }

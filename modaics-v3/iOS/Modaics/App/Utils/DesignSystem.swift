@@ -8,28 +8,28 @@ enum DesignSystem {
     // MARK: - Colors
     enum Colors {
         /// Primary app background - warm sand
-        static let warmSand = Color(red: 0.96, green: 0.94, blue: 0.90)
+        static let warmSand = SwiftUI.Color(red: 0.96, green: 0.94, blue: 0.90)
         
         /// Card/elevated surface background - paper
-        static let paper = Color(red: 0.98, green: 0.97, blue: 0.95)
+        static let paper = SwiftUI.Color(red: 0.98, green: 0.97, blue: 0.95)
         
         /// Primary accent - terracotta
-        static let terracotta = Color(red: 0.80, green: 0.38, blue: 0.27)
+        static let terracotta = SwiftUI.Color(red: 0.80, green: 0.38, blue: 0.27)
         
         /// Primary text - charcoal
-        static let charcoal = Color(red: 0.20, green: 0.18, blue: 0.16)
+        static let charcoal = SwiftUI.Color(red: 0.20, green: 0.18, blue: 0.16)
         
         /// Secondary text
-        static let stone = Color(red: 0.50, green: 0.47, blue: 0.44)
+        static let stone = SwiftUI.Color(red: 0.50, green: 0.47, blue: 0.44)
         
         /// Success state
-        static let sage = Color(red: 0.47, green: 0.58, blue: 0.47)
+        static let sage = SwiftUI.Color(red: 0.47, green: 0.58, blue: 0.47)
         
         /// Error state
-        static let rust = Color(red: 0.71, green: 0.28, blue: 0.21)
+        static let rust = SwiftUI.Color(red: 0.71, green: 0.28, blue: 0.21)
         
         /// Warning state
-        static let ochre = Color(red: 0.80, green: 0.52, blue: 0.25)
+        static let ochre = SwiftUI.Color(red: 0.80, green: 0.52, blue: 0.25)
         
         /// No pure white - use paper instead
         static let pureWhite = paper
@@ -93,21 +93,21 @@ enum DesignSystem {
     // MARK: - Shadows
     enum Shadows {
         static let small = ShadowStyle(
-            color: Color.black.opacity(0.08),
+            color: SwiftUI.Color.black.opacity(0.08),
             radius: 4,
             x: 0,
             y: 2
         )
         
         static let medium = ShadowStyle(
-            color: Color.black.opacity(0.1),
+            color: SwiftUI.Color.black.opacity(0.1),
             radius: 8,
             x: 0,
             y: 4
         )
         
         static let large = ShadowStyle(
-            color: Color.black.opacity(0.12),
+            color: SwiftUI.Color.black.opacity(0.12),
             radius: 16,
             x: 0,
             y: 8
@@ -115,7 +115,7 @@ enum DesignSystem {
     }
     
     struct ShadowStyle {
-        let color: Color
+        let color: SwiftUI.Color
         let radius: CGFloat
         let x: CGFloat
         let y: CGFloat

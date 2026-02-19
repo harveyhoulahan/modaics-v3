@@ -9,7 +9,37 @@ class MockAuthService: AuthServiceProtocol {
         displayName: "Test User",
         username: "testuser",
         bio: "Fashion enthusiast",
-        email: "test@example.com"
+        email: "test@example.com",
+        avatarURL: nil,
+        coverImageURL: nil,
+        styleDescriptors: [],
+        aesthetic: nil,
+        sizePreferences: [],
+        favoriteColors: [],
+        favoriteBrands: [],
+        wishlistItems: [],
+        openToTrade: true,
+        preferredExchangeTypes: [.sellOrTrade],
+        wardrobeCount: 0,
+        exchangeCount: 0,
+        rating: 0,
+        ratingCount: 0,
+        followerCount: 0,
+        followingCount: 0,
+        totalCarbonSavingsKg: 0,
+        totalWaterSavingsLiters: 0,
+        itemsCirculated: 0,
+        location: nil,
+        shippingPreference: .domestic,
+        isEmailVerified: true,
+        tier: .free,
+        atelierSubscription: nil,
+        joinedAt: Date(),
+        lastActiveAt: Date(),
+        status: .active,
+        notificationPreferences: NotificationPreferences(),
+        privacySettings: PrivacySettings(),
+        contentPreferences: ContentPreferences()
     )
     
     func signIn(email: String, password: String) async throws {}
@@ -29,28 +59,113 @@ class MockLogger: LoggerProtocol {
 // MARK: - Mock Repositories
 
 class MockGarmentRepository: GarmentRepositoryProtocol {
-    func getGarments() async throws -> [Garment] {
-        return MockData.garments
-    }
-    
-    func getGarment(id: UUID) async throws -> Garment {
+    func get(by id: UUID) async throws -> Garment {
         return MockData.garments.first { $0.id == id } ?? MockData.garments[0]
     }
     
-    func createGarment(_ garment: Garment) async throws -> Garment {
+    func get(ids: [UUID]) async throws -> [Garment] {
+        return MockData.garments.filter { ids.contains($0.id) }
+    }
+    
+    func create(_ garment: Garment) async throws -> Garment {
         return garment
     }
     
-    func updateGarment(_ garment: Garment) async throws -> Garment {
+    func update(_ garment: Garment) async throws -> Garment {
         return garment
     }
     
-    func deleteGarment(id: UUID) async throws {}
+    func delete(id: UUID) async throws {}
+    
+    func exists(id: UUID) async throws -> Bool {
+        return MockData.garments.contains { $0.id == id }
+    }
+    
+    func getByOwner(userId: UUID) async throws -> [Garment] {
+        return MockData.garments.filter { $0.ownerId == userId }
+    }
+    
+    func getByOwner(userId: UUID, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        let garments = MockData.garments.filter { $0.ownerId == userId }
+        return PaginatedResult(items: garments, totalCount: garments.count, page: page, limit: limit)
+    }
+    
+    func getByOwner(userId: UUID, isListed: Bool) async throws -> [Garment] {
+        return MockData.garments.filter { $0.ownerId == userId && $0.isListed == isListed }
+    }
+    
+    func listGarment(id: UUID, exchangeType: ExchangeType, price: Decimal?) async throws -> Garment {
+        guard var garment = MockData.garments.first(where: { $0.id == id }) else {
+            throw NSError(domain: "Mock", code: 404)
+        }
+        garment.isListed = true
+        garment.exchangeType = exchangeType
+        garment.listingPrice = price
+        return garment
+    }
+    
+    func delistGarment(id: UUID) async throws -> Garment {
+        guard var garment = MockData.garments.first(where: { $0.id == id }) else {
+            throw NSError(domain: "Mock", code: 404)
+        }
+        garment.isListed = false
+        return garment
+    }
+    
+    func updatePrice(id: UUID, newPrice: Decimal?) async throws -> Garment {
+        guard var garment = MockData.garments.first(where: { $0.id == id }) else {
+            throw NSError(domain: "Mock", code: 404)
+        }
+        garment.listingPrice = newPrice
+        return garment
+    }
+    
+    func createBatch(_ garments: [Garment]) async throws -> [Garment] {
+        return garments
+    }
+    
+    func updateBatch(_ garments: [Garment]) async throws -> [Garment] {
+        return garments
+    }
+    
+    func deleteBatch(ids: [UUID]) async throws {}
+    
+    func search(query: String) async throws -> [Garment] {
+        return MockData.garments.filter { $0.title.contains(query) || $0.description.contains(query) }
+    }
+    
+    func search(query: String, ownerId: UUID) async throws -> [Garment] {
+        return MockData.garments.filter { 
+            $0.ownerId == ownerId && ($0.title.contains(query) || $0.description.contains(query))
+        }
+    }
+    
+    func filter(_ criteria: GarmentFilterCriteria) async throws -> [Garment] {
+        return MockData.garments
+    }
+    
+    func filter(_ criteria: GarmentFilterCriteria, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        return PaginatedResult(items: MockData.garments, totalCount: MockData.garments.count, page: page, limit: limit)
+    }
+    
+    func countByOwner(userId: UUID) async throws -> Int {
+        return MockData.garments.filter { $0.ownerId == userId }.count
+    }
+    
+    func countListedByOwner(userId: UUID) async throws -> Int {
+        return MockData.garments.filter { $0.ownerId == userId && $0.isListed }.count
+    }
+    
+    func totalValueByOwner(userId: UUID) async throws -> Decimal {
+        return MockData.garments
+            .filter { $0.ownerId == userId }
+            .reduce(Decimal(0)) { $0 + ($1.originalPrice ?? 0) }
+    }
 }
 
 class MockStoryRepository: StoryRepositoryProtocol {
     func getStories(for garmentId: UUID) async throws -> [Story] {
-        return MockData.stories.filter { $0.id == garmentId }
+        return MockData.stories
     }
     
     func createStory(_ story: Story) async throws -> Story {
@@ -130,6 +245,41 @@ class MockGetUserProfileUseCase: GetUserProfileUseCaseProtocol {
     }
 }
 
+// MARK: - DiscoveryFeed Model (for API responses)
+struct DiscoveryFeed: Codable {
+    var trendingStories: [Story]
+    var recentGarments: [Garment]
+    var collections: [WardrobeCollection]
+}
+
+// MARK: - SearchResults Model (for API responses)
+struct SearchResults: Codable {
+    var garments: [Garment]
+    var stories: [Story]
+    var users: [User]
+}
+
+// MARK: - Use Case Protocols (simplified versions for mocks)
+protocol GetGarmentsUseCaseProtocol {
+    func execute() async throws -> [Garment]
+}
+
+protocol CreateGarmentUseCaseProtocol {
+    func execute(_ garment: Garment) async throws -> Garment
+}
+
+protocol DeleteGarmentUseCaseProtocol {
+    func execute(id: UUID) async throws
+}
+
+protocol GetDiscoveryFeedUseCaseProtocol {
+    func execute() async throws -> DiscoveryFeed
+}
+
+protocol GetUserProfileUseCaseProtocol {
+    func execute() async throws -> User
+}
+
 // MARK: - Mock Data
 
 enum MockData {
@@ -138,7 +288,37 @@ enum MockData {
         displayName: "Alex Rivera",
         username: "alexrivera",
         bio: "Curating my intentional wardrobe",
-        email: "alex@example.com"
+        email: "alex@example.com",
+        avatarURL: nil,
+        coverImageURL: nil,
+        styleDescriptors: [],
+        aesthetic: nil,
+        sizePreferences: [],
+        favoriteColors: [],
+        favoriteBrands: [],
+        wishlistItems: [],
+        openToTrade: true,
+        preferredExchangeTypes: [.sellOrTrade],
+        wardrobeCount: 5,
+        exchangeCount: 0,
+        rating: 5.0,
+        ratingCount: 10,
+        followerCount: 25,
+        followingCount: 30,
+        totalCarbonSavingsKg: 100,
+        totalWaterSavingsLiters: 500,
+        itemsCirculated: 3,
+        location: nil,
+        shippingPreference: .domestic,
+        isEmailVerified: true,
+        tier: .free,
+        atelierSubscription: nil,
+        joinedAt: Date(),
+        lastActiveAt: Date(),
+        status: .active,
+        notificationPreferences: NotificationPreferences(),
+        privacySettings: PrivacySettings(),
+        contentPreferences: ContentPreferences()
     )
     
     static let garments: [Garment] = [

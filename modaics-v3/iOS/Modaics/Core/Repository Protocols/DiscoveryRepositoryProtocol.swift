@@ -218,7 +218,7 @@ public enum MatchReasonType: String, Codable, Hashable, Sendable {
     case styleCompatibility = "style_compatibility"
     case sizeMatch = "size_match"
     case brandPreference = "brand_preference"
-    categoryMatch = "category_match"
+    case categoryMatch = "category_match"
     case colorHarmony = "color_harmony"
     case mutualInterest = "mutual_interest"
     case locationProximity = "location_proximity"
@@ -275,5 +275,18 @@ public struct BrandTrend: Codable, Hashable, Identifiable, Sendable {
         self.brandName = brandName
         self.growthRate = growthRate
         self.searchCount = searchCount
+    }
+}
+
+// MARK: - SearchResults
+public struct SearchResults: Codable, Sendable {
+    public let garments: [Garment]
+    public let stories: [Story]
+    public let users: [User]
+    
+    public init(garments: [Garment] = [], stories: [Story] = [], users: [User] = []) {
+        self.garments = garments
+        self.stories = stories
+        self.users = users
     }
 }
