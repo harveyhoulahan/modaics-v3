@@ -253,7 +253,7 @@ public struct BrandSketchbookPublicView: View {
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1, style: StrokeStyle(lineWidth: 1, dash: [5]))
+                .stroke(Color.luxeGold.opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [5]))
         )
     }
     

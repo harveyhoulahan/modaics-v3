@@ -42,7 +42,7 @@ struct LocationPickerSheet: View {
 
 // MARK: - Link Item Picker Sheet
 struct LinkItemPickerSheet: View {
-    @Binding var linkedItem: String?
+    @Binding var linkedItem: LinkedItem?
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
