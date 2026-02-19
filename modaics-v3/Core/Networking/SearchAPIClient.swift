@@ -12,62 +12,6 @@ public actor SearchAPIClient {
     private let baseURL: URL
     private let session: URLSession
     
-    // MARK: - Mock Data (non-isolated for actor access)
-    private let mockItems: [FashionItem] = [
-        FashionItem(
-            id: "1",
-            brand: "Levi's",
-            name: "Vintage 501 Jeans",
-            description: "Classic vintage Levi's 501 jeans",
-            price: 85.0,
-            originalPrice: 120.0,
-            category: .bottoms,
-            condition: .good,
-            size: "32",
-            images: [],
-            sellerId: "seller1"
-        ),
-        FashionItem(
-            id: "2",
-            brand: "Zimmermann",
-            name: "Silk Blouse",
-            description: "Elegant silk blouse",
-            price: 180.0,
-            originalPrice: 280.0,
-            category: .tops,
-            condition: .excellent,
-            size: "S",
-            images: [],
-            sellerId: "seller2"
-        ),
-        FashionItem(
-            id: "3",
-            brand: "Vintage Coach",
-            name: "Leather Bag",
-            description: "Authentic vintage leather bag",
-            price: 220.0,
-            originalPrice: 350.0,
-            category: .bags,
-            condition: .good,
-            size: "OS",
-            images: [],
-            sellerId: "seller3"
-        ),
-        FashionItem(
-            id: "4",
-            brand: "Zara",
-            name: "Linen Trousers",
-            description: "Perfect summer linen trousers",
-            price: 45.0,
-            originalPrice: 89.0,
-            category: .bottoms,
-            condition: .veryGood,
-            size: "M",
-            images: [],
-            sellerId: "seller4"
-        )
-    ]
-    
     // MARK: - Initialization
     public init(baseURL: URL? = nil) {
         self.baseURL = baseURL ?? URL(string: "https://api.modaics.com/v1")!
@@ -75,6 +19,68 @@ public actor SearchAPIClient {
         config.timeoutIntervalForRequest = 60
         config.timeoutIntervalForResource = 120
         self.session = URLSession(configuration: config)
+    }
+    
+    // MARK: - Mock Data Helper
+    private func createMockItems() -> [FashionItem] {
+        [
+            FashionItem(
+                id: "1",
+                brand: "Levi's",
+                name: "Vintage 501 Jeans",
+                description: "Classic vintage Levi's 501 jeans",
+                price: 85.0,
+                originalPrice: 120.0,
+                category: .bottoms,
+                condition: .good,
+                size: .m,
+                images: [],
+                sellerId: "seller1",
+                sellerName: "VintageSeller"
+            ),
+            FashionItem(
+                id: "2",
+                brand: "Zimmermann",
+                name: "Silk Blouse",
+                description: "Elegant silk blouse",
+                price: 180.0,
+                originalPrice: 280.0,
+                category: .tops,
+                condition: .excellent,
+                size: .s,
+                images: [],
+                sellerId: "seller2",
+                sellerName: "DesignerFinds"
+            ),
+            FashionItem(
+                id: "3",
+                brand: "Vintage Coach",
+                name: "Leather Bag",
+                description: "Authentic vintage leather bag",
+                price: 220.0,
+                originalPrice: 350.0,
+                category: .bags,
+                condition: .good,
+                size: .os,
+                images: [],
+                sellerId: "seller3",
+                sellerName: "BagCollector"
+            ),
+            FashionItem(
+                id: "4",
+                brand: "Zara",
+                name: "Linen Trousers",
+                description: "Perfect summer linen trousers",
+                price: 45.0,
+                originalPrice: 89.0,
+                category: .bottoms,
+                condition: .excellent,
+                size: .m,
+                images: [],
+                sellerId: "seller4",
+                sellerName: "FastFashionResale"
+            )
+        ]
     }
     
     // MARK: - Search
@@ -85,7 +91,7 @@ public actor SearchAPIClient {
         try await Task.sleep(nanoseconds: 800_000_000)
         
         // Return mock data
-        var items = mockItems
+        var items = createMockItems()
         
         // Apply category filter if specified
         if let category = parameters.category {
@@ -102,7 +108,7 @@ public actor SearchAPIClient {
             items = items.filter { $0.price >= minPrice }
         }
         if let maxPrice = parameters.maxPrice {
-            items = items.filter { $0.price <= maxPrice }
+                items = items.filter { $0.price <= maxPrice }
         }
         
         // Apply sustainability filter
@@ -134,7 +140,7 @@ public actor SearchAPIClient {
         case .brand:
             items.sort { $0.brand < $1.brand }
         case .condition:
-            let conditionOrder: [Condition] = [.new, .likeNew, .excellent, .veryGood, .good, .fair]
+            let conditionOrder: [Condition] = [.new, .likeNew, .excellent, .good, .fair]
             items.sort { item1, item2 in
                 guard let index1 = conditionOrder.firstIndex(of: item1.condition),
                       let index2 = conditionOrder.firstIndex(of: item2.condition) else {
@@ -250,7 +256,7 @@ public actor SearchAPIClient {
                 title: "Similar Wool Coat",
                 brand: "Max Mara",
                 price: 320.0,
-                condition: .veryGood,
+                condition: .excellent,
                 imageURL: nil
             ),
             SimilarItem(
@@ -321,7 +327,7 @@ public actor SearchAPIClient {
 
 // MARK: - AI Analysis Types
 
-public struct AIGarmentAnalysis: Codable, Sendable {
+public struct AIGarmentAnalysis: Codable {
     public var title: String
     public var category: Category
     public var condition: Condition
@@ -358,13 +364,13 @@ public struct AIGarmentAnalysis: Codable, Sendable {
     }
 }
 
-public struct AIMaterial: Codable, Sendable {
+public struct AIMaterial: Codable {
     public let name: String
     public let percentage: Int
     public let isSustainable: Bool
 }
 
-public struct SimilarItem: Codable, Sendable {
+public struct SimilarItem: Codable {
     public let id: String
     public let title: String
     public let brand: String
@@ -373,7 +379,7 @@ public struct SimilarItem: Codable, Sendable {
     public let imageURL: String?
 }
 
-public struct SustainabilityAnalysis: Codable, Sendable {
+public struct SustainabilityAnalysis: Codable {
     public let score: Int
     public let carbonSavingsKg: Double
     public let waterSavingsLiters: Double
@@ -381,7 +387,7 @@ public struct SustainabilityAnalysis: Codable, Sendable {
     public let suggestions: [String]
 }
 
-public enum SustainabilityRating: String, Codable, Sendable {
+public enum SustainabilityRating: String, Codable {
     case excellent = "Excellent"
     case good = "Good"
     case average = "Average"
@@ -390,7 +396,7 @@ public enum SustainabilityRating: String, Codable, Sendable {
 
 // MARK: - Search Types
 
-public struct SearchParameters: Codable, Sendable {
+public struct SearchParameters {
     public var query: String?
     public var category: Category?
     public var condition: Condition?
@@ -427,13 +433,13 @@ public struct SearchParameters: Codable, Sendable {
     }
 }
 
-public struct SearchResponse: Codable, Sendable {
+public struct SearchResponse: Codable {
     public let items: [FashionItem]
     public let totalCount: Int
     public let hasMore: Bool
 }
 
-public struct SearchSuggestion: Codable, Sendable {
+public struct SearchSuggestion: Codable {
     public let text: String
     public let type: SuggestionType
     
@@ -443,7 +449,7 @@ public struct SearchSuggestion: Codable, Sendable {
     }
 }
 
-public enum SuggestionType: String, Codable, Sendable {
+public enum SuggestionType: String, Codable {
     case style = "Style"
     case category = "Category"
     case brand = "Brand"
@@ -452,7 +458,7 @@ public enum SuggestionType: String, Codable, Sendable {
 
 // MARK: - Errors
 
-public enum SearchAPIError: Error, Sendable {
+public enum SearchAPIError: Error {
     case noImagesProvided
     case invalidResponse
     case networkError(Error)
