@@ -135,11 +135,11 @@ public struct EditProfileView: View {
     // MARK: - Basic Info Section
     private var basicInfoSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader(title: "Basic Info")
+            EditSectionHeader(title: "Basic Info")
             
             VStack(spacing: 16) {
                 // Display Name
-                FormField(
+                EditFormField(
                     title: "Display Name",
                     text: $viewModel.editForm.displayName,
                     placeholder: "Your name"
@@ -205,7 +205,7 @@ public struct EditProfileView: View {
                 }
                 
                 // Location
-                FormField(
+                EditFormField(
                     title: "Location",
                     text: $viewModel.editForm.location,
                     placeholder: "City, Country"
@@ -217,7 +217,7 @@ public struct EditProfileView: View {
     // MARK: - Style Profile Section
     private var styleProfileSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader(title: "Style Profile")
+            EditSectionHeader(title: "Style Profile")
             
             VStack(spacing: 16) {
                 // Aesthetic Picker
@@ -342,7 +342,7 @@ public struct EditProfileView: View {
     // MARK: - Exchange Preferences Section
     private var exchangePreferencesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader(title: "Exchange Preferences")
+            EditSectionHeader(title: "Exchange Preferences")
             
             VStack(spacing: 16) {
                 // Open to Trade Toggle
@@ -441,7 +441,7 @@ public struct EditProfileView: View {
 }
 
 // MARK: - Section Header
-private struct SectionHeader: View {
+private struct EditSectionHeader: View {
     let title: String
     
     var body: some View {
@@ -453,7 +453,7 @@ private struct SectionHeader: View {
 }
 
 // MARK: - Form Field
-private struct FormField: View {
+private struct EditFormField: View {
     let title: String
     @Binding var text: String
     let placeholder: String
