@@ -45,6 +45,7 @@ public extension Color {
     // MARK: - Semantic (ENHANCED greens)
     static let modaicsEco = Color(hex: "3DDC84")                 // brighter eco green
     static let emerald = Color(hex: "2DD47A")                    // more vibrant emerald
+    static let natureTeal = Color(hex: "2D9CDB")                 // water/teal accent
     static let modaicsWarning = Color(hex: "F59E0B")
     static let modaicsError = Color(hex: "EF4444")
     

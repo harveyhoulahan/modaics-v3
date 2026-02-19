@@ -212,7 +212,7 @@ struct MainAppView: View {
                 case .community:
                     CommunityView()
                 case .profile:
-                    WardrobePlaceholderView()
+                    WardrobeView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

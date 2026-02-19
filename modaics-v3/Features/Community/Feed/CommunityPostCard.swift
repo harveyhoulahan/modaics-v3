@@ -43,13 +43,16 @@ public struct CommunityPostCard: View {
             // Industrial-style header with type badge
             headerBar
             
-            // Editorial image grid (not carousel)
+            // Editorial image grid (not carousel) - constrained height
             if !post.imageURLs.isEmpty {
                 editorialImageGrid
+                    .frame(maxHeight: 320)
+                    .clipped()
             }
             
-            // Story/Caption section
+            // Story/Caption section - with max height constraint
             storySection
+                .frame(maxHeight: 200, alignment: .top)
             
             // Sustainability metrics (Modaics unique)
             if post.postType == .thriftFind || post.postType == .ecoTip {
@@ -70,6 +73,7 @@ public struct CommunityPostCard: View {
             Rectangle()
                 .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1)
         )
+        .cornerRadius(12)
     }
     
     // MARK: - Industrial Header Bar
@@ -207,12 +211,11 @@ public struct CommunityPostCard: View {
     // MARK: - Story Section
     private var storySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Caption with editorial styling
+            // Caption with editorial styling - constrained
             Text(post.caption)
                 .font(.system(size: 14, design: .monospaced))
                 .foregroundColor(.sageWhite)
-                .lineLimit(showFullCaption ? nil : 3)
-                .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(showFullCaption ? 8 : 3)
             
             if post.caption.count > 150 {
                 Button(action: { withAnimation { showFullCaption.toggle() } }) {
@@ -222,10 +225,10 @@ public struct CommunityPostCard: View {
                 }
             }
             
-            // Tags with industrial styling
+            // Tags with industrial styling - max 2 rows
             if !post.tags.isEmpty {
                 FlowLayout(spacing: 8) {
-                    ForEach(post.tags, id: \.self) { tag in
+                    ForEach(post.tags.prefix(6), id: \.self) { tag in
                         Text("#\(tag.uppercased())")
                             .font(.system(size: 10, design: .monospaced))
                             .foregroundColor(.sageMuted)

@@ -37,6 +37,7 @@ public struct ModaicsUser: Identifiable, Codable, Hashable {
     public var email: String
     public var isEmailVerified: Bool
     public var tier: ModaicsUserTier
+    public var ecoPoints: Int
     public var joinedAt: Date
     public var lastActiveAt: Date
     public var status: ModaicsUserStatus
@@ -74,6 +75,7 @@ public struct ModaicsUser: Identifiable, Codable, Hashable {
         email: String,
         isEmailVerified: Bool = false,
         tier: ModaicsUserTier = .free,
+        ecoPoints: Int = 0,
         joinedAt: Date = Date(),
         lastActiveAt: Date = Date(),
         status: ModaicsUserStatus = .active,
@@ -109,6 +111,7 @@ public struct ModaicsUser: Identifiable, Codable, Hashable {
         self.email = email
         self.isEmailVerified = isEmailVerified
         self.tier = tier
+        self.ecoPoints = ecoPoints
         self.joinedAt = joinedAt
         self.lastActiveAt = lastActiveAt
         self.status = status

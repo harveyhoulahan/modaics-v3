@@ -47,6 +47,8 @@ public struct WardrobeView: View {
         .toolbar(.hidden, for: .navigationBar)
     }
     
+    @State private var showProfile = false
+    
     // MARK: - Header Section
     private var headerSection: some View {
         HStack {
@@ -63,20 +65,48 @@ public struct WardrobeView: View {
             
             Spacer()
             
-            // Add Garment Button
-            Button(action: { showingAddGarment = true }) {
-                HStack(spacing: 8) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text("ADD")
-                        .font(.forestCaptionLarge)
+            HStack(spacing: 12) {
+                // Add Garment Button
+                Button(action: { showingAddGarment = true }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("ADD")
+                            .font(.forestCaptionLarge)
+                    }
+                    .foregroundColor(.modaicsBackground)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.luxeGold)
+                    .cornerRadius(8)
                 }
-                .foregroundColor(.modaicsBackground)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(Color.luxeGold)
-                .cornerRadius(8)
+                
+                // Profile Button
+                Button(action: { showProfile = true }) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [.modaicsPrimary, .luxeGold.opacity(0.3)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 40, height: 40)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.luxeGold.opacity(0.5), lineWidth: 1)
+                            )
+                        
+                        Text("H")
+                            .font(.system(size: 16, weight: .bold, design: .monospaced))
+                            .foregroundColor(.sageWhite)
+                    }
+                }
             }
+        }
+        .sheet(isPresented: $showProfile) {
+            ProfileView()
         }
     }
     
