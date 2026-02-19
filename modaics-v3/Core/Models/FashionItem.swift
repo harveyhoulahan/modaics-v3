@@ -115,7 +115,7 @@ public enum Size: String, CaseIterable, Codable, Identifiable {
 
 // MARK: - FashionItem Model
 // Shared with Create page
-public struct FashionItem: Identifiable, Codable, Hashable {
+public struct FashionItem: Identifiable, Codable, Hashable, Sendable {
     public let id: String
     public let brand: String
     public let name: String
@@ -247,81 +247,6 @@ public struct FashionItem: Identifiable, Codable, Hashable {
             isRecycled: true,
             likes: 89,
             isLiked: false
-        ),
-        FashionItem(
-            id: "3",
-            brand: "VINTAGE CHANEL",
-            name: "CLASSIC TWEED JACKET",
-            description: "Authentic vintage Chanel tweed jacket",
-            price: 1200,
-            category: .vintage,
-            condition: .good,
-            size: .l,
-            images: ["https://example.com/chanel1.jpg"],
-            sellerId: "user3",
-            sellerName: "LuxuryResale",
-            sustainabilityScore: 95,
-            materials: ["Tweed", "Silk"],
-            isVintage: true,
-            isRecycled: false,
-            likes: 156,
-            isLiked: true
-        ),
-        FashionItem(
-            id: "4",
-            brand: "NIKE",
-            name: "AIR FORCE 1 '07",
-            description: "Classic white sneakers, barely worn",
-            price: 85,
-            originalPrice: 110,
-            category: .shoes,
-            condition: .likeNew,
-            size: .w9,
-            images: ["https://example.com/nike1.jpg"],
-            sellerId: "user4",
-            sellerName: "SneakerHead",
-            sustainabilityScore: 60,
-            likes: 23,
-            isLiked: false
-        ),
-        FashionItem(
-            id: "5",
-            brand: "STELLA MCCARTNEY",
-            name: "VEGAN LEATHER BAG",
-            description: "Mini crossbody bag in burgundy",
-            price: 520,
-            originalPrice: 890,
-            category: .bags,
-            condition: .excellent,
-            size: .os,
-            images: ["https://example.com/bag1.jpg"],
-            sellerId: "user5",
-            sellerName: "VeganStyle",
-            sustainabilityScore: 88,
-            materials: ["Vegan Leather"],
-            isVintage: false,
-            isRecycled: false,
-            likes: 67,
-            isLiked: false
-        ),
-        FashionItem(
-            id: "6",
-            brand: "LEVI'S",
-            name: "VINTAGE 501 JEANS",
-            description: "Authentic vintage 501s from 1990s",
-            price: 120,
-            category: .bottoms,
-            condition: .good,
-            size: .m,
-            images: ["https://example.com/levis1.jpg"],
-            sellerId: "user6",
-            sellerName: "DenimHunter",
-            sustainabilityScore: 85,
-            materials: ["Cotton"],
-            isVintage: true,
-            isRecycled: false,
-            likes: 45,
-            isLiked: true
         )
     ]
 }

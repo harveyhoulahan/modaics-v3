@@ -30,6 +30,20 @@ public struct ItemCard: View {
         self.isLoading = isLoading
     }
     
+    public init(
+        item: FashionItem,
+        onLikeTapped: @escaping () -> Void = {},
+        onCardTapped: @escaping () -> Void = {}
+    ) {
+        self.title = item.name
+        self.subtitle = item.brand
+        self.imageURL = item.images.first.flatMap { URL(string: $0) }
+        self.price = Decimal(item.price)
+        self.condition = item.condition
+        self.sustainabilityScore = item.sustainabilityScore
+        self.isLoading = false
+    }
+    
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Image container

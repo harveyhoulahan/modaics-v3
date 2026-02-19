@@ -100,14 +100,13 @@ public class DiscoverViewModel: ObservableObject {
                 query: searchQuery.isEmpty ? nil : searchQuery,
                 category: selectedCategory,
                 condition: filterCriteria.condition,
-                size: filterCriteria.size,
                 minPrice: filterCriteria.minPrice > 0 ? filterCriteria.minPrice : nil,
                 maxPrice: filterCriteria.maxPrice < 2000 ? filterCriteria.maxPrice : nil,
-                sustainabilityOnly: filterCriteria.sustainabilityOnly,
-                vintageOnly: filterCriteria.vintageOnly,
                 sortBy: sortOption,
                 page: currentPage,
-                limit: itemsPerPage
+                limit: itemsPerPage,
+                sustainabilityOnly: filterCriteria.sustainabilityOnly,
+                vintageOnly: filterCriteria.vintageOnly
             )
             
             let response = try await apiClient.search(parameters: parameters)
