@@ -14,7 +14,7 @@ public struct DiscoverView: View {
     public init() {}
     
     private var headerCollapseProgress: CGFloat {
-        let progress = min(1, max(0, scrollOffset / collapsedThreshold))
+        let progress: CGFloat = min(CGFloat(1), max(CGFloat(0), scrollOffset / collapsedThreshold))
         return progress
     }
     
@@ -370,7 +370,7 @@ public struct DiscoverView: View {
             GridItem(.flexible(), spacing: 16),
             GridItem(.flexible(), spacing: 16)
         ], spacing: 20) {
-            ForEach(0..<6) { _ in
+            ForEach(0..<6, id: \.self) { _ in
                 ItemCard(
                     title: "Loading...",
                     subtitle: nil,
