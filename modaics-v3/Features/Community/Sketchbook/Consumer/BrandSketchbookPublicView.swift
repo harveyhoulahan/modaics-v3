@@ -232,9 +232,69 @@ public struct BrandSketchbookPublicView: View {
                 .foregroundColor(.sageMuted)
             
             ForEach(viewModel.visiblePosts) { post in
-                SketchbookPostRow(post: post, viewModel: viewModel)
+                simplePostRow(for: post)
             }
         }
+    }
+    
+    private func simplePostRow(for post: SketchbookPost) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Rectangle()
+                        .fill(Color.modaicsSurfaceHighlight)
+                        .frame(width: 40, height: 40)
+                    
+                    Text(post.authorDisplayName?.prefix(1) ?? "B")
+                        .font(.system(size: 18, weight: .bold, design: .monospaced))
+                        .foregroundColor(.luxeGold)
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(post.authorDisplayName?.uppercased() ?? "BRAND")
+                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                        .foregroundColor(.sageWhite)
+                    
+                    Text(post.postType.displayName.uppercased())
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(Color(hex: post.postType.color))
+                }
+                
+                Spacer()
+                
+                if post.visibility == .membersOnly {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.luxeGold)
+                }
+            }
+            
+            Text(post.title)
+                .font(.forestHeadlineSmall)
+                .foregroundColor(.sageWhite)
+            
+            if let body = post.body {
+                Text(body)
+                    .font(.forestBodySmall)
+                    .foregroundColor(.sageMuted)
+                    .lineLimit(2)
+            }
+            
+            HStack(spacing: 16) {
+                HStack(spacing: 4) {
+                    Image(systemName: "flame")
+                        .font(.system(size: 14))
+                    Text("\(post.reactionCount)")
+                        .font(.forestCaptionSmall)
+                }
+                .foregroundColor(.sageMuted)
+                
+                Spacer()
+            }
+        }
+        .padding(16)
+        .background(Color.modaicsSurface)
+        .cornerRadius(12)
     }
     
     private var lockedContentIndicator: some View {
