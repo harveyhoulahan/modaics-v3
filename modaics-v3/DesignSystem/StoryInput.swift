@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Story Input Component
+// MARK: - Story Input Component (Dark Green Porsche)
 /// Multi-line text input for story content with title and help text
 public struct StoryInput: View {
     let placeholder: String
@@ -21,30 +21,31 @@ public struct StoryInput: View {
     }
     
     public var body: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.small) {
-            Text(title)
-                .font(.modaicsBodySemiBold)
-                .foregroundColor(Color.modaicsTextPrimary)
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title.uppercased())
+                .font(.forestCaptionMedium)
+                .foregroundColor(Color.sageMuted)
+                .tracking(1)
             
             TextEditor(text: $text)
-                .font(.modaicsBodyRegular)
-                .foregroundColor(Color.modaicsTextPrimary)
+                .font(.forestBodyMedium)
+                .foregroundColor(Color.sageWhite)
                 .frame(minHeight: 100)
-                .padding(ModaicsLayout.small)
-                .background(Color.modaicsPaper)
-                .cornerRadius(ModaicsLayout.cornerRadius)
+                .padding(10)
+                .background(Color.modaicsSurface)
+                .cornerRadius(8)
                 .overlay(
-                    RoundedRectangle(cornerRadius: ModaicsLayout.cornerRadius)
-                        .stroke(Color.modaicsTextTertiary.opacity(0.3), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
                 )
                 .overlay(
                     Group {
                         if text.isEmpty {
                             Text(placeholder)
-                                .font(.modaicsBodyRegular)
-                                .foregroundColor(Color.modaicsTextTertiary)
-                                .padding(.horizontal, ModaicsLayout.small + 4)
-                                .padding(.vertical, ModaicsLayout.small + 8)
+                                .font(.forestBodyMedium)
+                                .foregroundColor(Color.sageSubtle)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 18)
                                 .allowsHitTesting(false)
                         }
                     },
@@ -52,8 +53,8 @@ public struct StoryInput: View {
                 )
             
             Text(helpText)
-                .font(.modaicsCaptionRegular)
-                .foregroundColor(Color.modaicsTextSecondary)
+                .font(.forestCaptionSmall)
+                .foregroundColor(Color.sageSubtle)
         }
     }
 }

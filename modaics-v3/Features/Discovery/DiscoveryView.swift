@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - DiscoveryView
+// MARK: - DiscoveryView (Dark Green Porsche)
 /// Main discovery feed view showing garments in a grid layout
 /// with search, new arrivals, and trending sections
 public struct DiscoveryView: View {
@@ -14,17 +14,17 @@ public struct DiscoveryView: View {
     public var body: some View {
         ZStack {
             // Background
-            Color.modaicsWarmSand
+            Color.modaicsBackground
                 .ignoresSafeArea()
             
             ScrollView(showsIndicators: false) {
-                VStack(spacing: ModaicsLayout.large) {
+                VStack(spacing: 24) {
                     // Header
                     headerSection
                     
                     // Search Bar
                     searchBar
-                        .padding(.horizontal, ModaicsLayout.margin)
+                        .padding(.horizontal, 20)
                     
                     if viewModel.isLoading {
                         loadingView
@@ -45,7 +45,7 @@ public struct DiscoveryView: View {
                         allGarmentsSection
                     }
                 }
-                .padding(.vertical, ModaicsLayout.medium)
+                .padding(.vertical, 16)
             }
         }
         .task {
@@ -54,20 +54,22 @@ public struct DiscoveryView: View {
         .refreshable {
             await viewModel.refresh()
         }
+        .toolbar(.hidden, for: .navigationBar)
     }
     
     // MARK: - Header Section
     
     private var headerSection: some View {
         HStack {
-            VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
-                Text("Discover")
-                    .font(.modaicsDisplaySmall)
-                    .foregroundColor(.modaicsTextPrimary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("DISCOVER")
+                    .font(.forestDisplaySmall)
+                    .foregroundColor(.sageWhite)
+                    .tracking(2)
                 
                 Text("Find pre-loved pieces with stories")
-                    .font(.modaicsBodyRegular)
-                    .foregroundColor(.modaicsTextSecondary)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageMuted)
             }
             
             Spacer()
@@ -94,23 +96,23 @@ public struct DiscoveryView: View {
             } label: {
                 Image(systemName: "line.3.horizontal.decrease.circle")
                     .font(.system(size: 24))
-                    .foregroundColor(.modaicsCharcoal)
+                    .foregroundColor(.sageWhite)
             }
         }
-        .padding(.horizontal, ModaicsLayout.margin)
+        .padding(.horizontal, 20)
     }
     
     // MARK: - Search Bar
     
     private var searchBar: some View {
-        HStack(spacing: ModaicsLayout.small) {
+        HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 18))
-                .foregroundColor(.modaicsStone)
+                .foregroundColor(.sageSubtle)
             
             TextField("Search garments, brands, styles...", text: $viewModel.searchQuery)
-                .font(.modaicsBodyRegular)
-                .foregroundColor(.modaicsTextPrimary)
+                .font(.forestBodyMedium)
+                .foregroundColor(.sageWhite)
             
             if !viewModel.searchQuery.isEmpty {
                 Button(action: {
@@ -118,67 +120,75 @@ public struct DiscoveryView: View {
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(.modaicsStone)
+                        .foregroundColor(.sageSubtle)
                 }
             }
+            
+            // Camera button for visual search
+            Button(action: {}) {
+                Image(systemName: "camera")
+                    .font(.system(size: 20))
+                    .foregroundColor(.luxeGold)
+            }
         }
-        .padding(.horizontal, ModaicsLayout.medium)
-        .padding(.vertical, ModaicsLayout.small)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: ModaicsLayout.cornerRadiusButton)
-                .fill(Color.modaicsPaper)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.modaicsSurface)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: ModaicsLayout.cornerRadiusButton)
-                .stroke(Color.modaicsCharcoal.opacity(0.1), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
         )
     }
     
     // MARK: - Loading View
     
     private var loadingView: some View {
-        VStack(spacing: ModaicsLayout.medium) {
+        VStack(spacing: 20) {
             ProgressView()
                 .scaleEffect(1.2)
+                .tint(.luxeGold)
             
             Text("Discovering treasures...")
-                .font(.modaicsBodyRegular)
-                .foregroundColor(.modaicsTextSecondary)
+                .font(.forestBodyMedium)
+                .foregroundColor(.sageMuted)
         }
-        .padding(.top, ModaicsLayout.xxxlarge)
+        .padding(.top, 80)
     }
     
     // MARK: - Error View
     
     private var errorView: some View {
-        VStack(spacing: ModaicsLayout.medium) {
+        VStack(spacing: 20) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 48))
-                .foregroundColor(.modaicsOchre)
+                .foregroundColor(.modaicsWarning)
             
             Text("Something went wrong")
-                .font(.modaicsHeadline3)
-                .foregroundColor(.modaicsTextPrimary)
+                .font(.forestHeadlineMedium)
+                .foregroundColor(.sageWhite)
             
             Button("Try Again") {
                 Task {
                     await viewModel.loadGarments()
                 }
             }
-            .font(.modaicsButton)
-            .foregroundColor(.modaicsTerracotta)
+            .font(.forestBodyMedium)
+            .foregroundColor(.luxeGold)
         }
-        .padding(.top, ModaicsLayout.xxxlarge)
+        .padding(.top, 80)
     }
     
     // MARK: - New Arrivals Section
     
     private var newArrivalsSection: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.medium) {
-            SectionHeader(title: "New Arrivals", subtitle: "Fresh finds just added")
+        VStack(alignment: .leading, spacing: 16) {
+            SectionHeader(title: "NEW ARRIVALS", subtitle: "Fresh finds just added")
             
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: ModaicsLayout.medium) {
+                HStack(spacing: 16) {
                     ForEach(viewModel.newArrivals) { garment in
                         GarmentCard(
                             garment: garment,
@@ -193,7 +203,7 @@ public struct DiscoveryView: View {
                         .frame(width: 180)
                     }
                 }
-                .padding(.horizontal, ModaicsLayout.margin)
+                .padding(.horizontal, 20)
             }
         }
     }
@@ -201,11 +211,11 @@ public struct DiscoveryView: View {
     // MARK: - Trending Section
     
     private var trendingSection: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.medium) {
-            SectionHeader(title: "Trending", subtitle: "Popular right now")
+        VStack(alignment: .leading, spacing: 16) {
+            SectionHeader(title: "TRENDING", subtitle: "Popular right now")
             
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: ModaicsLayout.medium) {
+                HStack(spacing: 16) {
                     ForEach(viewModel.trendingGarments) { garment in
                         GarmentCard(
                             garment: garment,
@@ -220,7 +230,7 @@ public struct DiscoveryView: View {
                         .frame(width: 180)
                     }
                 }
-                .padding(.horizontal, ModaicsLayout.margin)
+                .padding(.horizontal, 20)
             }
         }
     }
@@ -228,31 +238,33 @@ public struct DiscoveryView: View {
     // MARK: - All Garments Section
     
     private var allGarmentsSection: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.medium) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
-                VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
-                    Text(viewModel.searchQuery.isEmpty ? "All Garments" : "Results")
-                        .font(.modaicsHeadingSemiBold)
-                        .foregroundColor(.modaicsTextPrimary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(viewModel.searchQuery.isEmpty ? "ALL GARMENTS" : "RESULTS")
+                        .font(.forestHeadlineMedium)
+                        .foregroundColor(.sageWhite)
+                        .tracking(1)
                     
-                    Text("\(viewModel.filteredGarments.count) items")
-                        .font(.modaicsCaption)
-                        .foregroundColor(.modaicsTextSecondary)
+                    Text("\(viewModel.filteredGarments.count) PIECES")
+                        .font(.forestCaptionMedium)
+                        .foregroundColor(.sageMuted)
+                        .tracking(1)
                 }
                 
                 Spacer()
             }
-            .padding(.horizontal, ModaicsLayout.margin)
+            .padding(.horizontal, 20)
             
             if viewModel.filteredGarments.isEmpty {
                 emptyStateView
             } else {
                 LazyVGrid(
                     columns: [
-                        GridItem(.flexible(), spacing: ModaicsLayout.medium),
-                        GridItem(.flexible(), spacing: ModaicsLayout.medium)
+                        GridItem(.flexible(), spacing: 16),
+                        GridItem(.flexible(), spacing: 16)
                     ],
-                    spacing: ModaicsLayout.medium
+                    spacing: 16
                 ) {
                     ForEach(viewModel.filteredGarments) { garment in
                         GarmentCard(
@@ -267,33 +279,33 @@ public struct DiscoveryView: View {
                         )
                     }
                 }
-                .padding(.horizontal, ModaicsLayout.margin)
+                .padding(.horizontal, 20)
             }
         }
     }
     
     private var emptyStateView: some View {
-        VStack(spacing: ModaicsLayout.medium) {
+        VStack(spacing: 20) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 48))
-                .foregroundColor(.modaicsStone)
+                .foregroundColor(.sageSubtle)
             
-            Text("No garments found")
-                .font(.modaicsHeadline3)
-                .foregroundColor(.modaicsTextPrimary)
+            Text("No pieces found")
+                .font(.forestHeadlineMedium)
+                .foregroundColor(.sageWhite)
             
             Text("Try adjusting your search or filters")
-                .font(.modaicsBodyRegular)
-                .foregroundColor(.modaicsTextSecondary)
+                .font(.forestBodyMedium)
+                .foregroundColor(.sageMuted)
             
             Button("Clear Filters") {
                 viewModel.clearFilters()
             }
-            .font(.modaicsButton)
-            .foregroundColor(.modaicsTerracotta)
-            .padding(.top, ModaicsLayout.small)
+            .font(.forestBodyMedium)
+            .foregroundColor(.luxeGold)
+            .padding(.top, 8)
         }
-        .padding(.vertical, ModaicsLayout.xxlarge)
+        .padding(.vertical, 60)
     }
 }
 
@@ -304,18 +316,19 @@ private struct SectionHeader: View {
     let subtitle: String?
     
     var body: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.modaicsHeadingSemiBold)
-                .foregroundColor(.modaicsTextPrimary)
+                .font(.forestHeadlineMedium)
+                .foregroundColor(.sageWhite)
+                .tracking(1)
             
             if let subtitle = subtitle {
                 Text(subtitle)
-                    .font(.modaicsCaption)
-                    .foregroundColor(.modaicsTextSecondary)
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.sageMuted)
             }
         }
-        .padding(.horizontal, ModaicsLayout.margin)
+        .padding(.horizontal, 20)
     }
 }
 
@@ -325,6 +338,7 @@ private struct SectionHeader: View {
 struct DiscoveryView_Previews: PreviewProvider {
     static var previews: some View {
         DiscoveryView()
+            .preferredColorScheme(.dark)
     }
 }
 #endif
