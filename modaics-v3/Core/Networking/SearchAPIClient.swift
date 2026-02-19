@@ -12,6 +12,62 @@ public actor SearchAPIClient {
     private let baseURL: URL
     private let session: URLSession
     
+    // MARK: - Mock Data (non-isolated for actor access)
+    private let mockItems: [FashionItem] = [
+        FashionItem(
+            id: "1",
+            brand: "Levi's",
+            name: "Vintage 501 Jeans",
+            description: "Classic vintage Levi's 501 jeans",
+            price: 85.0,
+            originalPrice: 120.0,
+            category: .bottoms,
+            condition: .good,
+            size: "32",
+            images: [],
+            sellerId: "seller1"
+        ),
+        FashionItem(
+            id: "2",
+            brand: "Zimmermann",
+            name: "Silk Blouse",
+            description: "Elegant silk blouse",
+            price: 180.0,
+            originalPrice: 280.0,
+            category: .tops,
+            condition: .excellent,
+            size: "S",
+            images: [],
+            sellerId: "seller2"
+        ),
+        FashionItem(
+            id: "3",
+            brand: "Vintage Coach",
+            name: "Leather Bag",
+            description: "Authentic vintage leather bag",
+            price: 220.0,
+            originalPrice: 350.0,
+            category: .bags,
+            condition: .good,
+            size: "OS",
+            images: [],
+            sellerId: "seller3"
+        ),
+        FashionItem(
+            id: "4",
+            brand: "Zara",
+            name: "Linen Trousers",
+            description: "Perfect summer linen trousers",
+            price: 45.0,
+            originalPrice: 89.0,
+            category: .bottoms,
+            condition: .veryGood,
+            size: "M",
+            images: [],
+            sellerId: "seller4"
+        )
+    ]
+    
     // MARK: - Initialization
     public init(baseURL: URL? = nil) {
         self.baseURL = baseURL ?? URL(string: "https://api.modaics.com/v1")!
@@ -29,7 +85,7 @@ public actor SearchAPIClient {
         try await Task.sleep(nanoseconds: 800_000_000)
         
         // Return mock data
-        var items = FashionItem.sampleItems
+        var items = mockItems
         
         // Apply category filter if specified
         if let category = parameters.category {
@@ -78,7 +134,7 @@ public actor SearchAPIClient {
         case .brand:
             items.sort { $0.brand < $1.brand }
         case .condition:
-            let conditionOrder: [Condition] = [.new, .likeNew, .excellent, .good, .fair]
+            let conditionOrder: [Condition] = [.new, .likeNew, .excellent, .veryGood, .good, .fair]
             items.sort { item1, item2 in
                 guard let index1 = conditionOrder.firstIndex(of: item1.condition),
                       let index2 = conditionOrder.firstIndex(of: item2.condition) else {
@@ -160,7 +216,7 @@ public actor SearchAPIClient {
                 AIMaterial(name: "Cashmere", percentage: 20, isSustainable: true)
             ],
             colors: ["Camel", "Brown"],
-            estimatedPrice: Decimal(245),
+            estimatedPrice: 245.0,
             sustainabilityScore: 78,
             confidence: 0.92,
             suggestions: [
@@ -190,18 +246,18 @@ public actor SearchAPIClient {
         
         return [
             SimilarItem(
-                id: UUID(),
+                id: UUID().uuidString,
                 title: "Similar Wool Coat",
                 brand: "Max Mara",
-                price: Decimal(320),
+                price: 320.0,
                 condition: .veryGood,
                 imageURL: nil
             ),
             SimilarItem(
-                id: UUID(),
+                id: UUID().uuidString,
                 title: "Camel Coat Vintage",
                 brand: "Burberry",
-                price: Decimal(450),
+                price: 450.0,
                 condition: .excellent,
                 imageURL: nil
             )
@@ -248,7 +304,7 @@ public actor SearchAPIClient {
     ) -> [String] {
         var suggestions: [String] = []
         
-        let sustainableCount = materials.filter(\.isSustainable).count
+        let sustainableCount = materials.filter { $0.isSustainable }.count
         if sustainableCount == 0 {
             suggestions.append("Consider highlighting the garment's durability and care instructions")
         }
@@ -265,13 +321,13 @@ public actor SearchAPIClient {
 
 // MARK: - AI Analysis Types
 
-public struct AIGarmentAnalysis: Codable, Equatable {
+public struct AIGarmentAnalysis: Codable, Sendable {
     public var title: String
     public var category: Category
     public var condition: Condition
     public var materials: [AIMaterial]
     public var colors: [String]
-    public var estimatedPrice: Decimal
+    public var estimatedPrice: Double
     public var sustainabilityScore: Int
     public var confidence: Double
     public var suggestions: [String]
@@ -283,7 +339,7 @@ public struct AIGarmentAnalysis: Codable, Equatable {
         condition: Condition,
         materials: [AIMaterial],
         colors: [String],
-        estimatedPrice: Decimal,
+        estimatedPrice: Double,
         sustainabilityScore: Int,
         confidence: Double,
         suggestions: [String],
@@ -302,30 +358,22 @@ public struct AIGarmentAnalysis: Codable, Equatable {
     }
 }
 
-public struct AIMaterial: Codable, Identifiable {
-    public let id: UUID
-    public var name: String
-    public var percentage: Int
-    public var isSustainable: Bool
-    
-    public init(id: UUID = UUID(), name: String, percentage: Int, isSustainable: Bool) {
-        self.id = id
-        self.name = name
-        self.percentage = percentage
-        self.isSustainable = isSustainable
-    }
+public struct AIMaterial: Codable, Sendable {
+    public let name: String
+    public let percentage: Int
+    public let isSustainable: Bool
 }
 
-public struct SimilarItem: Codable, Identifiable {
-    public let id: UUID
+public struct SimilarItem: Codable, Sendable {
+    public let id: String
     public let title: String
-    public let brand: String?
-    public let price: Decimal
+    public let brand: String
+    public let price: Double
     public let condition: Condition
-    public let imageURL: URL?
+    public let imageURL: String?
 }
 
-public struct SustainabilityAnalysis: Codable {
+public struct SustainabilityAnalysis: Codable, Sendable {
     public let score: Int
     public let carbonSavingsKg: Double
     public let waterSavingsLiters: Double
@@ -333,66 +381,59 @@ public struct SustainabilityAnalysis: Codable {
     public let suggestions: [String]
 }
 
-public enum SustainabilityRating: String, Codable {
-    case excellent = "EXCELLENT"
-    case good = "GOOD"
-    case average = "AVERAGE"
-    case needsImprovement = "NEEDS_IMPROVEMENT"
-    
-    public var color: String {
-        switch self {
-        case .excellent: return "3DDC84"
-        case .good: return "4A9A5A"
-        case .average: return "D9BD6B"
-        case .needsImprovement: return "F59E0B"
-        }
-    }
+public enum SustainabilityRating: String, Codable, Sendable {
+    case excellent = "Excellent"
+    case good = "Good"
+    case average = "Average"
+    case needsImprovement = "Needs Improvement"
 }
 
-// MARK: - Search Parameters
-public struct SearchParameters {
-    public let query: String?
-    public let category: Category?
-    public let condition: Condition?
-    public let size: Size?
-    public let minPrice: Double?
-    public let maxPrice: Double?
-    public let sustainabilityOnly: Bool
-    public let vintageOnly: Bool
-    public let sortBy: SortOption
-    public let page: Int
-    public let limit: Int
+// MARK: - Search Types
+
+public struct SearchParameters: Codable, Sendable {
+    public var query: String?
+    public var category: Category?
+    public var condition: Condition?
+    public var minPrice: Double?
+    public var maxPrice: Double?
+    public var sortBy: SortOption
+    public var page: Int
+    public var limit: Int
+    public var sustainabilityOnly: Bool
+    public var vintageOnly: Bool
     
     public init(
         query: String? = nil,
         category: Category? = nil,
         condition: Condition? = nil,
-        size: Size? = nil,
         minPrice: Double? = nil,
         maxPrice: Double? = nil,
-        sustainabilityOnly: Bool = false,
-        vintageOnly: Bool = false,
         sortBy: SortOption = .recent,
         page: Int = 1,
-        limit: Int = 20
+        limit: Int = 20,
+        sustainabilityOnly: Bool = false,
+        vintageOnly: Bool = false
     ) {
         self.query = query
         self.category = category
         self.condition = condition
-        self.size = size
         self.minPrice = minPrice
         self.maxPrice = maxPrice
-        self.sustainabilityOnly = sustainabilityOnly
-        self.vintageOnly = vintageOnly
         self.sortBy = sortBy
         self.page = page
         self.limit = limit
+        self.sustainabilityOnly = sustainabilityOnly
+        self.vintageOnly = vintageOnly
     }
 }
 
-// MARK: - Search Suggestion
-public struct SearchSuggestion: Identifiable {
-    public let id = UUID()
+public struct SearchResponse: Codable, Sendable {
+    public let items: [FashionItem]
+    public let totalCount: Int
+    public let hasMore: Bool
+}
+
+public struct SearchSuggestion: Codable, Sendable {
     public let text: String
     public let type: SuggestionType
     
@@ -400,52 +441,20 @@ public struct SearchSuggestion: Identifiable {
         self.text = text
         self.type = type
     }
-    
-    public enum SuggestionType {
-        case brand
-        case category
-        case style
-        case recent
-        case trending
-    }
 }
 
-// MARK: - Search Response
-public struct SearchResponse {
-    public let items: [FashionItem]
-    public let totalCount: Int
-    public let hasMore: Bool
-    
-    public init(items: [FashionItem], totalCount: Int, hasMore: Bool) {
-        self.items = items
-        self.totalCount = totalCount
-        self.hasMore = hasMore
-    }
+public enum SuggestionType: String, Codable, Sendable {
+    case style = "Style"
+    case category = "Category"
+    case brand = "Brand"
+    case trending = "Trending"
 }
 
 // MARK: - Errors
-public enum SearchAPIError: Error, LocalizedError {
+
+public enum SearchAPIError: Error, Sendable {
     case noImagesProvided
-    case invalidImageData
+    case invalidResponse
     case networkError(Error)
     case decodingError(Error)
-    case serverError(Int, String)
-    case analysisFailed
-    
-    public var errorDescription: String? {
-        switch self {
-        case .noImagesProvided:
-            return "No images were provided for analysis"
-        case .invalidImageData:
-            return "Could not process image data"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
-        case .decodingError:
-            return "Failed to parse server response"
-        case .serverError(let code, let message):
-            return "Server error (\(code)): \(message)"
-        case .analysisFailed:
-            return "AI analysis failed. Please try again."
-        }
-    }
 }
