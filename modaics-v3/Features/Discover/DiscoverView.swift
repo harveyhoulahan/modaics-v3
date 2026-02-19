@@ -225,7 +225,7 @@ public struct DiscoverView: View {
             ForEach(viewModel.items) { item in
                 ItemCard(
                     item: item,
-                    onLikeTapped: { viewModel.toggleLike(item) },
+                    onLikeTapped: { viewModel.toggleLike(for: item) },
                     onCardTapped: { }
                 )
             }
