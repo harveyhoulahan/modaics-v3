@@ -210,7 +210,7 @@ struct MainAppView: View {
                 case .create:
                     UnifiedCreateView()
                 case .community:
-                    CommunityPlaceholderView()
+                    CommunityView()
                 case .profile:
                     WardrobePlaceholderView()
                 }
