@@ -57,7 +57,7 @@ class ExchangeViewModel: ObservableObject {
     }
     
     /// Initiate a purchase transaction
-    func initiatePurchase(garmentId: String, paymentMethod: PaymentMethod, handoffNote: String?) async throws -> Transaction {
+    func initiatePurchase(garmentId: UUID, paymentMethod: PaymentMethod, handoffNote: String?) async throws -> ExchangeTransaction {
         isLoading = true
         defer { isLoading = false }
         
@@ -69,7 +69,7 @@ class ExchangeViewModel: ObservableObject {
     }
     
     /// List a garment for sale
-    func listGarment(garmentId: String, price: Decimal, handoffNote: String?) async throws -> Listing {
+    func listGarment(garmentId: UUID, price: Decimal, handoffNote: String?) async throws -> GarmentListing {
         isLoading = true
         defer { isLoading = false }
         
@@ -81,7 +81,7 @@ class ExchangeViewModel: ObservableObject {
     }
     
     /// Propose a trade
-    func proposeTrade(offeredGarmentId: String, requestedGarmentId: String, message: String?) async throws -> TradeProposal {
+    func proposeTrade(offeredGarmentId: UUID, requestedGarmentId: UUID, message: String?) async throws -> TradeOffer {
         isLoading = true
         defer { isLoading = false }
         
@@ -93,7 +93,7 @@ class ExchangeViewModel: ObservableObject {
     }
     
     /// Cancel an ongoing transaction
-    func cancelTransaction(_ transactionId: String) async throws {
+    func cancelTransaction(_ transactionId: UUID) async throws {
         try await exchangeUseCase.cancelTransaction(transactionId)
     }
     
@@ -160,34 +160,34 @@ protocol ExchangeGarmentUseCaseProtocol {
     func getRecentActivity() async throws -> [ExchangeActivity]
     func getUserGarments() async throws -> [Garment]
     func getAvailableGarments() async throws -> [Garment]
-    func purchaseGarment(garmentId: String, paymentMethodId: String, handoffNote: String?) async throws -> Transaction
-    func createListing(garmentId: String, price: Decimal, handoffNote: String?) async throws -> Listing
-    func proposeTrade(offeredGarmentId: String, requestedGarmentId: String, message: String?) async throws -> TradeProposal
-    func cancelTransaction(_ transactionId: String) async throws
+    func purchaseGarment(garmentId: UUID, paymentMethodId: String, handoffNote: String?) async throws -> ExchangeTransaction
+    func createListing(garmentId: UUID, price: Decimal, handoffNote: String?) async throws -> GarmentListing
+    func proposeTrade(offeredGarmentId: UUID, requestedGarmentId: UUID, message: String?) async throws -> TradeOffer
+    func cancelTransaction(_ transactionId: UUID) async throws
 }
 
 // MARK: - Response Models
-struct Transaction: Identifiable {
-    let id: String
-    let garmentId: String
+struct ExchangeTransaction: Identifiable {
+    let id: UUID
+    let garmentId: UUID
     let amount: Decimal
     let status: TransactionStatus
     let createdAt: Date
     let handoffNote: String?
 }
 
-struct Listing: Identifiable {
-    let id: String
-    let garmentId: String
+struct GarmentListing: Identifiable {
+    let id: UUID
+    let garmentId: UUID
     let price: Decimal
     let status: ListingStatus
     let createdAt: Date
 }
 
-struct TradeProposal: Identifiable {
-    let id: String
-    let offeredGarmentId: String
-    let requestedGarmentId: String
+struct TradeOffer: Identifiable {
+    let id: UUID
+    let offeredGarmentId: UUID
+    let requestedGarmentId: UUID
     let status: TradeStatus
     let message: String?
     let createdAt: Date
@@ -236,10 +236,42 @@ class MockExchangeGarmentUseCase: ExchangeGarmentUseCaseProtocol {
         try await Task.sleep(nanoseconds: 300_000_000)
         
         return [
-            Garment(name: "Cashmere Sweater", brand: "Everlane", size: "M", imageUrl: nil),
-            Garment(name: "Denim Jacket", brand: "Levi's", size: "L", imageUrl: nil),
-            Garment(name: "Pleated Skirt", brand: "COS", size: "S", imageUrl: nil),
-            Garment(name: "Wool Trousers", brand: "ARKET", size: "32", imageUrl: nil)
+            Garment(
+                title: "Cashmere Sweater",
+                description: "Soft cashmere",
+                story: Story.sampleMinimal,
+                condition: .excellent,
+                category: .tops,
+                size: Size(label: "M", system: .us),
+                ownerId: UUID()
+            ),
+            Garment(
+                title: "Denim Jacket",
+                description: "Classic denim",
+                story: Story.sampleMinimal,
+                condition: .vintage,
+                category: .outerwear,
+                size: Size(label: "L", system: .us),
+                ownerId: UUID()
+            ),
+            Garment(
+                title: "Pleated Skirt",
+                description: "Elegant skirt",
+                story: Story.sampleMinimal,
+                condition: .excellent,
+                category: .bottoms,
+                size: Size(label: "S", system: .us),
+                ownerId: UUID()
+            ),
+            Garment(
+                title: "Wool Trousers",
+                description: "Warm trousers",
+                story: Story.sampleMinimal,
+                condition: .good,
+                category: .bottoms,
+                size: Size(label: "32", system: .us),
+                ownerId: UUID()
+            )
         ]
     }
     
@@ -247,18 +279,50 @@ class MockExchangeGarmentUseCase: ExchangeGarmentUseCaseProtocol {
         try await Task.sleep(nanoseconds: 300_000_000)
         
         return [
-            Garment(name: "Trench Coat", brand: "Burberry", size: "M", imageUrl: nil),
-            Garment(name: "Knit Cardigan", brand: "Acne Studios", size: "S", imageUrl: nil),
-            Garment(name: "Leather Boots", brand: "Common Projects", size: "42", imageUrl: nil),
-            Garment(name: "Canvas Tote", brand: "Baggu", size: nil, imageUrl: nil)
+            Garment(
+                title: "Trench Coat",
+                description: "Classic trench",
+                story: Story.sampleMinimal,
+                condition: .excellent,
+                category: .outerwear,
+                size: Size(label: "M", system: .us),
+                ownerId: UUID()
+            ),
+            Garment(
+                title: "Knit Cardigan",
+                description: "Cozy knit",
+                story: Story.sampleMinimal,
+                condition: .veryGood,
+                category: .tops,
+                size: Size(label: "S", system: .us),
+                ownerId: UUID()
+            ),
+            Garment(
+                title: "Leather Boots",
+                description: "Quality leather",
+                story: Story.sampleMinimal,
+                condition: .excellent,
+                category: .shoes,
+                size: Size(label: "42", system: .eu),
+                ownerId: UUID()
+            ),
+            Garment(
+                title: "Canvas Tote",
+                description: "Sturdy tote",
+                story: Story.sampleMinimal,
+                condition: .good,
+                category: .bags,
+                size: Size(label: "One Size", system: .oneSize),
+                ownerId: UUID()
+            )
         ]
     }
     
-    func purchaseGarment(garmentId: String, paymentMethodId: String, handoffNote: String?) async throws -> Transaction {
+    func purchaseGarment(garmentId: UUID, paymentMethodId: String, handoffNote: String?) async throws -> ExchangeTransaction {
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
-        return Transaction(
-            id: UUID().uuidString,
+        return ExchangeTransaction(
+            id: UUID(),
             garmentId: garmentId,
             amount: 150.00,
             status: .completed,
@@ -267,11 +331,11 @@ class MockExchangeGarmentUseCase: ExchangeGarmentUseCaseProtocol {
         )
     }
     
-    func createListing(garmentId: String, price: Decimal, handoffNote: String?) async throws -> Listing {
+    func createListing(garmentId: UUID, price: Decimal, handoffNote: String?) async throws -> GarmentListing {
         try await Task.sleep(nanoseconds: 800_000_000)
         
-        return Listing(
-            id: UUID().uuidString,
+        return GarmentListing(
+            id: UUID(),
             garmentId: garmentId,
             price: price,
             status: .active,
@@ -279,11 +343,11 @@ class MockExchangeGarmentUseCase: ExchangeGarmentUseCaseProtocol {
         )
     }
     
-    func proposeTrade(offeredGarmentId: String, requestedGarmentId: String, message: String?) async throws -> TradeProposal {
+    func proposeTrade(offeredGarmentId: UUID, requestedGarmentId: UUID, message: String?) async throws -> TradeOffer {
         try await Task.sleep(nanoseconds: 600_000_000)
         
-        return TradeProposal(
-            id: UUID().uuidString,
+        return TradeOffer(
+            id: UUID(),
             offeredGarmentId: offeredGarmentId,
             requestedGarmentId: requestedGarmentId,
             status: .pending,
@@ -292,7 +356,7 @@ class MockExchangeGarmentUseCase: ExchangeGarmentUseCaseProtocol {
         )
     }
     
-    func cancelTransaction(_ transactionId: String) async throws {
+    func cancelTransaction(_ transactionId: UUID) async throws {
         try await Task.sleep(nanoseconds: 300_000_000)
     }
 }

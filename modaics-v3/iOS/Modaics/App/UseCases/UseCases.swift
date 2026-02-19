@@ -47,7 +47,7 @@ class DeleteGarmentUseCase: DeleteGarmentUseCaseProtocol {
         self.repository = repository
     }
     
-    func execute(id: String) async throws {
+    func execute(id: UUID) async throws {
         try await repository.deleteGarment(id: id)
     }
 }
@@ -60,7 +60,7 @@ class GetStoriesUseCase: GetStoriesUseCaseProtocol {
         self.repository = repository
     }
     
-    func execute(for garmentId: String) async throws -> [Story] {
+    func execute(for garmentId: UUID) async throws -> [Story] {
         return try await repository.getStories(for: garmentId)
     }
 }

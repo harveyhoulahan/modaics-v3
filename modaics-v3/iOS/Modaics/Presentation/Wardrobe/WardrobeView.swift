@@ -6,7 +6,7 @@ import Combine
 /// A visual tapestry of their sustainable fashion journey
 struct WardrobeView: View {
     @StateObject private var viewModel = WardrobeViewModel()
-    @State private var selectedCollection: Collection?
+    @State private var selectedCollection: GarmentCollection?
     @State private var showSustainabilityScore = false
     @State private var selectedGarment: Garment?
     
@@ -311,7 +311,7 @@ struct MosaicAccentPattern: View {
 
 // MARK: - Collection Preview Card
 struct CollectionPreviewCard: View {
-    let collection: Collection
+    let collection: GarmentCollection
     let action: () -> Void
     
     var body: some View {
@@ -396,7 +396,7 @@ struct CommunityConnectionRow: View {
 }
 
 // MARK: - Supporting Models
-struct Collection: Identifiable {
+struct GarmentCollection: Identifiable {
     let id = UUID()
     let name: String
     let garmentCount: Int

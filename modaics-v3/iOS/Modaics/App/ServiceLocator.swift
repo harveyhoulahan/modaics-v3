@@ -146,7 +146,7 @@ class ServiceLocator {
         )
     }
     
-    func garmentDetailViewModel(garmentId: String) -> GarmentDetailViewModel {
+    func garmentDetailViewModel(garmentId: UUID) -> GarmentDetailViewModel {
         GarmentDetailViewModel(
             garmentId: garmentId,
             garmentRepository: garmentRepository,
@@ -240,6 +240,15 @@ protocol AuthServiceProtocol {
     func resetPassword(email: String) async throws
 }
 
+// MARK: - APIError Definition
+enum APIError: Error {
+    case invalidURL
+    case unauthorized
+    case notFound
+    case serverError
+    case decodingError
+}
+
 protocol APIClientProtocol {
     func get<T: Decodable>(_ path: String) async throws -> T
     func post<T: Decodable, B: Encodable>(_ path: String, body: B) async throws -> T
@@ -260,10 +269,10 @@ protocol OfflineStorageProtocol {
     func configure()
     func saveGarment(_ garment: Garment) async throws
     func getGarments() async throws -> [Garment]
-    func getGarment(id: String) async throws -> Garment?
-    func deleteGarment(id: String) async throws
+    func getGarment(id: UUID) async throws -> Garment?
+    func deleteGarment(id: UUID) async throws
     func saveStory(_ story: Story) async throws
-    func getStories(for garmentId: String) async throws -> [Story]
+    func getStories(for garmentId: UUID) async throws -> [Story]
     func syncPendingChanges() async throws
 }
 
@@ -278,28 +287,28 @@ enum LogLevel {
 // Repositories
 protocol GarmentRepositoryProtocol {
     func getGarments() async throws -> [Garment]
-    func getGarment(id: String) async throws -> Garment
+    func getGarment(id: UUID) async throws -> Garment
     func createGarment(_ garment: Garment) async throws -> Garment
     func updateGarment(_ garment: Garment) async throws -> Garment
-    func deleteGarment(id: String) async throws
+    func deleteGarment(id: UUID) async throws
 }
 
 protocol StoryRepositoryProtocol {
-    func getStories(for garmentId: String) async throws -> [Story]
+    func getStories(for garmentId: UUID) async throws -> [Story]
     func createStory(_ story: Story) async throws -> Story
-    func deleteStory(id: String) async throws
+    func deleteStory(id: UUID) async throws
 }
 
 protocol UserRepositoryProtocol {
     func getCurrentUser() async throws -> User
     func updateUser(_ user: User) async throws -> User
-    func getUser(id: String) async throws -> User
+    func getUser(id: UUID) async throws -> User
 }
 
 protocol DiscoveryRepositoryProtocol {
     func getTrendingStories() async throws -> [Story]
     func getRecentGarments() async throws -> [Garment]
-    func getCollections() async throws -> [Collection]
+    func getCollections() async throws -> [WardrobeCollection]
     func search(query: String) async throws -> SearchResults
 }
 
@@ -317,11 +326,11 @@ protocol UpdateGarmentUseCaseProtocol {
 }
 
 protocol DeleteGarmentUseCaseProtocol {
-    func execute(id: String) async throws
+    func execute(id: UUID) async throws
 }
 
 protocol GetStoriesUseCaseProtocol {
-    func execute(for garmentId: String) async throws -> [Story]
+    func execute(for garmentId: UUID) async throws -> [Story]
 }
 
 protocol CreateStoryUseCaseProtocol {
@@ -340,60 +349,24 @@ protocol UploadImageUseCaseProtocol {
     func execute(_ image: UIImage, path: String) async throws -> String
 }
 
-// MARK: - Models
-struct Garment: Identifiable, Codable {
-    let id: String
-    var name: String
-    var category: String
-    var color: String
-    var brand: String?
-    var size: String?
-    var images: [String]
-    var storyIds: [String]
-    var createdAt: Date
-    var updatedAt: Date
+// MARK: - DiscoveryFeed Model (for API responses)
+struct DiscoveryFeed: Codable {
+    var trendingStories: [Story]
+    var recentGarments: [Garment]
+    var collections: [WardrobeCollection]
+    
+    enum CodingKeys: String, CodingKey {
+        case trendingStories
+        case recentGarments
+        case collections
+    }
 }
 
-struct Story: Identifiable, Codable {
-    let id: String
-    let garmentId: String
-    let authorId: String
-    var title: String
-    var content: String
-    var images: [String]
-    var createdAt: Date
-    var updatedAt: Date
-}
-
-struct User: Identifiable, Codable {
-    let id: String
-    var email: String
-    var displayName: String
-    var avatarUrl: String?
-    var bio: String?
-    var garmentCount: Int
-    var storyCount: Int
-    var followerCount: Int
-}
-
-struct Collection: Identifiable, Codable {
-    let id: String
-    var title: String
-    var description: String
-    var imageUrl: String
-    var garmentCount: Int
-}
-
+// MARK: - SearchResults Model (for API responses)
 struct SearchResults: Codable {
     var garments: [Garment]
     var stories: [Story]
     var users: [User]
-}
-
-struct DiscoveryFeed: Codable {
-    var trendingStories: [Story]
-    var recentGarments: [Garment]
-    var collections: [Collection]
 }
 
 // MARK: - Notification Names

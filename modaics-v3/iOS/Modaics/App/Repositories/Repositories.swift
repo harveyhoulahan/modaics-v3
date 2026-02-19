@@ -31,9 +31,9 @@ class GarmentRepository: GarmentRepositoryProtocol {
         }
     }
     
-    func getGarment(id: String) async throws -> Garment {
+    func getGarment(id: UUID) async throws -> Garment {
         do {
-            let garment: Garment = try await apiClient.get("/garments/\(id)")
+            let garment: Garment = try await apiClient.get("/garments/\(id.uuidString)")
             try? await offlineStorage.saveGarment(garment)
             return garment
         } catch {
@@ -51,13 +51,13 @@ class GarmentRepository: GarmentRepositoryProtocol {
     }
     
     func updateGarment(_ garment: Garment) async throws -> Garment {
-        let updated: Garment = try await apiClient.put("/garments/\(garment.id)", body: garment)
+        let updated: Garment = try await apiClient.put("/garments/\(garment.id.uuidString)", body: garment)
         try? await offlineStorage.saveGarment(updated)
         return updated
     }
     
-    func deleteGarment(id: String) async throws {
-        try await apiClient.delete("/garments/\(id)")
+    func deleteGarment(id: UUID) async throws {
+        try await apiClient.delete("/garments/\(id.uuidString)")
         try? await offlineStorage.deleteGarment(id: id)
     }
 }
@@ -78,9 +78,9 @@ class StoryRepository: StoryRepositoryProtocol {
         self.logger = logger
     }
     
-    func getStories(for garmentId: String) async throws -> [Story] {
+    func getStories(for garmentId: UUID) async throws -> [Story] {
         do {
-            let stories: [Story] = try await apiClient.get("/garments/\(garmentId)/stories")
+            let stories: [Story] = try await apiClient.get("/garments/\(garmentId.uuidString)/stories")
             for story in stories {
                 try? await offlineStorage.saveStory(story)
             }
@@ -96,8 +96,8 @@ class StoryRepository: StoryRepositoryProtocol {
         return created
     }
     
-    func deleteStory(id: String) async throws {
-        try await apiClient.delete("/stories/\(id)")
+    func deleteStory(id: UUID) async throws {
+        try await apiClient.delete("/stories/\(id.uuidString)")
     }
 }
 
@@ -124,8 +124,8 @@ class UserRepository: UserRepositoryProtocol {
         return updated
     }
     
-    func getUser(id: String) async throws -> User {
-        let user: User = try await apiClient.get("/users/\(id)")
+    func getUser(id: UUID) async throws -> User {
+        let user: User = try await apiClient.get("/users/\(id.uuidString)")
         return user
     }
 }
@@ -153,8 +153,8 @@ class DiscoveryRepository: DiscoveryRepositoryProtocol {
         return garments
     }
     
-    func getCollections() async throws -> [Collection] {
-        let collections: [Collection] = try await apiClient.get("/discover/collections")
+    func getCollections() async throws -> [WardrobeCollection] {
+        let collections: [WardrobeCollection] = try await apiClient.get("/discover/collections")
         return collections
     }
     

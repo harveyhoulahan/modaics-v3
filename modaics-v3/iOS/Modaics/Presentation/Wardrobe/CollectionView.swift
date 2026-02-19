@@ -4,7 +4,7 @@ import SwiftUI
 /// Detailed view of a curated set within the wardrobe
 /// Like opening a curated folder of stories
 struct CollectionView: View {
-    let collection: Collection
+    let collection: GarmentCollection
     @Environment(\.dismiss) private var dismiss
     @State private var selectedGarment: Garment?
     @State private var isEditing = false
@@ -444,8 +444,8 @@ struct GarmentProvenance {
     let exchangeType: ExchangeMode
 }
 
-// Extension to Collection for CollectionView
-extension Collection {
+// Extension to GarmentCollection for CollectionView
+extension GarmentCollection {
     var mood: CollectionMood? {
         // Return mock mood for preview
         CollectionMood(
@@ -491,6 +491,6 @@ extension Garment {
 
 struct CollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        CollectionView(collection: Collection(name: "Capsule Wardrobe", garmentCount: 12, previewGarments: [], createdAt: Date()))
+        CollectionView(collection: GarmentCollection(name: "Capsule Wardrobe", garmentCount: 12, previewGarments: [], createdAt: Date()))
     }
 }

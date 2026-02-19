@@ -80,18 +80,21 @@ struct ContentView: View {
         
         switch host {
         case "garment":
-            if let id = components.path.split(separator: "/").last {
-                appState.deepLinkTarget = .garment(id: String(id))
+            if let idString = components.path.split(separator: "/").last,
+               let id = UUID(uuidString: String(idString)) {
+                appState.deepLinkTarget = .garment(id: id)
                 appState.selectedTab = .discovery
             }
         case "story":
-            if let id = components.path.split(separator: "/").last {
-                appState.deepLinkTarget = .story(id: String(id))
+            if let idString = components.path.split(separator: "/").last,
+               let id = UUID(uuidString: String(idString)) {
+                appState.deepLinkTarget = .story(id: id)
                 appState.selectedTab = .discovery
             }
         case "user":
-            if let id = components.path.split(separator: "/").last {
-                appState.deepLinkTarget = .userProfile(id: String(id))
+            if let idString = components.path.split(separator: "/").last,
+               let id = UUID(uuidString: String(idString)) {
+                appState.deepLinkTarget = .userProfile(id: id)
                 appState.selectedTab = .profile
             }
         case "wardrobe":
@@ -109,7 +112,7 @@ class NavigationState: ObservableObject {
     @Published var wardrobePath = NavigationPath()
     @Published var profilePath = NavigationPath()
     
-    func navigateToGarment(_ id: String, from tab: Tab) {
+    func navigateToGarment(_ id: UUID, from tab: Tab) {
         switch tab {
         case .discovery:
             discoveryPath.append(NavigationDestination.garment(id: id))
@@ -120,19 +123,19 @@ class NavigationState: ObservableObject {
         }
     }
     
-    func navigateToStory(_ id: String) {
+    func navigateToStory(_ id: UUID) {
         discoveryPath.append(NavigationDestination.story(id: id))
     }
 }
 
 // MARK: - Navigation Destination
 enum NavigationDestination: Hashable {
-    case garment(id: String)
-    case story(id: String)
-    case userProfile(id: String)
+    case garment(id: UUID)
+    case story(id: UUID)
+    case userProfile(id: UUID)
     case settings
     case addGarment
-    case editGarment(id: String)
+    case editGarment(id: UUID)
 }
 
 // MARK: - Placeholder Views
@@ -148,9 +151,9 @@ struct DiscoveryView: View {
                     case .garment(let id):
                         GarmentDetailView(garmentId: id)
                     case .story(let id):
-                        StoryDetailView(storyId: id)
+                        StoryDetailView(storyId: id.uuidString)
                     case .userProfile(let id):
-                        UserProfileView(userId: id)
+                        UserProfileView(userId: id.uuidString)
                     default:
                         EmptyView()
                     }
@@ -276,7 +279,7 @@ struct WardrobeView: View {
                     case .addGarment:
                         AddGarmentView()
                     case .editGarment(let id):
-                        EditGarmentView(garmentId: id)
+                        EditGarmentView(garmentId: id.uuidString)
                     default:
                         EmptyView()
                     }

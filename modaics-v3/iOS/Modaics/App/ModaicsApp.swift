@@ -107,9 +107,9 @@ class AppState: ObservableObject {
 
 // MARK: - Deep Link Target
 enum DeepLinkTarget: Equatable {
-    case garment(id: String)
-    case story(id: String)
-    case userProfile(id: String)
+    case garment(id: UUID)
+    case story(id: UUID)
+    case userProfile(id: UUID)
     case wardrobe
 }
 

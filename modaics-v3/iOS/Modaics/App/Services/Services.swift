@@ -1,19 +1,18 @@
 import Foundation
 import FirebaseAuth
+import UIKit
 
 // MARK: - Firebase Auth Service
 class FirebaseAuthService: AuthServiceProtocol {
     var currentUser: User? {
         guard let firebaseUser = Auth.auth().currentUser else { return nil }
         return User(
-            id: firebaseUser.uid,
-            email: firebaseUser.email ?? "",
+            id: UUID(uuidString: firebaseUser.uid) ?? UUID(),
             displayName: firebaseUser.displayName ?? "User",
-            avatarUrl: firebaseUser.photoURL?.absoluteString,
-            bio: nil,
-            garmentCount: 0,
-            storyCount: 0,
-            followerCount: 0
+            username: firebaseUser.email?.components(separatedBy: "@").first ?? "user",
+            bio: "",
+            email: firebaseUser.email ?? "",
+            avatarURL: firebaseUser.photoURL
         )
     }
     
@@ -119,14 +118,6 @@ class APIClient: APIClientProtocol {
     }
 }
 
-enum APIError: Error {
-    case invalidURL
-    case unauthorized
-    case notFound
-    case serverError
-    case decodingError
-}
-
 // MARK: - Image Service
 class ImageService: ImageServiceProtocol {
     private var imageCache: NSCache<NSString, UIImage> = NSCache()
@@ -191,11 +182,11 @@ class CoreDataOfflineStorage: OfflineStorageProtocol {
         return []
     }
     
-    func getGarment(id: String) async throws -> Garment? {
+    func getGarment(id: UUID) async throws -> Garment? {
         return nil
     }
     
-    func deleteGarment(id: String) async throws {
+    func deleteGarment(id: UUID) async throws {
         // Delete from Core Data
     }
     
@@ -203,7 +194,7 @@ class CoreDataOfflineStorage: OfflineStorageProtocol {
         // Save to Core Data
     }
     
-    func getStories(for garmentId: String) async throws -> [Story] {
+    func getStories(for garmentId: UUID) async throws -> [Story] {
         return []
     }
     

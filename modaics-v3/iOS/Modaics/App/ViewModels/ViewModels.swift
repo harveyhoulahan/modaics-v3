@@ -6,7 +6,7 @@ import Combine
 class DiscoveryViewModel: ObservableObject {
     @Published var trendingStories: [Story] = []
     @Published var recentGarments: [Garment] = []
-    @Published var collections: [Collection] = []
+    @Published var collections: [WardrobeCollection] = []
     @Published var isLoading = false
     @Published var error: Error?
     
@@ -67,8 +67,8 @@ class WardrobeViewModel: ObservableObject {
             return garments
         }
         return garments.filter { garment in
-            garment.name.localizedCaseInsensitiveContains(searchQuery) ||
-            garment.category.localizedCaseInsensitiveContains(searchQuery)
+            garment.title.localizedCaseInsensitiveContains(searchQuery) ||
+            garment.category.rawValue.localizedCaseInsensitiveContains(searchQuery)
         }
     }
     
@@ -118,7 +118,7 @@ class WardrobeViewModel: ObservableObject {
         }
     }
     
-    func deleteGarment(id: String) async {
+    func deleteGarment(id: UUID) async {
         do {
             try await deleteGarmentUseCase.execute(id: id)
             garments.removeAll { $0.id == id }
@@ -155,11 +155,11 @@ class ProfileViewModel: ObservableObject {
     }
     
     var garmentCount: Int {
-        user?.garmentCount ?? 0
+        user?.wardrobeCount ?? 0
     }
     
     var storyCount: Int {
-        user?.storyCount ?? 0
+        0 // Not directly available on User model
     }
     
     var followerCount: Int {
@@ -208,13 +208,13 @@ class GarmentDetailViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var error: Error?
     
-    let garmentId: String
+    let garmentId: UUID
     private let garmentRepository: GarmentRepositoryProtocol
     private let getStoriesUseCase: GetStoriesUseCaseProtocol
     private let logger: LoggerProtocol
     
     init(
-        garmentId: String,
+        garmentId: UUID,
         garmentRepository: GarmentRepositoryProtocol,
         getStoriesUseCase: GetStoriesUseCaseProtocol,
         logger: LoggerProtocol
@@ -259,7 +259,7 @@ class GarmentDetailViewModel: ObservableObject {
 class StoryComposerViewModel: ObservableObject {
     @Published var title = ""
     @Published var content = ""
-    @Published var selectedGarmentId: String?
+    @Published var selectedGarmentId: UUID?
     @Published var selectedImages: [UIImage] = []
     @Published var isLoading = false
     @Published var error: Error?
@@ -287,32 +287,16 @@ class StoryComposerViewModel: ObservableObject {
     }
     
     func submitStory() async {
-        guard let garmentId = selectedGarmentId else { return }
-        
         isLoading = true
         error = nil
         
         do {
-            // Upload images first
-            var imageUrls: [String] = []
-            for (index, image) in selectedImages.enumerated() {
-                let url = try await uploadImageUseCase.execute(
-                    image,
-                    path: "stories/\(UUID().uuidString)_\(index).jpg"
-                )
-                imageUrls.append(url)
-            }
-            
-            // Create story
+            // Create story using Core Domain model
             let story = Story(
-                id: UUID().uuidString,
-                garmentId: garmentId,
-                authorId: "", // Will be set by backend
-                title: title,
-                content: content,
-                images: imageUrls,
-                createdAt: Date(),
-                updatedAt: Date()
+                narrative: content,
+                provenance: title,
+                memories: [],
+                whySelling: nil
             )
             
             _ = try await createStoryUseCase.execute(story)

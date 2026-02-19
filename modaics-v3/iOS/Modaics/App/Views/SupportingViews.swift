@@ -53,12 +53,12 @@ struct StoryCard: View {
                 )
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(story.title)
+                Text(story.provenance)
                     .font(DesignSystem.Typography.cardTitle)
                     .foregroundColor(DesignSystem.Colors.charcoal)
                     .lineLimit(2)
                 
-                Text(story.content.prefix(60) + "...")
+                Text(story.narrative.prefix(60) + "...")
                     .font(DesignSystem.Typography.caption)
                     .foregroundColor(DesignSystem.Colors.stone)
                     .lineLimit(2)
@@ -117,12 +117,12 @@ struct GarmentGridItem: View {
                         .foregroundColor(DesignSystem.Colors.terracotta.opacity(0.5))
                 )
             
-            Text(garment.name)
+            Text(garment.title)
                 .font(DesignSystem.Typography.body)
                 .foregroundColor(DesignSystem.Colors.charcoal)
                 .lineLimit(1)
             
-            Text(garment.category)
+            Text(garment.category.rawValue)
                 .font(DesignSystem.Typography.caption)
                 .foregroundColor(DesignSystem.Colors.stone)
         }
@@ -130,7 +130,7 @@ struct GarmentGridItem: View {
 }
 
 struct CollectionsSection: View {
-    let collections: [Collection]
+    let collections: [WardrobeCollection]
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.Spacing.medium) {
@@ -152,7 +152,7 @@ struct CollectionsSection: View {
 }
 
 struct CollectionCard: View {
-    let collection: Collection
+    let collection: WardrobeCollection
     
     var body: some View {
         ZStack {
@@ -166,11 +166,11 @@ struct CollectionCard: View {
                 Spacer()
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(collection.title)
+                    Text(collection.name)
                         .font(DesignSystem.Typography.cardTitle)
                         .foregroundColor(.white)
                     
-                    Text("\(collection.garmentCount) garments")
+                    Text("\(collection.garmentIds.count) garments")
                         .font(DesignSystem.Typography.caption)
                         .foregroundColor(.white.opacity(0.8))
                 }
@@ -226,7 +226,7 @@ struct WardrobeItem: View {
                 .aspectRatio(0.8, contentMode: .fit)
                 .overlay(
                     Group {
-                        if let firstImage = garment.images.first {
+                        if garment.coverImageURL != nil {
                             // Would load actual image here
                             Image(systemName: "photo.fill")
                                 .font(.largeTitle)
@@ -239,7 +239,7 @@ struct WardrobeItem: View {
                     }
                 )
             
-            Text(garment.name)
+            Text(garment.title)
                 .font(DesignSystem.Typography.caption)
                 .foregroundColor(DesignSystem.Colors.charcoal)
                 .lineLimit(1)
@@ -249,10 +249,10 @@ struct WardrobeItem: View {
 
 // MARK: - Placeholder Destination Views
 struct GarmentDetailView: View {
-    let garmentId: String
+    let garmentId: UUID
     @StateObject private var viewModel: GarmentDetailViewModel
     
-    init(garmentId: String) {
+    init(garmentId: UUID) {
         self.garmentId = garmentId
         _viewModel = StateObject(wrappedValue: ServiceLocator.shared.garmentDetailViewModel(garmentId: garmentId))
     }
@@ -275,15 +275,15 @@ struct GarmentDetailView: View {
                             .padding(.horizontal)
                         
                         VStack(alignment: .leading, spacing: DesignSystem.Spacing.small) {
-                            Text(garment.name)
+                            Text(garment.title)
                                 .font(DesignSystem.Typography.largeTitle)
                                 .foregroundColor(DesignSystem.Colors.charcoal)
                             
                             HStack(spacing: DesignSystem.Spacing.small) {
-                                Label(garment.category, systemImage: "tag")
+                                Label(garment.category.rawValue, systemImage: "tag")
                                 if let brand = garment.brand {
                                     Text("•")
-                                    Text(brand)
+                                    Text(brand.name)
                                 }
                             }
                             .font(DesignSystem.Typography.body)
@@ -337,11 +337,11 @@ struct StoryListItem: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.Spacing.small) {
-            Text(story.title)
+            Text(story.provenance)
                 .font(DesignSystem.Typography.cardTitle)
                 .foregroundColor(DesignSystem.Colors.charcoal)
             
-            Text(story.content)
+            Text(story.narrative)
                 .font(DesignSystem.Typography.body)
                 .foregroundColor(DesignSystem.Colors.stone)
                 .lineLimit(3)
