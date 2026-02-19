@@ -31,49 +31,17 @@ enum Tab: String, CaseIterable, Identifiable {
     case discover = "Discover"
     case create = "Create"
     case community = "Community"
-    case profile = "Profile"
+    case profile = "Wardrobe"
     
     var id: String { rawValue }
     
-    /// SF Symbol icon name for the tab
     var icon: String {
         switch self {
-        case .home:
-            return "house.fill"
-        case .discover:
-            return "magnifyingglass"
-        case .create:
-            return "plus.circle.fill"
-        case .community:
-            return "person.3.fill"
-        case .profile:
-            return "person.fill"
+        case .home: return "house.fill"
+        case .discover: return "magnifyingglass"
+        case .create: return "plus.circle.fill"
+        case .community: return "person.3.fill"
+        case .profile: return "square.grid.2x2"
         }
-    }
-    
-    /// Alternative icon when tab is not selected
-    var inactiveIcon: String {
-        switch self {
-        case .home:
-            return "house"
-        case .discover:
-            return "magnifyingglass"
-        case .create:
-            return "plus.circle"
-        case .community:
-            return "person.3"
-        case .profile:
-            return "person"
-        }
-    }
-    
-    /// Display label for the tab
-    var label: String {
-        return rawValue.uppercased()
-    }
-    
-    /// Whether this tab has special styling (Create button)
-    var isSpecial: Bool {
-        return self == .create
     }
 }

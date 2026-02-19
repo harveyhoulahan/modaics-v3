@@ -1,83 +1,81 @@
 import SwiftUI
 
-// MARK: - Modaics Industrial Typography
-/// Industrial typography system
-/// Monospace fonts for all text (industrial/technical aesthetic)
+// MARK: - Modaics Typography
+/// Editorial typography system
+/// Playfair Display for headings (elegant, editorial)
+/// Inter for body text (clean, readable)
 public extension Font {
     
-    // MARK: - Display Fonts (Monospace)
+    // MARK: - Display Fonts (Playfair Display)
     
-    /// Splash/hero title - 42pt bold monospace
-    static let modaicsSplashTitle = Font.system(size: 42, weight: .bold, design: .monospaced)
+    /// Splash/hero title - 42pt bold
+    static let modaicsSplashTitle = Font.custom("PlayfairDisplay-Bold", size: 42)
     
-    /// Large display - 36pt bold monospace
-    static let modaicsDisplayLarge = Font.system(size: 36, weight: .bold, design: .monospaced)
+    /// Large display - 36pt bold
+    static let modaicsDisplayLarge = Font.custom("PlayfairDisplay-Bold", size: 36)
     
-    /// Medium display - 32pt bold monospace
-    static let modaicsDisplayMedium = Font.system(size: 32, weight: .bold, design: .monospaced)
+    /// Medium display - 32pt bold
+    static let modaicsDisplayMedium = Font.custom("PlayfairDisplay-Bold", size: 32)
     
-    /// Small display - 28pt bold monospace
-    static let modaicsDisplaySmall = Font.system(size: 28, weight: .bold, design: .monospaced)
+    /// Small display - 28pt bold
+    static let modaicsDisplaySmall = Font.custom("PlayfairDisplay-Bold", size: 28)
     
-    // MARK: - Heading Fonts (Monospace)
+    // MARK: - Heading Fonts (Playfair Display)
     
-    /// Large heading - 24pt semibold monospace
-    static let modaicsHeadingLarge = Font.system(size: 24, weight: .semibold, design: .monospaced)
+    /// Large heading - 24pt semi-bold
+    static let modaicsHeadingLarge = Font.custom("PlayfairDisplay-SemiBold", size: 24)
     
-    /// Medium heading - 20pt semibold monospace
-    static let modaicsHeadingSemiBold = Font.system(size: 20, weight: .semibold, design: .monospaced)
+    /// Medium heading - 20pt semi-bold
+    static let modaicsHeadingSemiBold = Font.custom("PlayfairDisplay-SemiBold", size: 20)
     
-    /// Heading 1 - 22pt medium monospace
-    static let modaicsHeadline1 = Font.system(size: 22, weight: .medium, design: .monospaced)
+    /// Heading 1 - 22pt medium
+    static let modaicsHeadline1 = Font.custom("PlayfairDisplay-Medium", size: 22)
     
-    /// Heading 2 - 20pt medium monospace
-    static let modaicsHeadline2 = Font.system(size: 20, weight: .medium, design: .monospaced)
+    /// Heading 2 - 20pt medium
+    static let modaicsHeadline2 = Font.custom("PlayfairDisplay-Medium", size: 20)
     
-    /// Heading 3 - 18pt medium monospace
-    static let modaicsHeadline3 = Font.system(size: 18, weight: .medium, design: .monospaced)
+    /// Heading 3 - 18pt medium
+    static let modaicsHeadline3 = Font.custom("PlayfairDisplay-Medium", size: 18)
     
-    /// Card title - 18pt medium monospace
-    static let modaicsCardTitle = Font.system(size: 18, weight: .medium, design: .monospaced)
+    /// Card title - 18pt medium
+    static let modaicsCardTitle = Font.custom("PlayfairDisplay-Medium", size: 18)
     
-    // MARK: - Body Fonts (Monospace)
+    // MARK: - Body Fonts (Inter)
     
-    /// Large body - 17pt regular monospace
-    static let modaicsBodyLarge = Font.system(size: 17, weight: .regular, design: .monospaced)
+    /// Large body - 17pt regular
+    static let modaicsBodyLarge = Font.custom("Inter-Regular", size: 17)
     
-    /// Body - 15pt regular monospace
-    static let modaicsBodyRegular = Font.system(size: 15, weight: .regular, design: .monospaced)
+    /// Body - 15pt regular
+    static let modaicsBodyRegular = Font.custom("Inter-Regular", size: 15)
     
-    /// Body emphasis - 15pt medium monospace
-    static let modaicsBodyEmphasis = Font.system(size: 15, weight: .medium, design: .monospaced)
+    /// Body emphasis - 15pt medium
+    static let modaicsBodyEmphasis = Font.custom("Inter-Medium", size: 15)
     
-    /// Body semibold - 15pt semibold monospace
-    static let modaicsBodySemiBold = Font.system(size: 15, weight: .semibold, design: .monospaced)
+    /// Body semi-bold - 15pt semi-bold
+    static let modaicsBodySemiBold = Font.custom("Inter-SemiBold", size: 15)
     
-    /// Label - 14pt medium monospace
-    static let modaicsLabel = Font.system(size: 14, weight: .medium, design: .monospaced)
+    /// Label - 14pt medium
+    static let modaicsLabel = Font.custom("Inter-Medium", size: 14)
     
-    // MARK: - Supporting Fonts (Monospace)
+    // MARK: - Supporting Fonts (Inter)
     
-    /// Button text - 16pt semibold monospace
-    static let modaicsButton = Font.system(size: 16, weight: .semibold, design: .monospaced)
+    /// Button text - 16pt semi-bold
+    static let modaicsButton = Font.custom("Inter-SemiBold", size: 16)
     
-    /// Caption - 13pt medium monospace
-    static let modaicsCaption = Font.system(size: 13, weight: .medium, design: .monospaced)
+    /// Caption - 13pt medium
+    static let modaicsCaption = Font.custom("Inter-Medium", size: 13)
     
-    /// Caption regular - 13pt regular monospace
-    static let modaicsCaptionRegular = Font.system(size: 13, weight: .regular, design: .monospaced)
+    /// Caption regular - 13pt regular
+    static let modaicsCaptionRegular = Font.custom("Inter-Regular", size: 13)
     
-    /// Fine print - 12pt medium monospace (for tags, labels)
-    static let modaicsFinePrint = Font.system(size: 12, weight: .medium, design: .monospaced)
+    /// Fine print - 12pt medium (for tags, labels)
+    static let modaicsFinePrint = Font.custom("Inter-Medium", size: 12)
     
-    /// Small - 12pt regular monospace
-    static let modaicsSmall = Font.system(size: 12, weight: .regular, design: .monospaced)
+    /// Small - 12pt regular
+    static let modaicsSmall = Font.custom("Inter-Regular", size: 12)
     
-    /// Micro - 11pt regular monospace
-    static let modaicsMicro = Font.system(size: 11, weight: .regular, design: .monospaced)
-    
-    /// Tab label - 11pt medium monospace
-    static let modaicsTabLabel = Font.system(size: 11, weight: .medium, design: .monospaced)
+    /// Micro - 11pt regular
+    static let modaicsMicro = Font.custom("Inter-Regular", size: 11)
 }
 
 // MARK: - Font Modifiers
@@ -100,12 +98,6 @@ public extension View {
     func modaicsBodyStyle(emphasis: ModaicsBodyEmphasis = .regular) -> some View {
         self.font(emphasis.font)
             .foregroundColor(.modaicsTextPrimary)
-    }
-    
-    /// Applies tab label style
-    func modaicsTabLabelStyle(isActive: Bool = false) -> some View {
-        self.font(.modaicsTabLabel)
-            .foregroundColor(isActive ? .modaicsActive : .modaicsInactive)
     }
 }
 

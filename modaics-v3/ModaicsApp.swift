@@ -6,46 +6,45 @@ struct ModaicsApp: App {
     @StateObject private var appState = AppState()
     
     init() {
-        configureIndustrialAppearance()
+        configureAppearance()
     }
     
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(appState)
-                .preferredColorScheme(.dark)
         }
     }
     
-    private func configureIndustrialAppearance() {
-        // Navigation bar - transparent with industrial styling
-        let navBarAppearance = UINavigationBarAppearance()
-        navBarAppearance.configureWithTransparentBackground()
-        navBarAppearance.backgroundColor = UIColor(Color.industrialBackground)
-        navBarAppearance.titleTextAttributes = [
-            .foregroundColor: UIColor(Color.industrialTextMain),
-            .font: UIFont.monospacedSystemFont(ofSize: 17, weight: .medium)
+    private func configureAppearance() {
+        // Tab bar appearance - warm sand background
+        let tabBarAppearance = UITabBarAppearance()
+        tabBarAppearance.configureWithOpaqueBackground()
+        tabBarAppearance.backgroundColor = UIColor(Color.modaicsWarmSand)
+        
+        tabBarAppearance.stackedLayoutAppearance.normal.iconColor = UIColor(Color.modaicsStone)
+        tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [
+            .foregroundColor: UIColor(Color.modaicsStone)
         ]
-        navBarAppearance.largeTitleTextAttributes = [
-            .foregroundColor: UIColor(Color.industrialTextMain),
-            .font: UIFont.monospacedSystemFont(ofSize: 34, weight: .bold)
+        tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.modaicsTerracotta)
+        tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [
+            .foregroundColor: UIColor(Color.modaicsTerracotta)
+        ]
+        
+        UITabBar.appearance().standardAppearance = tabBarAppearance
+        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        
+        // Navigation bar appearance
+        let navBarAppearance = UINavigationBarAppearance()
+        navBarAppearance.configureWithOpaqueBackground()
+        navBarAppearance.backgroundColor = UIColor(Color.modaicsWarmSand)
+        navBarAppearance.titleTextAttributes = [
+            .foregroundColor: UIColor(Color.modaicsCharcoal),
+            .font: UIFont(name: "PlayfairDisplay-Bold", size: 20) ?? UIFont.systemFont(ofSize: 20, weight: .bold)
         ]
         
         UINavigationBar.appearance().standardAppearance = navBarAppearance
         UINavigationBar.appearance().compactAppearance = navBarAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navBarAppearance
-        
-        // Tab bar - industrial dark styling
-        let tabBarAppearance = UITabBarAppearance()
-        tabBarAppearance.configureWithOpaqueBackground()
-        tabBarAppearance.backgroundColor = UIColor(Color.industrialSurface)
-        
-        UITabBar.appearance().standardAppearance = tabBarAppearance
-        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-        
-        // Remove default back button text
-        UIBarButtonItem.appearance().setTitleTextAttributes([
-            .font: UIFont.monospacedSystemFont(ofSize: 0, weight: .medium)
-        ], for: .normal)
     }
 }
