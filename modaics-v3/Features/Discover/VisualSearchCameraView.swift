@@ -121,7 +121,7 @@ public struct VisualSearchCameraView: View {
             }
         }
         .sheet(isPresented: $showImagePicker) {
-            ImagePicker(sourceType: sourceType, selectedImage: $selectedImage)
+            VisualSearchImagePicker(sourceType: sourceType, selectedImage: $selectedImage)
                 .onDisappear {
                     if let image = selectedImage {
                         onImageSelected(image)
@@ -132,8 +132,8 @@ public struct VisualSearchCameraView: View {
     }
 }
 
-// MARK: - ImagePicker (UIKit wrapper)
-struct ImagePicker: UIViewControllerRepresentable {
+// MARK: - VisualSearchImagePicker (UIKit wrapper)
+struct VisualSearchImagePicker: UIViewControllerRepresentable {
     let sourceType: UIImagePickerController.SourceType
     @Binding var selectedImage: UIImage?
     
@@ -151,9 +151,9 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
     
     class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: ImagePicker
+        let parent: VisualSearchImagePicker
         
-        init(_ parent: ImagePicker) {
+        init(_ parent: VisualSearchImagePicker) {
             self.parent = parent
         }
         

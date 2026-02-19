@@ -210,8 +210,8 @@ public final class CreateViewModel: ObservableObject {
     
     // MARK: - Initialization
     
-    public init(apiClient: SearchAPIClient = SearchAPIClient()) {
-        self.apiClient = apiClient
+    public init(apiClient: SearchAPIClient? = nil) {
+        self.apiClient = apiClient ?? SearchAPIClient.shared
         setupValidation()
     }
     

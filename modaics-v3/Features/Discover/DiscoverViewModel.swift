@@ -73,8 +73,8 @@ public class DiscoverViewModel: ObservableObject {
     private var searchTask: Task<Void, Never>?
     
     // MARK: - Initialization
-    public init(apiClient: SearchAPIClient = .shared) {
-        self.apiClient = apiClient
+    public init(apiClient: SearchAPIClient? = nil) {
+        self.apiClient = apiClient ?? SearchAPIClient.shared
         setupBindings()
     }
     
@@ -302,7 +302,7 @@ public class DiscoverViewModel: ObservableObject {
         }
         return events
             .filter { typeFilter.contains($0.type) }
-            .sorted { $0.date < $1.date }
+            .sorted { $0.startDate < $1.startDate }
     }
     
     public var isEmpty: Bool {

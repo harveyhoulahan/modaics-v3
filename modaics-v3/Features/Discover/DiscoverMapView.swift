@@ -98,7 +98,7 @@ public struct DiscoverMapView: View {
                 .lineLimit(1)
             
             HStack(spacing: 12) {
-                Label(event.location, systemImage: "mappin")
+                Label(event.venueName, systemImage: "mappin")
                     .font(.forestCaptionMedium)
                     .foregroundColor(.sageMuted)
                     .lineLimit(1)

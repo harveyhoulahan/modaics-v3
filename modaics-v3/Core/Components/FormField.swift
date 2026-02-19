@@ -312,6 +312,115 @@ extension View {
     }
 }
 
+// MARK: - Section Header
+public struct SectionHeader: View {
+    let title: String
+    let icon: String?
+    let subtitle: String?
+    
+    public init(
+        title: String,
+        icon: String? = nil,
+        subtitle: String? = nil
+    ) {
+        self.title = title
+        self.icon = icon
+        self.subtitle = subtitle
+    }
+    
+    public var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 14))
+                        .foregroundColor(.luxeGold)
+                }
+                
+                Text(title.uppercased())
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.luxeGold)
+                    .tracking(1.5)
+            }
+            
+            if let subtitle = subtitle {
+                Text(subtitle)
+                    .font(.forestCaptionSmall)
+                    .foregroundColor(.sageMuted)
+            }
+        }
+    }
+}
+
+// MARK: - Price Field
+public struct PriceField: View {
+    let title: String
+    let placeholder: String
+    @Binding var text: String
+    let isRequired: Bool
+    
+    @FocusState private var isFocused: Bool
+    
+    public init(
+        title: String,
+        placeholder: String,
+        text: Binding<String>,
+        isRequired: Bool = false
+    ) {
+        self.title = title
+        self.placeholder = placeholder
+        self._text = text
+        self.isRequired = isRequired
+    }
+    
+    public var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 4) {
+                Text(title.uppercased())
+                    .font(.forestCaptionSmall)
+                    .foregroundColor(.luxeGold)
+                    .tracking(1.5)
+                
+                if isRequired {
+                    Text("*")
+                        .font(.forestCaptionSmall)
+                        .foregroundColor(.red)
+                }
+            }
+            
+            HStack(spacing: 8) {
+                Text("$")
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.luxeGold)
+                
+                TextField("", text: $text)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageWhite)
+                    .placeholder(when: text.isEmpty) {
+                        Text(placeholder)
+                            .font(.forestBodyMedium)
+                            .foregroundColor(.sageMuted)
+                    }
+                    .focused($isFocused)
+                    .keyboardType(.decimalPad)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.modaicsSurface)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(
+                        isFocused ? Color.luxeGold : Color.luxeGold.opacity(0.2),
+                        lineWidth: 1
+                    )
+            )
+        }
+    }
+}
+
 // MARK: - Preview
 struct FormField_Previews: PreviewProvider {
     static var previews: some View {

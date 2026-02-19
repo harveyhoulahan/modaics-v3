@@ -89,15 +89,6 @@ private struct _FlowLayoutContainer<Content: View>: View {
     }
 }
 
-// MARK: - Convenience extension for backwards compatibility
-extension FlowLayout {
-    /// Initialize with ViewBuilder content (for easier migration)
-    public init(spacing: CGFloat = 8, @ViewBuilder content: () -> some View) {
-        self.spacing = spacing
-        self.rowSpacing = spacing
-    }
-}
-
 // MARK: - Preview
 struct FlowLayout_Previews: PreviewProvider {
     static var previews: some View {

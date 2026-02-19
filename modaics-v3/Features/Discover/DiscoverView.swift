@@ -510,10 +510,10 @@ public struct DiscoverView: View {
         ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 12) {
                 ForEach(viewModel.filteredEvents) { event in
-                    EventListCard(event: event) {
+                    EventListCard(event: event, onTap: {
                         viewModel.selectedEvent = event
                         viewModel.showEventDetail = true
-                    }
+                    })
                 }
                 
                 Color.clear.frame(height: 20)

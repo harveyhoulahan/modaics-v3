@@ -3,6 +3,7 @@ import UIKit
 
 // MARK: - SearchAPIClient
 /// Client for AI-powered search and garment analysis
+@MainActor
 public final class SearchAPIClient {
     
     // MARK: - Shared Instance
