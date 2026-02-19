@@ -64,7 +64,7 @@ public struct DiscoverView: View {
             ActionSheet(
                 title: Text("SORT BY").font(.system(.headline, design: .monospaced)),
                 buttons: SortOption.allCases.map { option in
-                    .default(Text(option.rawValue)) {
+                    .default(Text(option.displayName)) {
                         viewModel.setSortOption(option)
                     }
                 } + [.cancel()]
@@ -141,7 +141,7 @@ public struct DiscoverView: View {
                 // Title (shows when collapsed)
                 if viewModel.isHeaderCollapsed {
                     Text("DISCOVER")
-                        .font(.font(.forestBodyLarge))
+                        .font(.forestBodyLarge)
                         .foregroundColor(Color.sageWhite)
                         .tracking(2)
                         .transition(.opacity)
@@ -165,7 +165,7 @@ public struct DiscoverView: View {
                     // Title
                     HStack {
                         Text("DISCOVER")
-                            .font(.font(.forestDisplayLarge))
+                            .font(.forestDisplayLarge)
                             .foregroundColor(Color.sageWhite)
                             .tracking(2)
                         
@@ -200,11 +200,11 @@ public struct DiscoverView: View {
             
             // Search TextField
             TextField("", text: $viewModel.searchQuery)
-                .font(.font(.forestBodyMedium))
+                .font(.forestBodyMedium)
                 .foregroundColor(Color.sageWhite)
                 .placeholder(when: viewModel.searchQuery.isEmpty) {
                     Text("SEARCH BRANDS, STYLES...")
-                        .font(.font(.forestBodyMedium))
+                        .font(.forestBodyMedium)
                         .foregroundColor(Color.sageMuted)
                 }
                 .submitLabel(.search)
@@ -261,7 +261,7 @@ public struct DiscoverView: View {
             // Suggestions List
             VStack(alignment: .leading, spacing: 0) {
                 Text("SUGGESTIONS")
-                    .font(.font(.forestCaptionSmall))
+                    .font(.forestCaptionSmall)
                     .foregroundColor(Color.luxeGold)
                     .tracking(1.5)
                     .padding(.horizontal, 16)
@@ -277,14 +277,14 @@ public struct DiscoverView: View {
                                 .foregroundColor(Color.luxeGold)
                             
                             Text(suggestion.text)
-                                .font(.font(.forestBodyMedium))
+                                .font(.forestBodyMedium)
                                 .foregroundColor(Color.sageWhite)
                             
                             Spacer()
                             
                             if suggestion.type == .trending {
                                 Text("TRENDING")
-                                    .font(.font(.forestCaptionSmall))
+                                    .font(.forestCaptionSmall)
                                     .foregroundColor(Color.modaicsEco)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 2)
@@ -304,7 +304,7 @@ public struct DiscoverView: View {
                 // Trending Section
                 if !viewModel.trendingSearches.isEmpty && viewModel.searchSuggestions.isEmpty {
                     Text("TRENDING NOW")
-                        .font(.font(.forestCaptionSmall))
+                        .font(.forestCaptionSmall)
                         .foregroundColor(Color.luxeGold)
                         .tracking(1.5)
                         .padding(.horizontal, 16)
@@ -321,7 +321,7 @@ public struct DiscoverView: View {
                                         .font(.system(size: 10))
                                     
                                     Text(search.text)
-                                        .font(.font(.forestCaptionSmall))
+                                        .font(.forestCaptionSmall)
                                 }
                                 .foregroundColor(Color.sageWhite)
                                 .padding(.horizontal, 12)
@@ -390,8 +390,8 @@ public struct DiscoverView: View {
                     Image(systemName: "arrow.up.arrow.down")
                         .font(.system(size: 12))
                     
-                    Text(viewModel.sortOption.rawValue)
-                        .font(.font(.forestCaptionSmall))
+                    Text(viewModel.sortOption.displayName)
+                        .font(.forestCaptionSmall)
                         .lineLimit(1)
                 }
                 .foregroundColor(Color.sageWhite)
@@ -416,11 +416,11 @@ public struct DiscoverView: View {
                         .font(.system(size: 12))
                     
                     Text("FILTERS")
-                        .font(.font(.forestCaptionSmall))
+                        .font(.forestCaptionSmall)
                     
                     if viewModel.activeFilterCount > 0 {
                         Text("\(viewModel.activeFilterCount)")
-                            .font(.font(.forestCaptionSmall))
+                            .font(.forestCaptionSmall)
                             .fontWeight(.bold)
                             .foregroundColor(Color.modaicsBackground)
                             .frame(minWidth: 18, minHeight: 18)
@@ -511,12 +511,12 @@ public struct DiscoverView: View {
             // Text
             VStack(spacing: 8) {
                 Text(viewModel.emptyStateTitle)
-                    .font(.font(.forestHeadlineSmall))
+                    .font(.forestHeadlineSmall)
                     .foregroundColor(Color.sageWhite)
                     .tracking(1)
                 
                 Text(viewModel.emptyStateMessage)
-                    .font(.font(.forestBodyMedium))
+                    .font(.forestBodyMedium)
                     .foregroundColor(Color.sageMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
@@ -529,7 +529,7 @@ public struct DiscoverView: View {
                     viewModel.clearSearch()
                 }) {
                     Text("CLEAR ALL FILTERS")
-                        .font(.font(.forestBodyLarge))
+                        .font(.forestBodyLarge)
                         .foregroundColor(Color.modaicsBackground)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 12)
@@ -571,7 +571,7 @@ struct CategoryPill: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .fontWeight(isSelected ? .semibold : .regular)
                 .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
                 .tracking(0.5)
@@ -597,6 +597,217 @@ extension View {
         ZStack(alignment: alignment) {
             placeholder().opacity(shouldShow ? 1 : 0)
             self
+        }
+    }
+}
+
+// MARK: - Visual Search Camera View
+struct VisualSearchCameraView: View {
+    @Binding var isPresented: Bool
+    let onImageSelected: (UIImage) -> Void
+    @State private var selectedImage: UIImage?
+    @State private var showImagePicker = false
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 24) {
+                Text("VISUAL SEARCH")
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.sageWhite)
+                    .padding(.top, 20)
+                
+                Text("Take a photo or upload an image to find similar items")
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageMuted)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                
+                if let image = selectedImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 300)
+                        .cornerRadius(12)
+                        .padding(.horizontal, 20)
+                } else {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.modaicsSurface)
+                        .frame(height: 300)
+                        .overlay(
+                            VStack(spacing: 16) {
+                                Image(systemName: "camera.viewfinder")
+                                    .font(.system(size: 60))
+                                    .foregroundColor(.luxeGold)
+                                Text("No image selected")
+                                    .font(.forestBodyMedium)
+                                    .foregroundColor(.sageMuted)
+                            }
+                        )
+                        .padding(.horizontal, 20)
+                }
+                
+                VStack(spacing: 12) {
+                    Button(action: {
+                        showImagePicker = true
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "photo")
+                            Text("Choose from Library")
+                        }
+                        .font(.forestBodyMedium)
+                        .foregroundColor(.modaicsBackground)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.luxeGold)
+                        .cornerRadius(12)
+                    }
+                    
+                    if selectedImage != nil {
+                        Button(action: {
+                            if let image = selectedImage {
+                                onImageSelected(image)
+                            }
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "magnifyingglass")
+                                Text("Search")
+                            }
+                            .font(.forestBodyMedium)
+                            .foregroundColor(.luxeGold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.modaicsSurface)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.luxeGold, lineWidth: 1)
+                            )
+                            .cornerRadius(12)
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                
+                Spacer()
+            }
+            .background(Color.modaicsBackground.ignoresSafeArea())
+            .navigationBarItems(
+                leading: Button("Cancel") { isPresented = false }
+                    .foregroundColor(.sageWhite)
+            )
+            .sheet(isPresented: $showImagePicker) {
+                ImagePickerView(selectedImage: $selectedImage)
+            }
+        }
+        .preferredColorScheme(.dark)
+    }
+}
+
+// MARK: - Image Picker View
+struct ImagePickerView: UIViewControllerRepresentable {
+    @Binding var selectedImage: UIImage?
+    @Environment(\.presentationMode) var presentationMode
+    
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.delegate = context.coordinator
+        picker.sourceType = .photoLibrary
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: ImagePickerView
+        
+        init(_ parent: ImagePickerView) {
+            self.parent = parent
+        }
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                parent.selectedImage = image
+            }
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+    }
+}
+
+// MARK: - Item Card Skeleton
+struct ItemCardSkeleton: View {
+    @State private var isAnimating = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Image placeholder
+            Rectangle()
+                .fill(Color.modaicsSurface)
+                .aspectRatio(3/4, contentMode: .fit)
+                .overlay(
+                    shimmerOverlay
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            
+            // Text placeholders
+            VStack(alignment: .leading, spacing: 6) {
+                Rectangle()
+                    .fill(Color.modaicsSurface)
+                    .frame(height: 16)
+                    .overlay(shimmerOverlay)
+                    .cornerRadius(4)
+                
+                Rectangle()
+                    .fill(Color.modaicsSurface)
+                    .frame(width: 80, height: 14)
+                    .overlay(shimmerOverlay)
+                    .cornerRadius(4)
+                
+                HStack {
+                    Rectangle()
+                        .fill(Color.modaicsSurface)
+                        .frame(width: 50, height: 12)
+                        .overlay(shimmerOverlay)
+                        .cornerRadius(4)
+                    
+                    Spacer()
+                    
+                    Rectangle()
+                        .fill(Color.modaicsSurface)
+                        .frame(width: 40, height: 14)
+                        .overlay(shimmerOverlay)
+                        .cornerRadius(4)
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.modaicsSurface.opacity(0.5))
+        .cornerRadius(12)
+        .onAppear {
+            withAnimation(Animation.linear(duration: 1.5).repeatForever(autoreverses: false)) {
+                isAnimating = true
+            }
+        }
+    }
+    
+    private var shimmerOverlay: some View {
+        GeometryReader { geometry in
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.modaicsSurface,
+                    Color.modaicsSurfaceHighlight.opacity(0.5),
+                    Color.modaicsSurface
+                ]),
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .offset(x: isAnimating ? geometry.size.width : -geometry.size.width)
         }
     }
 }

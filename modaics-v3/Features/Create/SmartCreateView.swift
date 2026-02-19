@@ -53,10 +53,10 @@ public struct SmartCreateView: View {
                 Spacer()
             }
         }
-        .onChange(of: viewModel.aiAnalysisState) { state in
-            if case .completed = state {
+        .onChange(of: viewModel.aiAnalysisState) { oldState, newState in
+            if case .completed = newState {
                 withAnimation { currentPhase = .review }
-            } else if case .failed = state {
+            } else if case .failed = newState {
                 // Show error, go back to photo
                 withAnimation { currentPhase = .photo }
             }
@@ -452,7 +452,7 @@ struct FinalReviewPhaseView: View {
                 images: viewModel.form.images,
                 title: viewModel.form.title,
                 category: viewModel.form.category,
-                price: viewModel.form.listingPriceDecimal,
+                price: viewModel.form.listingPriceDecimal as Decimal?,
                 condition: viewModel.form.condition
             )
             .padding(.horizontal, 20)

@@ -8,16 +8,16 @@ public struct ItemCard: View {
     let subtitle: String?
     let imageURL: URL?
     let price: Decimal?
-    let condition: ModaicsCondition?
+    let condition: Condition?
     let sustainabilityScore: Int?
     let isLoading: Bool
-    
+
     public init(
         title: String,
         subtitle: String? = nil,
         imageURL: URL? = nil,
         price: Decimal? = nil,
-        condition: ModaicsCondition? = nil,
+        condition: Condition? = nil,
         sustainabilityScore: Int? = nil,
         isLoading: Bool = false
     ) {
@@ -101,7 +101,7 @@ public struct ItemCard: View {
                     Spacer()
                     
                     if let price = price {
-                        Text("$") + Text(String(describing: price))
+                        Text("$\(String(describing: price))")
                             .font(.forestBodyMedium)
                             .foregroundColor(.luxeGold)
                     }
@@ -150,9 +150,9 @@ struct SustainabilityBadge: View {
 public struct PreviewCard: View {
     let images: [UIImage]
     let title: String
-    let category: ModaicsCategory?
+    let category: Category?
     let price: Decimal?
-    let condition: ModaicsCondition?
+    let condition: Condition?
     
     public var body: some View {
         VStack(spacing: 12) {
@@ -232,38 +232,4 @@ public struct PreviewCard: View {
     }
 }
 
-// MARK: - Condition Display Extension
-extension ModaicsCondition {
-    var displayName: String {
-        switch self {
-        case .newWithTags: return "NEW WITH TAGS"
-        case .newWithoutTags: return "NEW"
-        case .excellent: return "EXCELLENT"
-        case .veryGood: return "VERY GOOD"
-        case .good: return "GOOD"
-        case .fair: return "FAIR"
-        case .vintage: return "VINTAGE"
-        case .needsRepair: return "NEEDS REPAIR"
-        }
-    }
-}
-
-extension ModaicsCategory {
-    var displayName: String {
-        switch self {
-        case .tops: return "TOPS"
-        case .bottoms: return "BOTTOMS"
-        case .dresses: return "DRESSES"
-        case .outerwear: return "OUTERWEAR"
-        case .activewear: return "ACTIVEWEAR"
-        case .loungewear: return "LOUNGEWEAR"
-        case .formal: return "FORMAL"
-        case .accessories: return "ACCESSORIES"
-        case .shoes: return "SHOES"
-        case .jewelry: return "JEWELRY"
-        case .bags: return "BAGS"
-        case .vintage: return "VINTAGE"
-        case .other: return "OTHER"
-        }
-    }
-}
+// displayName extensions are defined in FashionItem.swift

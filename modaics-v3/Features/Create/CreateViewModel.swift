@@ -54,8 +54,8 @@ public struct CreateFormState {
     var garmentStory: String = ""
     
     // Category & Condition
-    var category: ModaicsCategory?
-    var condition: ModaicsCondition?
+    var category: Category?
+    var condition: Condition?
     
     // Pricing
     var listingPrice: String = ""
@@ -324,10 +324,10 @@ public final class CreateViewModel: ObservableObject {
         // Condition bonus (max 5)
         if let condition = form.condition {
             switch condition {
-            case .newWithTags, .newWithoutTags: score += 5
+            case .new, .likeNew: score += 5
             case .excellent: score += 3
-            case .veryGood: score += 2
-            default: break
+            case .good: score += 2
+            case .fair: break
             }
         }
         

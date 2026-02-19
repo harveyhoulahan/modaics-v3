@@ -49,7 +49,7 @@ public struct UnifiedCreateView: View {
         } message: {
             Text("Your item has been successfully listed!")
         }
-        .onChange(of: viewModel.submissionSuccess) { success in
+        .onChange(of: viewModel.submissionSuccess) { oldValue, success in
             if success { showSuccessAlert = true }
         }
     }
@@ -339,9 +339,9 @@ struct DetailsForm: View {
                 Text("CATEGORY").font(.forestCaptionMedium).foregroundColor(.sageMuted).tracking(1)
                 
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                    ForEach(MatchingCategory.allCases, id: \.self) { category in
-                        CategoryButton(category: category, isSelected: viewModel.form.category?.rawValue == category.rawValue) {
-                            viewModel.form.category = category.toModaicsCategory()
+                    ForEach(Category.allCases) { category in
+                        CategoryButton(category: category, isSelected: viewModel.form.category == category) {
+                            viewModel.form.category = category
                         }
                     }
                 }
@@ -352,9 +352,9 @@ struct DetailsForm: View {
                 Text("CONDITION").font(.forestCaptionMedium).foregroundColor(.sageMuted).tracking(1)
                 
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                    ForEach(MatchingCondition.allCases, id: \.self) { condition in
-                        ConditionButton(condition: condition, isSelected: viewModel.form.condition?.rawValue == condition.rawValue) {
-                            viewModel.form.condition = condition.toModaicsCondition()
+                    ForEach(Condition.allCases) { condition in
+                        CreateConditionButton(condition: condition, isSelected: viewModel.form.condition == condition) {
+                            viewModel.form.condition = condition
                         }
                     }
                 }
@@ -422,7 +422,7 @@ struct DetailsForm: View {
 
 // MARK: - Category Button
 struct CategoryButton: View {
-    let category: MatchingCategory
+    let category: Category
     let isSelected: Bool
     let action: () -> Void
     
@@ -440,9 +440,9 @@ struct CategoryButton: View {
     }
 }
 
-// MARK: - Condition Button
-struct ConditionButton: View {
-    let condition: MatchingCondition
+// MARK: - Create Condition Button (renamed to avoid conflict with TellStoryView)
+struct CreateConditionButton: View {
+    let condition: Condition
     let isSelected: Bool
     let action: () -> Void
     
@@ -569,7 +569,7 @@ struct SustainabilityForm: View {
             .toggleStyle(SwitchToggleStyle(tint: Color.modaicsEco))
             .padding(16).background(Color.modaicsSurface).cornerRadius(8)
             .padding(.horizontal, 20)
-            .onChange(of: viewModel.form.isRecycled) { _ in viewModel.calculateSustainabilityScore() }
+            .onChange(of: viewModel.form.isRecycled) { oldValue, newValue in viewModel.calculateSustainabilityScore() }
             
             VStack(alignment: .leading, spacing: 12) {
                 Text("CERTIFICATIONS").font(.forestCaptionMedium).foregroundColor(.sageMuted).tracking(1)
@@ -732,7 +732,7 @@ struct ReviewForm: View {
                 .padding(.horizontal, 20)
             }
             
-            PreviewCard(images: viewModel.form.images, title: viewModel.form.title, category: viewModel.form.category, price: viewModel.form.listingPriceDecimal, condition: viewModel.form.condition)
+            PreviewCard(images: viewModel.form.images, title: viewModel.form.title, category: viewModel.form.category, price: viewModel.form.listingPriceDecimal as Decimal?, condition: viewModel.form.condition)
                 .padding(.horizontal, 20)
             
             VStack(alignment: .leading, spacing: 16) {
@@ -746,8 +746,10 @@ struct ReviewForm: View {
                 
                 ReviewSection(title: "DETAILS") {
                     VStack(alignment: .leading, spacing: 8) {
-                        ReviewRow(label: "Category", value: viewModel.form.category?.displayName ?? "Not set")
-                        ReviewRow(label: "Condition", value: viewModel.form.condition?.displayName ?? "Not set")
+                        let categoryDisplayName: String = viewModel.form.category?.displayName ?? "Not set"
+                        let conditionDisplayName: String = viewModel.form.condition?.displayName ?? "Not set"
+                        ReviewRow(label: "Category", value: categoryDisplayName)
+                        ReviewRow(label: "Condition", value: conditionDisplayName)
                         ReviewRow(label: "Size", value: "\(viewModel.form.sizeSystem.rawValue.uppercased()) \(viewModel.form.sizeLabel)")
                         if !viewModel.form.brandName.isEmpty {
                             ReviewRow(label: "Brand", value: viewModel.form.brandName)
@@ -801,20 +803,25 @@ struct ReviewRow: View {
     }
 }
 
-// MARK: - Flow Layout
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
+// MARK: - Flow Layout (Shared Component)
+// Used by both UnifiedCreateView and FilterView
+public struct FlowLayout: Layout {
+    public var spacing: CGFloat = 8
     
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = FlowResult(in: proposal.replacingUnspecifiedDimensions().width, subviews: subviews, spacing: spacing)
+    public init(spacing: CGFloat = 8) {
+        self.spacing = spacing
+    }
+    
+    public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = FlowResult(in: proposal.width ?? 0, subviews: subviews, spacing: spacing)
         return result.size
     }
     
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+    public func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let result = FlowResult(in: bounds.width, subviews: subviews, spacing: spacing)
         for (index, subview) in subviews.enumerated() {
-            subview.place(at: CGPoint(x: result.positions[index].x + bounds.minX,
-                                      y: result.positions[index].y + bounds.minY),
+            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x,
+                                      y: bounds.minY + result.positions[index].y),
                          proposal: .unspecified)
         }
     }
@@ -840,87 +847,11 @@ struct FlowLayout: Layout {
                 positions.append(CGPoint(x: x, y: y))
                 rowHeight = max(rowHeight, size.height)
                 x += size.width + spacing
+                
+                self.size.width = max(self.size.width, x)
             }
             
-            self.size = CGSize(width: maxWidth, height: y + rowHeight)
-        }
-    }
-}
-
-// MARK: - Matching Enums
-enum MatchingCategory: String, CaseIterable {
-    case tops = "tops"
-    case bottoms = "bottoms"
-    case outerwear = "outerwear"
-    case dresses = "dresses"
-    case shoes = "shoes"
-    case accessories = "accessories"
-    case bags = "bags"
-    case activewear = "activewear"
-    case loungewear = "loungewear"
-    case formal = "formal"
-    case vintage = "vintage"
-    case other = "other"
-    
-    var displayName: String {
-        switch self {
-        case .tops: return "TOPS"
-        case .bottoms: return "BOTTOMS"
-        case .outerwear: return "OUTERWEAR"
-        case .dresses: return "DRESSES"
-        case .shoes: return "SHOES"
-        case .accessories: return "ACCESSORIES"
-        case .bags: return "BAGS"
-        case .activewear: return "ACTIVEWEAR"
-        case .loungewear: return "LOUNGEWEAR"
-        case .formal: return "FORMAL"
-        case .vintage: return "VINTAGE"
-        case .other: return "OTHER"
-        }
-    }
-    
-    func toModaicsCategory() -> ModaicsCategory {
-        switch self {
-        case .tops: return .tops
-        case .bottoms: return .bottoms
-        case .outerwear: return .outerwear
-        case .dresses: return .dresses
-        case .shoes: return .shoes
-        case .accessories: return .accessories
-        case .bags: return .bags
-        case .activewear: return .activewear
-        case .loungewear: return .loungewear
-        case .formal: return .formal
-        case .vintage: return .vintage
-        case .other: return .other
-        }
-    }
-}
-
-enum MatchingCondition: String, CaseIterable {
-    case new = "new"
-    case likeNew = "like_new"
-    case excellent = "excellent"
-    case good = "good"
-    case fair = "fair"
-    
-    var displayName: String {
-        switch self {
-        case .new: return "NEW"
-        case .likeNew: return "LIKE NEW"
-        case .excellent: return "EXCELLENT"
-        case .good: return "GOOD"
-        case .fair: return "FAIR"
-        }
-    }
-    
-    func toModaicsCondition() -> ModaicsCondition {
-        switch self {
-        case .new: return .newWithoutTags
-        case .likeNew: return .veryGood
-        case .excellent: return .excellent
-        case .good: return .good
-        case .fair: return .fair
+            self.size.height = y + rowHeight
         }
     }
 }

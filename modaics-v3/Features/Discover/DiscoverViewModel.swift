@@ -28,7 +28,7 @@ public class DiscoverViewModel: ObservableObject {
     @Published public var categoryFilters: [Category] = Category.allCases
     
     // Sort
-    @Published public var sortOption: SortOption = .newest
+    @Published public var sortOption: SortOption = .recent
     @Published public var showSortOptions: Bool = false
     
     // Filters

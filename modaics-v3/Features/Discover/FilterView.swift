@@ -66,7 +66,7 @@ public struct FilterView: View {
                     Button("CLOSE") {
                         isPresented = false
                     }
-                    .font(.font(.forestCaptionMedium))
+                    .font(.forestCaptionMedium)
                     .foregroundColor(Color.sageWhite)
                 }
                 
@@ -74,7 +74,7 @@ public struct FilterView: View {
                     Button("RESET") {
                         resetFilters()
                     }
-                    .font(.font(.forestCaptionMedium))
+                    .font(.forestCaptionMedium)
                     .foregroundColor(Color.luxeGold)
                     .disabled(!hasActiveFilters)
                     .opacity(hasActiveFilters ? 1.0 : 0.5)
@@ -91,7 +91,7 @@ public struct FilterView: View {
                         isPresented = false
                     }) {
                         Text("APPLY FILTERS")
-                            .font(.font(.forestBodyLarge))
+                            .font(.forestBodyLarge)
                             .foregroundColor(Color.modaicsBackground)
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -112,7 +112,7 @@ public struct FilterView: View {
     private var priceSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("PRICE RANGE")
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
@@ -120,14 +120,14 @@ public struct FilterView: View {
             VStack(spacing: 12) {
                 HStack {
                     Text("$\(Int(filters.minPrice))")
-                        .font(.font(.forestCaptionMedium))
+                        .font(.forestCaptionMedium)
                         .foregroundColor(Color.sageWhite)
                         .frame(width: 60, alignment: .leading)
                     
                     Spacer()
                     
                     Text("$\(Int(filters.maxPrice))")
-                        .font(.font(.forestCaptionMedium))
+                        .font(.forestCaptionMedium)
                         .foregroundColor(Color.sageWhite)
                         .frame(width: 60, alignment: .trailing)
                 }
@@ -143,7 +143,7 @@ public struct FilterView: View {
                             filters.maxPrice = Double(price)
                         }) {
                             Text("$\(price)")
-                                .font(.font(.forestCaptionSmall))
+                                .font(.forestCaptionSmall)
                                 .foregroundColor(filters.maxPrice == Double(price) ? Color.modaicsBackground : Color.sageWhite)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
@@ -159,7 +159,7 @@ public struct FilterView: View {
     private var categorySection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("CATEGORY")
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
@@ -184,13 +184,13 @@ public struct FilterView: View {
     private var sizeSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("SIZE")
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
             // Clothing sizes
             Text("CLOTHING")
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .foregroundColor(Color.sageMuted)
             
             HStack(spacing: 8) {
@@ -210,7 +210,7 @@ public struct FilterView: View {
             
             // Shoe sizes - Women's
             Text("WOMEN'S SHOES")
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .foregroundColor(Color.sageMuted)
                 .padding(.top, 8)
             
@@ -231,7 +231,7 @@ public struct FilterView: View {
             
             // Shoe sizes - Men's
             Text("MEN'S SHOES")
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .foregroundColor(Color.sageMuted)
                 .padding(.top, 8)
             
@@ -255,7 +255,7 @@ public struct FilterView: View {
     private var conditionSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("CONDITION")
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
@@ -279,7 +279,7 @@ public struct FilterView: View {
     private var sustainabilitySection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("SUSTAINABILITY")
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
@@ -291,11 +291,11 @@ public struct FilterView: View {
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("ECO-FRIENDLY ONLY")
-                                .font(.font(.forestCaptionMedium))
+                                .font(.forestCaptionMedium)
                                 .foregroundColor(Color.sageWhite)
                             
                             Text("Items with sustainability score 60+")
-                                .font(.font(.forestCaptionSmall))
+                                .font(.forestCaptionSmall)
                                 .foregroundColor(Color.sageMuted)
                         }
                     }
@@ -309,11 +309,11 @@ public struct FilterView: View {
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("VINTAGE ONLY")
-                                .font(.font(.forestCaptionMedium))
+                                .font(.forestCaptionMedium)
                                 .foregroundColor(Color.sageWhite)
                             
                             Text("Pre-loved vintage items")
-                                .font(.font(.forestCaptionSmall))
+                                .font(.forestCaptionSmall)
                                 .foregroundColor(Color.sageMuted)
                         }
                     }
@@ -405,7 +405,7 @@ struct FilterChip: View {
                     .font(.system(size: 12))
                 
                 Text(title)
-                    .font(.font(.forestCaptionSmall))
+                    .font(.forestCaptionSmall)
                     .fontWeight(isSelected ? .semibold : .regular)
             }
             .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
@@ -430,7 +430,7 @@ struct SizeChip: View {
     var body: some View {
         Button(action: action) {
             Text(size)
-                .font(.font(.forestCaptionSmall))
+                .font(.forestCaptionSmall)
                 .fontWeight(isSelected ? .semibold : .regular)
                 .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
                 .frame(minWidth: 40, minHeight: 36)
@@ -455,11 +455,11 @@ struct ConditionRow: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(condition.displayName)
-                        .font(.font(.forestCaptionMedium))
+                        .font(.forestCaptionMedium)
                         .foregroundColor(Color.sageWhite)
                     
                     Text(conditionDescription)
-                        .font(.font(.forestCaptionSmall))
+                        .font(.forestCaptionSmall)
                         .foregroundColor(Color.sageMuted)
                 }
                 
@@ -497,54 +497,6 @@ struct ConditionRow: View {
             return "Visible wear but still great condition"
         case .fair:
             return "Significant wear, priced accordingly"
-        }
-    }
-}
-
-// MARK: - Flow Layout
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-    
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = FlowResult(in: proposal.width ?? 0, subviews: subviews, spacing: spacing)
-        return result.size
-    }
-    
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = FlowResult(in: bounds.width, subviews: subviews, spacing: spacing)
-        for (index, subview) in subviews.enumerated() {
-            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x,
-                                      y: bounds.minY + result.positions[index].y),
-                         proposal: .unspecified)
-        }
-    }
-    
-    struct FlowResult {
-        var size: CGSize = .zero
-        var positions: [CGPoint] = []
-        
-        init(in maxWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
-            var x: CGFloat = 0
-            var y: CGFloat = 0
-            var rowHeight: CGFloat = 0
-            
-            for subview in subviews {
-                let size = subview.sizeThatFits(.unspecified)
-                
-                if x + size.width > maxWidth && x > 0 {
-                    x = 0
-                    y += rowHeight + spacing
-                    rowHeight = 0
-                }
-                
-                positions.append(CGPoint(x: x, y: y))
-                rowHeight = max(rowHeight, size.height)
-                x += size.width + spacing
-                
-                self.size.width = max(self.size.width, x)
-            }
-            
-            self.size.height = y + rowHeight
         }
     }
 }

@@ -5,6 +5,9 @@ import UIKit
 /// Client for AI-powered search and garment analysis
 public actor SearchAPIClient {
     
+    // MARK: - Shared Instance
+    public static let shared = SearchAPIClient()
+    
     // MARK: - Properties
     private let baseURL: URL
     private let session: URLSession
@@ -16,6 +19,128 @@ public actor SearchAPIClient {
         config.timeoutIntervalForRequest = 60
         config.timeoutIntervalForResource = 120
         self.session = URLSession(configuration: config)
+    }
+    
+    // MARK: - Search
+    
+    /// Perform a search with the given parameters
+    public func search(parameters: SearchParameters) async throws -> SearchResponse {
+        // Simulate network delay
+        try await Task.sleep(nanoseconds: 800_000_000)
+        
+        // Return mock data
+        var items = FashionItem.sampleItems
+        
+        // Apply category filter if specified
+        if let category = parameters.category {
+            items = items.filter { $0.category == category }
+        }
+        
+        // Apply condition filter if specified
+        if let condition = parameters.condition {
+            items = items.filter { $0.condition == condition }
+        }
+        
+        // Apply price filters
+        if let minPrice = parameters.minPrice {
+            items = items.filter { $0.price >= minPrice }
+        }
+        if let maxPrice = parameters.maxPrice {
+            items = items.filter { $0.price <= maxPrice }
+        }
+        
+        // Apply sustainability filter
+        if parameters.sustainabilityOnly {
+            items = items.filter { $0.sustainabilityScore >= 60 }
+        }
+        
+        // Apply vintage filter
+        if parameters.vintageOnly {
+            items = items.filter { $0.isVintage }
+        }
+        
+        // Apply search query
+        if let query = parameters.query, !query.isEmpty {
+            let lowerQuery = query.lowercased()
+            items = items.filter {
+                $0.name.lowercased().contains(lowerQuery) ||
+                $0.brand.lowercased().contains(lowerQuery) ||
+                $0.description.lowercased().contains(lowerQuery)
+            }
+        }
+        
+        // Apply sorting
+        switch parameters.sortBy {
+        case .recent:
+            items.sort { $0.createdAt > $1.createdAt }
+        case .alphabetical:
+            items.sort { $0.name < $1.name }
+        case .brand:
+            items.sort { $0.brand < $1.brand }
+        case .condition:
+            let conditionOrder: [Condition] = [.new, .likeNew, .excellent, .good, .fair]
+            items.sort { item1, item2 in
+                guard let index1 = conditionOrder.firstIndex(of: item1.condition),
+                      let index2 = conditionOrder.firstIndex(of: item2.condition) else {
+                    return false
+                }
+                return index1 < index2
+            }
+        }
+        
+        // Paginate
+        let startIndex = (parameters.page - 1) * parameters.limit
+        let endIndex = min(startIndex + parameters.limit, items.count)
+        let paginatedItems = Array(items[startIndex..<min(endIndex, items.count)])
+        
+        return SearchResponse(
+            items: paginatedItems,
+            totalCount: items.count,
+            hasMore: endIndex < items.count
+        )
+    }
+    
+    /// Perform visual search with an image
+    public func visualSearch(image: UIImage, parameters: SearchParameters) async throws -> SearchResponse {
+        // Simulate network delay for image processing
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        // Return all items as "visually similar" for mock
+        return try await search(parameters: parameters)
+    }
+    
+    /// Get search suggestions for a query
+    public func getSearchSuggestions(query: String) async throws -> [SearchSuggestion] {
+        // Simulate network delay
+        try await Task.sleep(nanoseconds: 300_000_000)
+        
+        let allSuggestions = [
+            SearchSuggestion(text: "Vintage Denim", type: .style),
+            SearchSuggestion(text: "Cashmere Sweater", type: .category),
+            SearchSuggestion(text: "Chanel", type: .brand),
+            SearchSuggestion(text: "Leather Jacket", type: .category),
+            SearchSuggestion(text: "Nike Air Force", type: .brand),
+            SearchSuggestion(text: "Wool Coat", type: .category),
+            SearchSuggestion(text: "Sustainable Fashion", type: .style)
+        ]
+        
+        let lowerQuery = query.lowercased()
+        return allSuggestions.filter { $0.text.lowercased().contains(lowerQuery) }
+    }
+    
+    /// Get trending searches
+    public func getTrendingSearches() async throws -> [SearchSuggestion] {
+        // Simulate network delay
+        try await Task.sleep(nanoseconds: 300_000_000)
+        
+        return [
+            SearchSuggestion(text: "Vintage Denim", type: .trending),
+            SearchSuggestion(text: "Sustainable Brands", type: .trending),
+            SearchSuggestion(text: "Cashmere", type: .trending),
+            SearchSuggestion(text: "Leather Bags", type: .trending),
+            SearchSuggestion(text: "Winter Coats", type: .trending),
+            SearchSuggestion(text: "Designer Shoes", type: .trending)
+        ]
     }
     
     // MARK: - AI Analysis
@@ -140,10 +265,10 @@ public actor SearchAPIClient {
 
 // MARK: - AI Analysis Types
 
-public struct AIGarmentAnalysis: Codable {
+public struct AIGarmentAnalysis: Codable, Equatable {
     public var title: String
-    public var category: ModaicsCategory
-    public var condition: ModaicsCondition
+    public var category: Category
+    public var condition: Condition
     public var materials: [AIMaterial]
     public var colors: [String]
     public var estimatedPrice: Decimal
@@ -154,8 +279,8 @@ public struct AIGarmentAnalysis: Codable {
     
     public init(
         title: String,
-        category: ModaicsCategory,
-        condition: ModaicsCondition,
+        category: Category,
+        condition: Condition,
         materials: [AIMaterial],
         colors: [String],
         estimatedPrice: Decimal,
@@ -196,7 +321,7 @@ public struct SimilarItem: Codable, Identifiable {
     public let title: String
     public let brand: String?
     public let price: Decimal
-    public let condition: ModaicsCondition
+    public let condition: Condition
     public let imageURL: URL?
 }
 
@@ -221,6 +346,80 @@ public enum SustainabilityRating: String, Codable {
         case .average: return "D9BD6B"
         case .needsImprovement: return "F59E0B"
         }
+    }
+}
+
+// MARK: - Search Parameters
+public struct SearchParameters {
+    public let query: String?
+    public let category: Category?
+    public let condition: Condition?
+    public let size: Size?
+    public let minPrice: Double?
+    public let maxPrice: Double?
+    public let sustainabilityOnly: Bool
+    public let vintageOnly: Bool
+    public let sortBy: SortOption
+    public let page: Int
+    public let limit: Int
+    
+    public init(
+        query: String? = nil,
+        category: Category? = nil,
+        condition: Condition? = nil,
+        size: Size? = nil,
+        minPrice: Double? = nil,
+        maxPrice: Double? = nil,
+        sustainabilityOnly: Bool = false,
+        vintageOnly: Bool = false,
+        sortBy: SortOption = .recent,
+        page: Int = 1,
+        limit: Int = 20
+    ) {
+        self.query = query
+        self.category = category
+        self.condition = condition
+        self.size = size
+        self.minPrice = minPrice
+        self.maxPrice = maxPrice
+        self.sustainabilityOnly = sustainabilityOnly
+        self.vintageOnly = vintageOnly
+        self.sortBy = sortBy
+        self.page = page
+        self.limit = limit
+    }
+}
+
+// MARK: - Search Suggestion
+public struct SearchSuggestion: Identifiable {
+    public let id = UUID()
+    public let text: String
+    public let type: SuggestionType
+    
+    public init(text: String, type: SuggestionType) {
+        self.text = text
+        self.type = type
+    }
+    
+    public enum SuggestionType {
+        case brand
+        case category
+        case style
+        case recent
+        case trending
+    }
+}
+
+// MARK: - Search Response
+public struct SearchResponse {
+    public let items: [FashionItem]
+    public let totalCount: Int
+    public let hasMore: Bool
+    
+    public init(items: [FashionItem], totalCount: Int, hasMore: Bool) {
+        self.items = items
+        self.totalCount = totalCount
+        self.hasMore = hasMore
     }
 }
 
