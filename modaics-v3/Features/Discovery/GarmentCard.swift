@@ -176,31 +176,6 @@ public struct GarmentCard: View {
     }
 }
 
-// MARK: - ModaicsCondition Display Name Extension
-
-private extension ModaicsCondition {
-    var displayName: String {
-        switch self {
-        case .newWithTags:
-            return "NWT"
-        case .newWithoutTags:
-            return "New"
-        case .excellent:
-            return "Excellent"
-        case .veryGood:
-            return "Very Good"
-        case .good:
-            return "Good"
-        case .fair:
-            return "Fair"
-        case .vintage:
-            return "Vintage"
-        case .needsRepair:
-            return "Repair"
-        }
-    }
-}
-
 // MARK: - Preview
 
 #if DEBUG

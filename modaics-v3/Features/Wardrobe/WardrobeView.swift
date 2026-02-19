@@ -100,7 +100,7 @@ public struct WardrobeView: View {
             )
             
             StatItem(
-                value: "\(viewModel.carbonSavedKg, specifier: "%g")",
+                value: String(format: "%.1f", viewModel.carbonSavedKg),
                 label: "kg CO₂ Saved",
                 icon: "arrow.down.circle"
             )

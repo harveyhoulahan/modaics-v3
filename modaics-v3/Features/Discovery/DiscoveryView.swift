@@ -319,28 +319,6 @@ private struct SectionHeader: View {
     }
 }
 
-// MARK: - ModaicsCategory Display Name Extension
-
-private extension ModaicsCategory {
-    var displayName: String {
-        switch self {
-        case .tops: return "Tops"
-        case .bottoms: return "Bottoms"
-        case .dresses: return "Dresses"
-        case .outerwear: return "Outerwear"
-        case .activewear: return "Activewear"
-        case .loungewear: return "Loungewear"
-        case .formal: return "Formal"
-        case .accessories: return "Accessories"
-        case .shoes: return "Shoes"
-        case .jewelry: return "Jewelry"
-        case .bags: return "Bags"
-        case .vintage: return "Vintage"
-        case .other: return "Other"
-        }
-    }
-}
-
 // MARK: - Preview
 
 #if DEBUG

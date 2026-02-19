@@ -290,7 +290,7 @@ public final class MockWardrobeService: WardrobeServiceProtocol {
     }
     
     // MARK: - Mock Data
-    private func createMockGarments() -> [ModaicsGarment] {
+    func createMockGarments() -> [ModaicsGarment] {
         let storyId = UUID()
         
         return [
