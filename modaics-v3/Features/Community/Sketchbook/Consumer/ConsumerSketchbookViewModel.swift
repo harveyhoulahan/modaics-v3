@@ -32,7 +32,7 @@ public class ConsumerSketchbookViewModel: ObservableObject {
         posts.filter { $0.visibility == .membersOnly }.count
     }
     
-    private func loadMockData() {
+    public func loadMockData() {
         // In real app, this would fetch from API
         posts = SketchbookPost.mockPosts
     }
