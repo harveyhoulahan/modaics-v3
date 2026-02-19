@@ -208,9 +208,9 @@ public struct SocialFeedView: View {
             }
             
             HStack(spacing: 24) {
-                StatItem(value: "12K+", label: "Members")
-                StatItem(value: "156", label: "Events")
-                StatItem(value: "8.5K", label: "Items")
+                FeedStatItem(value: "12K+", label: "Members")
+                FeedStatItem(value: "156", label: "Events")
+                FeedStatItem(value: "8.5K", label: "Items")
             }
         }
         .padding(16)
@@ -386,8 +386,8 @@ private struct EventBannerCard: View {
     }
 }
 
-// MARK: - Stat Item
-private struct StatItem: View {
+// MARK: - Feed Stat Item
+private struct FeedStatItem: View {
     let value: String
     let label: String
     
@@ -400,6 +400,14 @@ private struct StatItem: View {
                 .font(.forestCaptionSmall)
                 .foregroundColor(.sageMuted)
         }
+    }
+}
+
+// MARK: - Scroll Offset Preference Key
+private struct FeedScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 

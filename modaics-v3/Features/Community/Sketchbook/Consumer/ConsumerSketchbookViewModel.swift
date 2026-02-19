@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Combine
 
 // MARK: - Consumer Sketchbook ViewModel
 @MainActor
