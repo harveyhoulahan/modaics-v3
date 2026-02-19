@@ -73,7 +73,7 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showEventDetail) {
             if let event = selectedEvent {
-                EventDetailSheet(event: event)
+                LegacyEventDetailSheet(event: event)
             }
         }
         .onAppear {

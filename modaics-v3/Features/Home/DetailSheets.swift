@@ -224,8 +224,8 @@ struct DetailPill: View {
     }
 }
 
-// MARK: - Event Detail Sheet
-struct EventDetailSheet: View {
+// MARK: - Legacy Event Detail Sheet (for Home page)
+struct LegacyEventDetailSheet: View {
     let event: ModaicsEvent
     @Environment(\.dismiss) private var dismiss
     
@@ -373,9 +373,9 @@ struct ItemDetailSheet_Previews: PreviewProvider {
     }
 }
 
-struct EventDetailSheet_Previews: PreviewProvider {
+struct LegacyEventDetailSheet_Previews: PreviewProvider {
     static var previews: some View {
-        EventDetailSheet(
+        LegacyEventDetailSheet(
             event: ModaicsEvent(
                 title: "Vintage Market",
                 location: "Bondi Beach, Sydney",
