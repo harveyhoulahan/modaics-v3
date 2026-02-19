@@ -198,7 +198,7 @@ public struct SustainabilityDashboardView: View {
                 
                 Spacer()
                 
-                Text("\(viewModel.earnedBadges.count)/\(SustainabilityBadge.allCases.count)")
+                Text("\(viewModel.earnedBadges.count)/\(ModaicsSustainabilityBadge.allCases.count)")
                     .font(.forestCaptionMedium)
                     .foregroundColor(.sageMuted)
             }
