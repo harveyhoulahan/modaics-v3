@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import UserNotifications
 
 @main
@@ -7,9 +8,6 @@ struct ModaicsApp: App {
     @StateObject private var appState = AppState()
     
     init() {
-        // Configure Service Locator
-        ServiceLocator.shared.configure()
-        
         // Configure appearance
         configureAppearance()
     }
