@@ -216,20 +216,7 @@ public struct DiscoverView: View {
             
             Spacer()
             
-            Button(action: { viewModel.showFilterSheet = true }) {
-                HStack(spacing: 6) {
-                    Image(systemName: "line.3.horizontal.decrease").font(.system(size: 12))
-                    Text("FILTERS").font(.forestCaptionSmall)
-                    if viewModel.activeFilterCount > 0 {
-                        Text("(\(viewModel.activeFilterCount))").font(.forestCaptionSmall).foregroundColor(.luxeGold)
-                    }
-                }
-                .foregroundColor(.sageWhite)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Capsule().fill(viewModel.activeFilterCount > 0 ? Color.luxeGold.opacity(0.15) : Color.modaicsSurface))
-                .overlay(Capsule().stroke(viewModel.activeFilterCount > 0 ? Color.luxeGold : Color.modaicsSurfaceHighlight, lineWidth: 1))
-            }
+            filterButton
         }
     }
     
@@ -314,6 +301,35 @@ public struct DiscoverView: View {
         .background(Color.modaicsSurface)
         .cornerRadius(8)
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.modaicsSurfaceHighlight, lineWidth: 1))
+    }
+    
+    private var filterButton: some View {
+        Button {
+            viewModel.showFilterSheet = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "line.3.horizontal.decrease")
+                    .font(.system(size: 12))
+                Text("FILTERS")
+                    .font(.forestCaptionSmall)
+                if viewModel.activeFilterCount > 0 {
+                    Text("(\(viewModel.activeFilterCount))")
+                        .font(.forestCaptionSmall)
+                        .foregroundColor(.luxeGold)
+                }
+            }
+            .foregroundColor(.sageWhite)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                Capsule()
+                    .fill(viewModel.activeFilterCount > 0 ? Color.luxeGold.opacity(0.15) : Color.modaicsSurface)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(viewModel.activeFilterCount > 0 ? Color.luxeGold : Color.modaicsSurfaceHighlight, lineWidth: 1)
+            )
+        }
     }
     
     private var eventsListView: some View {
