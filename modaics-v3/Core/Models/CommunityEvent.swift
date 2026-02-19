@@ -1,5 +1,6 @@
 import Foundation
 import CoreLocation
+import SwiftUI
 
 // MARK: - CommunityEventType
 /// Event types supported in the app
@@ -38,6 +39,19 @@ public enum CommunityEventType: String, CaseIterable, Codable, Identifiable {
         case .workshop: return "hammer"
         case .classSession: return "person.2"
         case .popUp: return "star.fill"
+        }
+    }
+    
+    public var swiftColor: SwiftUI.Color {
+        switch self {
+        case .market: return .orange
+        case .exhibition: return .purple
+        case .talk: return .blue
+        case .party: return .pink
+        case .swapMeet: return .green
+        case .workshop: return .teal
+        case .classSession: return .indigo
+        case .popUp: return .yellow
         }
     }
 }
@@ -97,6 +111,23 @@ public struct CommunityEvent: Identifiable, Codable, Hashable, Sendable {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.day], from: Date(), to: startDate)
         return components.day
+    }
+    
+    public var timeUntil: String {
+        if let days = daysUntil {
+            if days == 0 { return "Today" }
+            if days == 1 { return "Tomorrow" }
+            return "In \(days) days"
+        }
+        return "Ended"
+    }
+    
+    public var maxAttendees: Int {
+        capacity ?? 100
+    }
+    
+    public var isAlmostFull: Bool {
+        Double(attendees) / Double(maxAttendees) > 0.8
     }
     
     public init(

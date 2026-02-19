@@ -1,5 +1,6 @@
 import SwiftUI
 import MapKit
+import UIKit
 
 // MARK: - DiscoverMapView
 /// Map view for displaying events with pins
@@ -187,10 +188,9 @@ public struct DiscoverMapView: View {
     }
     
     private func openInMaps(event: CommunityEvent) {
-        let placemark = MKPlacemark(coordinate: event.coordinate)
-        let mapItem = MKMapItem(placemark: placemark)
-        mapItem.name = event.title
-        mapItem.openInMaps()
+        let coordinates = event.coordinate
+        let url = URL(string: "http://maps.apple.com/?ll=\(coordinates.latitude),\(coordinates.longitude)&q=\(event.title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")!
+        UIApplication.shared.open(url)
     }
 }
 
