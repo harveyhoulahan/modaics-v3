@@ -35,8 +35,8 @@ public struct TellStoryView: View {
     @StateObject private var viewModel: TellStoryViewModel
     @Environment(\.dismiss) private var dismiss
     
-    public init(viewModel: TellStoryViewModel = TellStoryViewModel()) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    public init(viewModel: TellStoryViewModel? = nil) {
+        _viewModel = StateObject(wrappedValue: viewModel ?? TellStoryViewModel())
     }
     
     public var body: some View {
