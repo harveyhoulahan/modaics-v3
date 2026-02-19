@@ -350,7 +350,7 @@ struct PhotosStepView: View {
                             .foregroundColor(.emerald)
                         
                         Text(tip)
-                            .font(.forestCaptionRegular)
+                            .font(.forestCaptionMedium)
                             .foregroundColor(.sageMuted)
                     }
                 }

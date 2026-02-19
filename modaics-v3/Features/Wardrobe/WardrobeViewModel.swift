@@ -51,8 +51,8 @@ public final class WardrobeViewModel: ObservableObject {
     private let wardrobeService: WardrobeServiceProtocol
     
     // MARK: - Initialization
-    public init(wardrobeService: WardrobeServiceProtocol = MockWardrobeService()) {
-        self.wardrobeService = wardrobeService
+    public init(wardrobeService: WardrobeServiceProtocol? = nil) {
+        self.wardrobeService = wardrobeService ?? MockWardrobeService()
         
         // React to sort changes
         $sortBy
