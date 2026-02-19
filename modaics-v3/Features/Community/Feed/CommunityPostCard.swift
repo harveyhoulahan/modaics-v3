@@ -52,7 +52,7 @@ public struct CommunityPostCard: View {
             storySection
             
             // Sustainability metrics (Modaics unique)
-            if post.postType == .thriftFind || post.postType == .sustainabilityTip {
+            if post.postType == .thriftFind || post.postType == .ecoTip {
                 sustainabilityBadge
             }
             
@@ -93,7 +93,7 @@ public struct CommunityPostCard: View {
                         .font(.system(size: 13, weight: .bold, design: .monospaced))
                         .foregroundColor(.sageWhite)
                     
-                    Text(post.createdAt?.timeAgo().uppercased() ?? "")
+                    Text(post.formattedTime.uppercased())
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundColor(.sageMuted)
                 }
