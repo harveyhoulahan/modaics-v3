@@ -3,7 +3,7 @@ import UIKit
 
 // MARK: - SearchAPIClient
 /// Client for AI-powered search and garment analysis
-public actor SearchAPIClient {
+public final class SearchAPIClient {
     
     // MARK: - Shared Instance
     public static let shared = SearchAPIClient()
@@ -177,13 +177,13 @@ public actor SearchAPIClient {
         try await Task.sleep(nanoseconds: 300_000_000)
         
         let allSuggestions = [
-            SearchSuggestion(text: "Vintage Denim", type: .style),
-            SearchSuggestion(text: "Cashmere Sweater", type: .category),
-            SearchSuggestion(text: "Chanel", type: .brand),
-            SearchSuggestion(text: "Leather Jacket", type: .category),
-            SearchSuggestion(text: "Nike Air Force", type: .brand),
-            SearchSuggestion(text: "Wool Coat", type: .category),
-            SearchSuggestion(text: "Sustainable Fashion", type: .style)
+            SearchSuggestion(text: "Vintage Denim", type: .trending),
+            SearchSuggestion(text: "Cashmere Sweater", type: .trending),
+            SearchSuggestion(text: "Chanel", type: .trending),
+            SearchSuggestion(text: "Leather Jacket", type: .trending),
+            SearchSuggestion(text: "Nike Air Force", type: .trending),
+            SearchSuggestion(text: "Wool Coat", type: .trending),
+            SearchSuggestion(text: "Sustainable Fashion", type: .trending)
         ]
         
         let lowerQuery = query.lowercased()
@@ -364,10 +364,18 @@ public struct AIGarmentAnalysis: Codable {
     }
 }
 
-public struct AIMaterial: Codable {
+public struct AIMaterial: Codable, Identifiable {
+    public let id: UUID
     public let name: String
     public let percentage: Int
     public let isSustainable: Bool
+    
+    public init(id: UUID = UUID(), name: String, percentage: Int, isSustainable: Bool) {
+        self.id = id
+        self.name = name
+        self.percentage = percentage
+        self.isSustainable = isSustainable
+    }
 }
 
 public struct SimilarItem: Codable {
@@ -400,6 +408,7 @@ public struct SearchParameters {
     public var query: String?
     public var category: Category?
     public var condition: Condition?
+    public var size: Size?
     public var minPrice: Double?
     public var maxPrice: Double?
     public var sortBy: SortOption
@@ -412,6 +421,7 @@ public struct SearchParameters {
         query: String? = nil,
         category: Category? = nil,
         condition: Condition? = nil,
+        size: Size? = nil,
         minPrice: Double? = nil,
         maxPrice: Double? = nil,
         sortBy: SortOption = .recent,
@@ -423,6 +433,7 @@ public struct SearchParameters {
         self.query = query
         self.category = category
         self.condition = condition
+        self.size = size
         self.minPrice = minPrice
         self.maxPrice = maxPrice
         self.sortBy = sortBy
@@ -439,11 +450,13 @@ public struct SearchResponse: Codable {
     public let hasMore: Bool
 }
 
-public struct SearchSuggestion: Codable {
+public struct SearchSuggestion: Codable, Identifiable {
+    public let id: UUID
     public let text: String
     public let type: SuggestionType
     
-    public init(text: String, type: SuggestionType) {
+    public init(id: UUID = UUID(), text: String, type: SuggestionType) {
+        self.id = id
         self.text = text
         self.type = type
     }

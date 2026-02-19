@@ -96,7 +96,7 @@ public struct ImagePicker: View {
             matching: .images,
             photoLibrary: .shared()
         )
-        .onChange(of: selectedItems) { newItems in
+        .onChange(of: selectedItems) { _, newItems in
             Task {
                 var newImages: [UIImage] = []
                 for item in newItems {
@@ -296,7 +296,7 @@ public struct SingleImagePicker: View {
             matching: .images,
             photoLibrary: .shared()
         )
-        .onChange(of: selectedItem) { newItem in
+        .onChange(of: selectedItem) { _, newItem in
             Task {
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
                    let newImage = UIImage(data: data) {
