@@ -20,6 +20,14 @@ class Auth {
     func createUser(withEmail email: String, password: String) async throws -> AuthResult {
         throw NSError(domain: "FirebaseStub", code: -1, userInfo: [NSLocalizedDescriptionKey: "Firebase not configured"])
     }
+    
+    func signOut() throws {
+        // Stub - does nothing
+    }
+    
+    func sendPasswordReset(withEmail email: String) async throws {
+        throw NSError(domain: "FirebaseStub", code: -1, userInfo: [NSLocalizedDescriptionKey: "Firebase not configured"])
+    }
 }
 
 class AuthResult {

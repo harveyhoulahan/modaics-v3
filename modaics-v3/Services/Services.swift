@@ -10,8 +10,8 @@ class FirebaseAuthService: AuthServiceProtocol {
             displayName: firebaseUser.displayName ?? "User",
             username: firebaseUser.email?.components(separatedBy: "@").first ?? "user",
             bio: "",
-            email: firebaseUser.email ?? "",
-            avatarURL: firebaseUser.photoURL
+            avatarURL: firebaseUser.photoURL,
+            email: firebaseUser.email ?? ""
         )
     }
     

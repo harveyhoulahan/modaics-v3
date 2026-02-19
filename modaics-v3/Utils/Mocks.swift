@@ -9,7 +9,6 @@ class MockAuthService: AuthServiceProtocol {
         displayName: "Test User",
         username: "testuser",
         bio: "Fashion enthusiast",
-        email: "test@example.com",
         avatarURL: nil,
         coverImageURL: nil,
         styleDescriptors: [],
@@ -31,6 +30,7 @@ class MockAuthService: AuthServiceProtocol {
         itemsCirculated: 0,
         location: nil,
         shippingPreference: .domestic,
+        email: "test@example.com",
         isEmailVerified: true,
         tier: .free,
         atelierSubscription: nil,
@@ -202,12 +202,128 @@ class MockDiscoveryRepository: DiscoveryRepositoryProtocol {
         return MockData.collections
     }
     
-    func search(query: String) async throws -> MockSearchResults {
-        return MockSearchResults(
-            garments: MockData.garments,
-            stories: MockData.stories,
-            users: [MockData.currentUser]
-        )
+    func search(query: String) async throws -> [Garment] {
+        return MockData.garments
+    }
+    
+    func getPersonalizedFeed(for userId: UUID) async throws -> [Garment] {
+        return MockData.garments
+    }
+    
+    func getPersonalizedFeed(for userId: UUID, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        return PaginatedResult(items: MockData.garments, totalCount: MockData.garments.count, page: page, limit: limit)
+    }
+    
+    func getNewArrivals(for userId: UUID?) async throws -> [Garment] {
+        return MockData.garments
+    }
+    
+    func getTrending(limit: Int) async throws -> [Garment] {
+        return Array(MockData.garments.prefix(limit))
+    }
+    
+    func findStyleMatches(for userId: UUID, limit: Int) async throws -> [Garment] {
+        return Array(MockData.garments.prefix(limit))
+    }
+    
+    func findSimilar(to garmentId: UUID, limit: Int) async throws -> [Garment] {
+        return Array(MockData.garments.prefix(limit))
+    }
+    
+    func findComplementary(to garmentId: UUID, limit: Int) async throws -> [Garment] {
+        return Array(MockData.garments.prefix(limit))
+    }
+    
+    func findSimilarUsers(to userId: UUID, limit: Int) async throws -> [User] {
+        return [MockData.currentUser]
+    }
+    
+    func getSuggestedUsers(for userId: UUID, limit: Int) async throws -> [User] {
+        return [MockData.currentUser]
+    }
+    
+    func getFeaturedWardrobes(limit: Int) async throws -> [Wardrobe] {
+        return []
+    }
+    
+    func browseBy(category: Category, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        return PaginatedResult(items: MockData.garments, totalCount: MockData.garments.count, page: page, limit: limit)
+    }
+    
+    func browseBy(aesthetic: Aesthetic, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        return PaginatedResult(items: MockData.garments, totalCount: MockData.garments.count, page: page, limit: limit)
+    }
+    
+    func browseBy(brand: String, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        return PaginatedResult(items: MockData.garments, totalCount: MockData.garments.count, page: page, limit: limit)
+    }
+    
+    func getCuratedCollections() async throws -> [CuratedCollection] {
+        return []
+    }
+    
+    func getCollectionItems(collectionId: UUID, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        return PaginatedResult(items: MockData.garments, totalCount: MockData.garments.count, page: page, limit: limit)
+    }
+    
+    func getLocalItems(near location: Location, radiusKm: Double, limit: Int) async throws -> [Garment] {
+        return Array(MockData.garments.prefix(limit))
+    }
+    
+    func getLocalSellers(near location: Location, radiusKm: Double, limit: Int) async throws -> [User] {
+        return [MockData.currentUser]
+    }
+    
+    func search(query: String, filters: GarmentFilterCriteria?) async throws -> [Garment] {
+        return MockData.garments
+    }
+    
+    func searchSuggestions(query: String, limit: Int) async throws -> [SearchSuggestion] {
+        return []
+    }
+    
+    func getRecentSearches(for userId: UUID, limit: Int) async throws -> [String] {
+        return []
+    }
+    
+    func clearRecentSearches(for userId: UUID) async throws {}
+    
+    func recordSearch(userId: UUID, query: String) async throws {}
+    
+    func addToFavorites(userId: UUID, garmentId: UUID) async throws {}
+    
+    func removeFromFavorites(userId: UUID, garmentId: UUID) async throws {}
+    
+    func isFavorited(userId: UUID, garmentId: UUID) async throws -> Bool {
+        return false
+    }
+    
+    func getUserFavorites(userId: UUID, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        return PaginatedResult(items: MockData.garments, totalCount: MockData.garments.count, page: page, limit: limit)
+    }
+    
+    func getGarmentFavoritedBy(garmentId: UUID, limit: Int) async throws -> [User] {
+        return [MockData.currentUser]
+    }
+    
+    func findTradeMatches(for userId: UUID) async throws -> [TradeMatch] {
+        return []
+    }
+    
+    func findTradePartners(for garmentId: UUID) async throws -> [TradePartner] {
+        return []
+    }
+    
+    func getPopularSearches(limit: Int) async throws -> [String] {
+        return []
+    }
+    
+    func getTrendingCategories(limit: Int) async throws -> [CategoryTrend] {
+        return []
+    }
+    
+    func getTrendingBrands(limit: Int) async throws -> [BrandTrend] {
+        return []
     }
 }
 
@@ -288,7 +404,6 @@ enum MockData {
         displayName: "Alex Rivera",
         username: "alexrivera",
         bio: "Curating my intentional wardrobe",
-        email: "alex@example.com",
         avatarURL: nil,
         coverImageURL: nil,
         styleDescriptors: [],
@@ -310,6 +425,7 @@ enum MockData {
         itemsCirculated: 3,
         location: nil,
         shippingPreference: .domestic,
+        email: "alex@example.com",
         isEmailVerified: true,
         tier: .free,
         atelierSubscription: nil,

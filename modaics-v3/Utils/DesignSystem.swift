@@ -155,7 +155,7 @@ enum DesignSystem {
 
 // MARK: - View Extensions
 extension View {
-    func cardStyle() -> some View {
+    func designSystemCardStyle() -> some View {
         self
             .background(DesignSystem.Colors.paper)
             .cornerRadius(DesignSystem.CornerRadius.large)

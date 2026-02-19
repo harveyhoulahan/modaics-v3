@@ -193,7 +193,7 @@ class GarmentRepository: GarmentRepositoryProtocol {
     
     func totalValueByOwner(userId: UUID) async throws -> Decimal {
         let garments = try await getByOwner(userId: userId)
-        return garments.reduce(Decimal(0)) { $0 + ($0.originalPrice ?? 0) }
+        return garments.reduce(Decimal(0)) { sum, garment in sum + (garment.originalPrice ?? 0) }
     }
 }
 
@@ -278,6 +278,8 @@ class DiscoveryRepository: DiscoveryRepositoryProtocol {
         self.logger = logger
     }
     
+    // MARK: - Required Protocol Methods
+    
     func getTrendingStories() async throws -> [Story] {
         let stories: [Story] = try await apiClient.get("/discover/trending")
         return stories
@@ -293,8 +295,168 @@ class DiscoveryRepository: DiscoveryRepositoryProtocol {
         return collections
     }
     
-    func search(query: String) async throws -> MockSearchResults {
-        let results: MockSearchResults = try await apiClient.get("/search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
+    func search(query: String) async throws -> [Garment] {
+        let results: [Garment] = try await apiClient.get("/search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
         return results
+    }
+    
+    func getPersonalizedFeed(for userId: UUID) async throws -> [Garment] {
+        let garments: [Garment] = try await apiClient.get("/discover/feed/\(userId.uuidString)")
+        return garments
+    }
+    
+    func getPersonalizedFeed(for userId: UUID, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        let result: PaginatedResult<Garment> = try await apiClient.get("/discover/feed/\(userId.uuidString)?page=\(page)&limit=\(limit)")
+        return result
+    }
+    
+    func getNewArrivals(for userId: UUID?) async throws -> [Garment] {
+        let endpoint = userId != nil ? "/discover/new?user=\(userId!.uuidString)" : "/discover/new"
+        let garments: [Garment] = try await apiClient.get(endpoint)
+        return garments
+    }
+    
+    func getTrending(limit: Int) async throws -> [Garment] {
+        let garments: [Garment] = try await apiClient.get("/discover/trending?limit=\(limit)")
+        return garments
+    }
+    
+    func findStyleMatches(for userId: UUID, limit: Int) async throws -> [Garment] {
+        let garments: [Garment] = try await apiClient.get("/discover/matches/\(userId.uuidString)?limit=\(limit)")
+        return garments
+    }
+    
+    func findSimilar(to garmentId: UUID, limit: Int) async throws -> [Garment] {
+        let garments: [Garment] = try await apiClient.get("/discover/similar/\(garmentId.uuidString)?limit=\(limit)")
+        return garments
+    }
+    
+    func findComplementary(to garmentId: UUID, limit: Int) async throws -> [Garment] {
+        let garments: [Garment] = try await apiClient.get("/discover/complementary/\(garmentId.uuidString)?limit=\(limit)")
+        return garments
+    }
+    
+    func findSimilarUsers(to userId: UUID, limit: Int) async throws -> [User] {
+        let users: [User] = try await apiClient.get("/discover/similar-users/\(userId.uuidString)?limit=\(limit)")
+        return users
+    }
+    
+    func getSuggestedUsers(for userId: UUID, limit: Int) async throws -> [User] {
+        let users: [User] = try await apiClient.get("/discover/suggested-users/\(userId.uuidString)?limit=\(limit)")
+        return users
+    }
+    
+    func getFeaturedWardrobes(limit: Int) async throws -> [Wardrobe] {
+        let wardrobes: [Wardrobe] = try await apiClient.get("/discover/featured-wardrobes?limit=\(limit)")
+        return wardrobes
+    }
+    
+    func browseBy(category: Category, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        let result: PaginatedResult<Garment> = try await apiClient.get("/discover/browse/category/\(category.rawValue)?page=\(page)&limit=\(limit)")
+        return result
+    }
+    
+    func browseBy(aesthetic: Aesthetic, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        let result: PaginatedResult<Garment> = try await apiClient.get("/discover/browse/aesthetic/\(aesthetic.rawValue)?page=\(page)&limit=\(limit)")
+        return result
+    }
+    
+    func browseBy(brand: String, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        let encodedBrand = brand.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? brand
+        let result: PaginatedResult<Garment> = try await apiClient.get("/discover/browse/brand/\(encodedBrand)?page=\(page)&limit=\(limit)")
+        return result
+    }
+    
+    func getCuratedCollections() async throws -> [CuratedCollection] {
+        let collections: [CuratedCollection] = try await apiClient.get("/discover/curated-collections")
+        return collections
+    }
+    
+    func getCollectionItems(collectionId: UUID, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        let result: PaginatedResult<Garment> = try await apiClient.get("/discover/collections/\(collectionId.uuidString)/items?page=\(page)&limit=\(limit)")
+        return result
+    }
+    
+    func getLocalItems(near location: Location, radiusKm: Double, limit: Int) async throws -> [Garment] {
+        let garments: [Garment] = try await apiClient.get("/discover/local/items?lat=\(location.latitude)&lon=\(location.longitude)&radius=\(radiusKm)&limit=\(limit)")
+        return garments
+    }
+    
+    func getLocalSellers(near location: Location, radiusKm: Double, limit: Int) async throws -> [User] {
+        let users: [User] = try await apiClient.get("/discover/local/sellers?lat=\(location.latitude)&lon=\(location.longitude)&radius=\(radiusKm)&limit=\(limit)")
+        return users
+    }
+    
+    func search(query: String, filters: GarmentFilterCriteria?) async throws -> [Garment] {
+        var endpoint = "/search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        // TODO: Add filter parameters
+        let garments: [Garment] = try await apiClient.get(endpoint)
+        return garments
+    }
+    
+    func searchSuggestions(query: String, limit: Int) async throws -> [SearchSuggestion] {
+        let suggestions: [SearchSuggestion] = try await apiClient.get("/search/suggestions?q=\(query)&limit=\(limit)")
+        return suggestions
+    }
+    
+    func getRecentSearches(for userId: UUID, limit: Int) async throws -> [String] {
+        let searches: [String] = try await apiClient.get("/search/recent/\(userId.uuidString)?limit=\(limit)")
+        return searches
+    }
+    
+    func clearRecentSearches(for userId: UUID) async throws {
+        _ = try await apiClient.delete("/search/recent/\(userId.uuidString)")
+    }
+    
+    func recordSearch(userId: UUID, query: String) async throws {
+        _ = try await apiClient.post("/search/record", body: ["userId": userId.uuidString, "query": query])
+    }
+    
+    func addToFavorites(userId: UUID, garmentId: UUID) async throws {
+        _ = try await apiClient.post("/favorites", body: ["userId": userId.uuidString, "garmentId": garmentId.uuidString])
+    }
+    
+    func removeFromFavorites(userId: UUID, garmentId: UUID) async throws {
+        _ = try await apiClient.delete("/favorites/\(userId.uuidString)/\(garmentId.uuidString)")
+    }
+    
+    func isFavorited(userId: UUID, garmentId: UUID) async throws -> Bool {
+        let result: Bool = try await apiClient.get("/favorites/\(userId.uuidString)/\(garmentId.uuidString)/check")
+        return result
+    }
+    
+    func getUserFavorites(userId: UUID, page: Int, limit: Int) async throws -> PaginatedResult<Garment> {
+        let result: PaginatedResult<Garment> = try await apiClient.get("/favorites/\(userId.uuidString)?page=\(page)&limit=\(limit)")
+        return result
+    }
+    
+    func getGarmentFavoritedBy(garmentId: UUID, limit: Int) async throws -> [User] {
+        let users: [User] = try await apiClient.get("/favorites/garment/\(garmentId.uuidString)?limit=\(limit)")
+        return users
+    }
+    
+    func findTradeMatches(for userId: UUID) async throws -> [TradeMatch] {
+        let matches: [TradeMatch] = try await apiClient.get("/trades/matches/\(userId.uuidString)")
+        return matches
+    }
+    
+    func findTradePartners(for garmentId: UUID) async throws -> [TradePartner] {
+        let partners: [TradePartner] = try await apiClient.get("/trades/partners/\(garmentId.uuidString)")
+        return partners
+    }
+    
+    func getPopularSearches(limit: Int) async throws -> [String] {
+        let searches: [String] = try await apiClient.get("/analytics/popular-searches?limit=\(limit)")
+        return searches
+    }
+    
+    func getTrendingCategories(limit: Int) async throws -> [CategoryTrend] {
+        let trends: [CategoryTrend] = try await apiClient.get("/analytics/trending-categories?limit=\(limit)")
+        return trends
+    }
+    
+    func getTrendingBrands(limit: Int) async throws -> [BrandTrend] {
+        let trends: [BrandTrend] = try await apiClient.get("/analytics/trending-brands?limit=\(limit)")
+        return trends
     }
 }
