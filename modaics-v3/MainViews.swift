@@ -27,31 +27,3 @@ struct DiscoveryView: View {
         }
     }
 }
-
-struct WardrobeView: View {
-    var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("My Wardrobe")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    
-                    Text("Your curated collection")
-                        .foregroundColor(.secondary)
-                    
-                    // Placeholder for wardrobe items
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 16) {
-                        ForEach(0..<6) { _ in
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.gray.opacity(0.2))
-                                .aspectRatio(1, contentMode: .fit)
-                        }
-                    }
-                }
-                .padding()
-            }
-            .navigationTitle("Wardrobe")
-        }
-    }
-}
