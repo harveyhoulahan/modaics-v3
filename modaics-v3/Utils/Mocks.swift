@@ -202,8 +202,8 @@ class MockDiscoveryRepository: DiscoveryRepositoryProtocol {
         return MockData.collections
     }
     
-    func search(query: String) async throws -> SearchResults {
-        return SearchResults(
+    func search(query: String) async throws -> MockSearchResults {
+        return MockSearchResults(
             garments: MockData.garments,
             stories: MockData.stories,
             users: [MockData.currentUser]
@@ -252,8 +252,8 @@ struct DiscoveryFeed: Codable {
     var collections: [WardrobeCollection]
 }
 
-// MARK: - SearchResults Model (for API responses)
-struct SearchResults: Codable {
+// MARK: - Mock SearchResults Model (for API responses)
+struct MockSearchResults: Codable {
     var garments: [Garment]
     var stories: [Story]
     var users: [User]

@@ -170,7 +170,7 @@ struct DiscoveryFeed: Codable {
 }
 
 // MARK: - SearchResults Model  
-struct SearchResults: Codable {
+struct MockSearchResults: Codable {
     var garments: [Garment]
     var stories: [Story]
     var users: [User]

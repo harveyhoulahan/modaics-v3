@@ -855,7 +855,8 @@ struct TradeOffer: Identifiable {
     let message: String?
 }
 
-struct Garment: Identifiable {
+// MARK: - TransactionGarment (local model)
+struct TransactionGarment: Identifiable {
     let id = UUID()
     let name: String
     let brand: String

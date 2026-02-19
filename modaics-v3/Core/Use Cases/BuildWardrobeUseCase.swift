@@ -419,8 +419,8 @@ public final class BuildWardrobeUseCase: BuildWardrobeUseCaseProtocol {
         // Add to wardrobe
         _ = try await wardrobeRepository.addGarment(wardrobeId: wardrobe.id, garmentId: createdGarment.id)
         
-        // Get pricing guidance if not set
-        if input.suggestedPrice == nil {
+        // Get pricing guidance if listing price not set
+        if input.listingPrice == nil {
             _ = try? await styleMatchingService.getPricingGuidance(for: createdGarment)
         }
         

@@ -222,8 +222,8 @@ enum WardrobeError: LocalizedError {
     }
 }
 
-// MARK: - Use Case Protocol
-protocol BuildWardrobeUseCaseProtocol {
+// MARK: - Wardrobe Use Case Protocol
+protocol WardrobeUseCaseProtocol {
     func getGarments() async throws -> [Garment]
     func getCollections() async throws -> [GarmentCollection]
     func getCommunityConnections() async throws -> [CommunityConnection]
@@ -235,7 +235,7 @@ protocol BuildWardrobeUseCaseProtocol {
 }
 
 // MARK: - Mock Use Case
-class MockBuildWardrobeUseCase: BuildWardrobeUseCaseProtocol {
+class MockBuildWardrobeUseCase: WardrobeUseCaseProtocol {
     func getGarments() async throws -> [Garment] {
         try await Task.sleep(nanoseconds: 800_000_000)
         

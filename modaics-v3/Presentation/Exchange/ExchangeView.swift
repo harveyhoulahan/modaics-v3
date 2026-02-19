@@ -245,8 +245,8 @@ enum ExchangeMode: String, Identifiable {
     }
 }
 
-// MARK: - Exchange Status
-enum ExchangeStatus {
+// MARK: - Activity Exchange Status
+enum ActivityExchangeStatus {
     case pending, confirmed, shipped, delivered, completed
     
     var displayText: String {

@@ -293,8 +293,8 @@ class DiscoveryRepository: DiscoveryRepositoryProtocol {
         return collections
     }
     
-    func search(query: String) async throws -> SearchResults {
-        let results: SearchResults = try await apiClient.get("/search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
+    func search(query: String) async throws -> MockSearchResults {
+        let results: MockSearchResults = try await apiClient.get("/search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
         return results
     }
 }
