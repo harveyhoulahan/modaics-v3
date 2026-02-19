@@ -49,7 +49,6 @@ struct OnboardingView: View {
             VStack(spacing: 40) {
                 Spacer()
                 
-                // Logo/Title
                 VStack(spacing: 16) {
                     Text("Modaics")
                         .font(.modaicsDisplayLarge)
@@ -62,7 +61,6 @@ struct OnboardingView: View {
                 
                 Spacer()
                 
-                // Get Started Button
                 Button(action: {
                     appState.completeOnboarding()
                 }) {
@@ -94,7 +92,6 @@ struct AuthView: View {
             Color.modaicsWarmSand.ignoresSafeArea()
             
             VStack(spacing: 32) {
-                // Header
                 VStack(spacing: 8) {
                     Text("Modaics")
                         .font(.modaicsDisplaySmall)
@@ -108,29 +105,26 @@ struct AuthView: View {
                 
                 Spacer()
                 
-                // Form
                 VStack(spacing: 20) {
-                    // Email Field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Email")
-                            .font(.modaicsCaptionMedium)
+                            .font(.modaicsCaption)
                             .foregroundColor(.modaicsStone)
                         
                         TextField("", text: $email)
-                            .font(.modaicsBody)
+                            .font(.modaicsBodyRegular)
                             .padding(12)
                             .background(Color.modaicsPaper)
                             .cornerRadius(8)
                     }
                     
-                    // Password Field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Password")
-                            .font(.modaicsCaptionMedium)
+                            .font(.modaicsCaption)
                             .foregroundColor(.modaicsStone)
                         
                         SecureField("", text: $password)
-                            .font(.modaicsBody)
+                            .font(.modaicsBodyRegular)
                             .padding(12)
                             .background(Color.modaicsPaper)
                             .cornerRadius(8)
@@ -140,7 +134,6 @@ struct AuthView: View {
                 
                 Spacer()
                 
-                // Sign In Button
                 Button(action: {
                     appState.isAuthenticated = true
                 }) {
@@ -167,7 +160,8 @@ struct MainTabView: View {
     
     var body: some View {
         TabView(selection: $appState.selectedTab) {
-            HomeView()
+            // Home - Placeholder until ported
+            Text("Home")
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
@@ -185,7 +179,8 @@ struct MainTabView: View {
                 }
                 .tag(Tab.create)
             
-            CommunityView()
+            // Community - Placeholder until ported
+            Text("Community")
                 .tabItem {
                     Label("Community", systemImage: "person.3.fill")
                 }
