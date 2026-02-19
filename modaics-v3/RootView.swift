@@ -160,8 +160,7 @@ struct MainTabView: View {
     
     var body: some View {
         TabView(selection: $appState.selectedTab) {
-            // Home - Placeholder until ported
-            Text("Home")
+            HomeView()
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
