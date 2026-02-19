@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - CommunityPostCard
-/// Card component for displaying community posts in the feed
+/// Modaics-unique post card with industrial/editorial aesthetic
 public struct CommunityPostCard: View {
     let post: CommunityPost
     let onLikeTapped: () -> Void
@@ -14,7 +14,8 @@ public struct CommunityPostCard: View {
     
     @State private var currentImageIndex: Int = 0
     @State private var showFullCaption: Bool = false
-    @State private var isCaptionTruncated: Bool = false
+    @State private var isLiked: Bool = false
+    @State private var likeScale: CGFloat = 1.0
     
     public init(
         post: CommunityPost,
@@ -34,336 +35,290 @@ public struct CommunityPostCard: View {
         self.onUserTapped = onUserTapped
         self.onImageTapped = onImageTapped
         self.onMoreTapped = onMoreTapped
+        _isLiked = State(initialValue: post.isLiked)
     }
     
     public var body: some View {
         VStack(spacing: 0) {
-            // Header
-            headerView
+            // Industrial-style header with type badge
+            headerBar
             
-            // Image Carousel
+            // Editorial image grid (not carousel)
             if !post.imageURLs.isEmpty {
-                imageCarousel
+                editorialImageGrid
             }
             
-            // Action Bar
-            actionBar
+            // Story/Caption section
+            storySection
             
-            // Caption
-            captionSection
-            
-            // Tags
-            if !post.tags.isEmpty {
-                tagsSection
+            // Sustainability metrics (Modaics unique)
+            if post.postType == .thriftFind || post.postType == .sustainabilityTip {
+                sustainabilityBadge
             }
             
-            // Comments Preview
-            if !post.comments.isEmpty {
-                commentsPreview
-            }
-            
-            // Time
-            timeSection
+            // Actions with industrial styling
+            industrialActionBar
         }
-        .background(Color.modaicsSurface)
-        .cornerRadius(12)
+        .background(
+            LinearGradient(
+                colors: [Color.modaicsSurface, Color.modaicsSurface.opacity(0.8)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+            Rectangle()
+                .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1)
         )
     }
     
-    // MARK: - Header
-    private var headerView: some View {
-        HStack(spacing: 12) {
-            // Avatar
-            Button(action: { onUserTapped?() }) {
+    // MARK: - Industrial Header Bar
+    private var headerBar: some View {
+        HStack(spacing: 0) {
+            // Left: User with monospaced styling
+            HStack(spacing: 12) {
+                // Geometric avatar placeholder
                 ZStack {
-                    Circle()
+                    Rectangle()
                         .fill(Color.modaicsSurfaceHighlight)
-                        .frame(width: 40, height: 40)
+                        .frame(width: 44, height: 44)
                     
-                    if let avatar = post.avatar, let url = URL(string: avatar) {
-                        AsyncImage(url: url) { image in
+                    Text(post.username.prefix(1).uppercased())
+                        .font(.system(size: 18, weight: .bold, design: .monospaced))
+                        .foregroundColor(.luxeGold)
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(post.username.uppercased())
+                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                        .foregroundColor(.sageWhite)
+                    
+                    Text(post.createdAt?.timeAgo().uppercased() ?? "")
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(.sageMuted)
+                }
+            }
+            
+            Spacer()
+            
+            // Right: Post type badge with industrial styling
+            HStack(spacing: 6) {
+                Image(systemName: post.postType.icon)
+                    .font(.system(size: 12))
+                Text(post.postType.rawValue.uppercased())
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+            }
+            .foregroundColor(.modaicsBackground)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color(hex: post.postType.color))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.modaicsBackground)
+    }
+    
+    // MARK: - Editorial Image Grid
+    private var editorialImageGrid: some View {
+        let columns = post.imageURLs.count == 1 ? 1 : 2
+        let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
+        
+        return LazyVGrid(columns: layout, spacing: 2) {
+            ForEach(0..<min(post.imageURLs.count, 4), id: \.self) { index in
+                if let url = URL(string: post.imageURLs[index]) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            Rectangle()
+                                .fill(Color.modaicsSurfaceHighlight)
+                                .overlay(
+                                    ProgressView()
+                                        .tint(Color.luxeGold)
+                                )
+                        case .success(let image):
                             image
                                 .resizable()
                                 .scaledToFill()
-                        } placeholder: {
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 18))
-                                .foregroundColor(.sageMuted)
+                        case .failure:
+                            Rectangle()
+                                .fill(Color.modaicsSurfaceHighlight)
+                                .overlay(
+                                    Image(systemName: "photo")
+                                        .foregroundColor(.sageMuted)
+                                )
+                        @unknown default:
+                            EmptyView()
                         }
-                        .frame(width: 40, height: 40)
-                        .clipShape(Circle())
-                    } else {
-                        Image(systemName: "person.fill")
-                            .font(.system(size: 18))
+                    }
+                    .aspectRatio(1, contentMode: .fill)
+                    .clipped()
+                    .onTapGesture {
+                        onImageTapped?(index)
+                    }
+                }
+            }
+        }
+        .frame(height: post.imageURLs.count == 1 ? 400 : 200)
+    }
+    
+    // MARK: - Story Section
+    private var storySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Caption with editorial styling
+            Text(post.caption)
+                .font(.system(size: 14, design: .monospaced))
+                .foregroundColor(.sageWhite)
+                .lineLimit(showFullCaption ? nil : 3)
+                .fixedSize(horizontal: false, vertical: true)
+            
+            if post.caption.count > 150 {
+                Button(action: { withAnimation { showFullCaption.toggle() } }) {
+                    Text(showFullCaption ? "LESS" : "READ MORE")
+                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .foregroundColor(.luxeGold)
+                }
+            }
+            
+            // Tags with industrial styling
+            if !post.tags.isEmpty {
+                FlowLayout(spacing: 8) {
+                    ForEach(post.tags, id: \.self) { tag in
+                        Text("#\(tag.uppercased())")
+                            .font(.system(size: 10, design: .monospaced))
                             .foregroundColor(.sageMuted)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.modaicsSurfaceHighlight)
+                            .overlay(
+                                Rectangle()
+                                    .stroke(Color.luxeGold.opacity(0.3), lineWidth: 0.5)
+                            )
                     }
                 }
             }
-            .buttonStyle(PlainButtonStyle())
             
-            // User Info
-            VStack(alignment: .leading, spacing: 2) {
-                Button(action: { onUserTapped?() }) {
-                    Text(post.username)
-                        .font(.forestBodyMedium)
-                        .foregroundColor(.sageWhite)
-                }
-                .buttonStyle(PlainButtonStyle())
-                
+            // Location with industrial icon
+            if let location = post.location {
                 HStack(spacing: 6) {
-                    // Post Type Badge
-                    HStack(spacing: 4) {
-                        Image(systemName: post.postType.icon)
-                            .font(.system(size: 8))
-                        Text(post.postType.rawValue.uppercased())
-                            .font(.forestCaptionSmall)
-                    }
-                    .foregroundColor(Color(hex: post.postType.color))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color(hex: post.postType.color).opacity(0.15))
-                    .cornerRadius(4)
-                    
-                    // Location
-                    if let location = post.location {
-                        HStack(spacing: 2) {
-                            Image(systemName: "mappin")
-                                .font(.system(size: 8))
-                            Text(location)
-                                .font(.forestCaptionSmall)
-                        }
+                    Image(systemName: "mappin.and.ellipse")
+                        .font(.system(size: 10))
+                        .foregroundColor(.luxeGold)
+                    Text(location.uppercased())
+                        .font(.system(size: 10, design: .monospaced))
                         .foregroundColor(.sageMuted)
-                    }
                 }
             }
+        }
+        .padding(16)
+    }
+    
+    // MARK: - Sustainability Badge (Modaics Unique)
+    private var sustainabilityBadge: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 6) {
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(.modaicsEco)
+                Text("CO₂ SAVED: 2.4KG")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundColor(.modaicsEco)
+            }
             
-            Spacer()
+            Divider()
+                .background(Color.modaicsSurfaceHighlight)
             
-            // More Button
-            Button(action: { onMoreTapped?() }) {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 18))
-                    .foregroundColor(.sageMuted)
-                    .rotationEffect(.degrees(90))
+            HStack(spacing: 6) {
+                Image(systemName: "drop.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(.modaicsEco)
+                Text("WATER: 1,800L")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundColor(.modaicsEco)
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
+        .background(Color.modaicsEco.opacity(0.1))
+        .overlay(
+            Rectangle()
+                .stroke(Color.modaicsEco.opacity(0.3), lineWidth: 1)
+        )
     }
     
-    // MARK: - Image Carousel
-    private var imageCarousel: some View {
-        ZStack(alignment: .bottom) {
-            TabView(selection: $currentImageIndex) {
-                ForEach(0..<post.imageURLs.count, id: \.self) { index in
-                    if let url = URL(string: post.imageURLs[index]) {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .empty:
-                                RoundedRectangle(cornerRadius: 0)
-                                    .fill(Color.modaicsSurfaceHighlight)
-                                    .overlay(
-                                        ProgressView()
-                                            .tint(Color.luxeGold)
-                                    )
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                            case .failure:
-                                RoundedRectangle(cornerRadius: 0)
-                                    .fill(Color.modaicsSurfaceHighlight)
-                                    .overlay(
-                                        Image(systemName: "photo")
-                                            .font(.system(size: 40))
-                                            .foregroundColor(.sageMuted)
-                                    )
-                            @unknown default:
-                                EmptyView()
-                            }
-                        }
-                        .tag(index)
-                        .onTapGesture {
-                            onImageTapped?(index)
-                        }
-                    }
+    // MARK: - Industrial Action Bar
+    private var industrialActionBar: some View {
+        HStack(spacing: 0) {
+            // Like button with scale animation
+            Button(action: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    isLiked.toggle()
+                    likeScale = 1.3
                 }
-            }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .frame(height: 400)
-            .background(Color.modaicsBackgroundSecondary)
-            
-            // Page Indicators
-            if post.imageURLs.count > 1 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation { likeScale = 1.0 }
+                }
+                onLikeTapped()
+            }) {
                 HStack(spacing: 6) {
-                    ForEach(0..<post.imageURLs.count, id: \.self) { index in
-                        Circle()
-                            .fill(currentImageIndex == index ? Color.luxeGold : Color.sageWhite.opacity(0.5))
-                            .frame(width: 6, height: 6)
-                    }
-                }
-                .padding(.bottom, 12)
-            }
-        }
-    }
-    
-    // MARK: - Action Bar
-    private var actionBar: some View {
-        HStack(spacing: 16) {
-            // Like Button
-            Button(action: onLikeTapped) {
-                HStack(spacing: 4) {
-                    Image(systemName: post.isLiked ? "heart.fill" : "heart")
-                        .font(.system(size: 22))
-                        .foregroundColor(post.isLiked ? .red : .sageWhite)
+                    Image(systemName: isLiked ? "heart.fill" : "heart")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(isLiked ? .luxeGold : .sageMuted)
+                        .scaleEffect(likeScale)
                     
-                    if post.likes > 0 {
-                        Text(post.likeCountText)
-                            .font(.forestCaptionMedium)
-                            .foregroundColor(.sageWhite)
-                    }
+                    Text("\(post.likes + (isLiked ? 1 : 0))")
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundColor(.sageMuted)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
             }
             
-            // Comment Button
+            Divider()
+                .background(Color.modaicsSurfaceHighlight)
+            
+            // Comment button
             Button(action: onCommentTapped) {
-                HStack(spacing: 4) {
-                    Image(systemName: "bubble.right")
-                        .font(.system(size: 22))
-                        .foregroundColor(.sageWhite)
+                HStack(spacing: 6) {
+                    Image(systemName: "text.bubble")
+                        .font(.system(size: 16))
+                        .foregroundColor(.sageMuted)
                     
-                    if post.commentCount > 0 {
-                        Text(post.commentCountText)
-                            .font(.forestCaptionMedium)
-                            .foregroundColor(.sageWhite)
-                    }
+                    Text("\(post.comments.count)")
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundColor(.sageMuted)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
             }
             
-            // Share Button
+            Divider()
+                .background(Color.modaicsSurfaceHighlight)
+            
+            // Share button
             Button(action: onShareTapped) {
-                Image(systemName: "paperplane")
-                    .font(.system(size: 22))
-                    .foregroundColor(.sageWhite)
+                Image(systemName: "arrow.up.forward")
+                    .font(.system(size: 16))
+                    .foregroundColor(.sageMuted)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
             }
             
-            Spacer()
+            Divider()
+                .background(Color.modaicsSurfaceHighlight)
             
-            // Bookmark Button
+            // Bookmark button
             Button(action: onBookmarkTapped) {
                 Image(systemName: post.isBookmarked ? "bookmark.fill" : "bookmark")
-                    .font(.system(size: 22))
-                    .foregroundColor(post.isBookmarked ? Color.luxeGold : .sageWhite)
+                    .font(.system(size: 16))
+                    .foregroundColor(post.isBookmarked ? .luxeGold : .sageMuted)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-    }
-    
-    // MARK: - Caption Section
-    private var captionSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .top, spacing: 4) {
-                Text(post.username)
-                    .font(.forestBodyMedium)
-                    .foregroundColor(.sageWhite)
-                
-                if showFullCaption {
-                    Text(post.caption)
-                        .font(.forestBodyMedium)
-                        .foregroundColor(.sageWhite)
-                } else {
-                    Text(post.caption)
-                        .font(.forestBodyMedium)
-                        .foregroundColor(.sageWhite)
-                        .lineLimit(2)
-                        .background(
-                            GeometryReader { geometry in
-                                Color.clear
-                                    .onAppear {
-                                        let size = CGSize(
-                                            width: geometry.size.width,
-                                            height: .greatestFiniteMagnitude
-                                        )
-                                        let boundingRect = (post.caption as NSString)
-                                            .boundingRect(
-                                                with: size,
-                                                options: .usesLineFragmentOrigin,
-                                                attributes: [.font: UIFont.systemFont(ofSize: 14, weight: .medium)],
-                                                context: nil
-                                            )
-                                        isCaptionTruncated = boundingRect.height > geometry.size.height
-                                    }
-                            }
-                        )
-                }
-            }
-            
-            if isCaptionTruncated || showFullCaption {
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showFullCaption.toggle()
-                    }
-                }) {
-                    Text(showFullCaption ? "Show less" : "more")
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.sageMuted)
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-    }
-    
-    // MARK: - Tags Section
-    private var tagsSection: some View {
-        FlowLayout(spacing: 8) {
-            ForEach(post.tags, id: \.self) { tag in
-                Text("#\(tag)")
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(Color.luxeGold)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-    }
-    
-    // MARK: - Comments Preview
-    private var commentsPreview: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if post.comments.count > 2 {
-                Button(action: onCommentTapped) {
-                    Text("View all \(post.commentCount) comments")
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.sageMuted)
-                }
-            }
-            
-            ForEach(post.comments.prefix(2)) { comment in
-                HStack(alignment: .top, spacing: 4) {
-                    Text(comment.username)
-                        .font(.forestBodySmall)
-                        .foregroundColor(.sageWhite)
-                    Text(comment.text)
-                        .font(.forestBodySmall)
-                        .foregroundColor(.sageWhite)
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-    }
-    
-    // MARK: - Time Section
-    private var timeSection: some View {
-        Text(post.formattedTime.uppercased())
-            .font(.forestCaptionSmall)
-            .foregroundColor(.sageSubtle)
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 16)
+        .background(Color.modaicsBackground)
+        .overlay(
+            Rectangle()
+                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+        )
     }
 }
-

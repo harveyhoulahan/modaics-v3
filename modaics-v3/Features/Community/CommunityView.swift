@@ -124,102 +124,17 @@ public struct CommunityView: View {
                 SocialFeedView(viewModel: feedViewModel)
             case .sketchbook:
                 sketchbookContent
-            }
-        }
-    }
     
-    // MARK: - Sketchbook Content
-    private var sketchbookContent: some View {
-        ScrollView(showsIndicators: false) {
-            LazyVStack(spacing: 16) {
-                ForEach(sketchbookViewModel.posts) { post in
-                    sketchbookPostRow(for: post)
-                }
+    // MARK: - Content Area
+    private var contentArea: some View {
+        Group {
+            switch selectedSegment {
+            case .feed:
+                SocialFeedView(viewModel: feedViewModel)
+            case .sketchbook:
+                SketchbookFeedView()
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 8)
         }
-    }
-    
-    // MARK: - Sketchbook Post Row
-    private func sketchbookPostRow(for post: SketchbookPost) -> some View {
-        Button(action: {}) {
-            VStack(alignment: .leading, spacing: 12) {
-                // Brand Header
-                HStack(spacing: 12) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.luxeGold.opacity(0.2))
-                            .frame(width: 40, height: 40)
-                        
-                        Text(String(post.authorDisplayName?.prefix(1) ?? "B"))
-                            .font(.forestHeadlineSmall)
-                            .foregroundColor(.luxeGold)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(post.authorDisplayName ?? "Brand")
-                            .font(.forestBodyMedium)
-                            .foregroundColor(.sageWhite)
-                        
-                        Text(post.postType.displayName.uppercased())
-                            .font(.forestCaptionSmall)
-                            .foregroundColor(Color(hex: post.postType.color))
-                    }
-                    
-                    Spacer()
-                    
-                    if post.visibility == .membersOnly {
-                        Image(systemName: "lock.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.luxeGold)
-                    }
-                }
-                
-                // Post Content
-                Text(post.title)
-                    .font(.forestHeadlineSmall)
-                    .foregroundColor(.sageWhite)
-                    .multilineTextAlignment(.leading)
-                
-                if let body = post.body {
-                    Text(body)
-                        .font(.forestBodySmall)
-                        .foregroundColor(.sageMuted)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                }
-                
-                // Engagement
-                HStack(spacing: 16) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "heart")
-                            .font(.system(size: 14))
-                        Text("\(post.reactionCount)")
-                            .font(.forestCaptionSmall)
-                    }
-                    .foregroundColor(.sageMuted)
-                    
-                    HStack(spacing: 4) {
-                        Image(systemName: "bubble.left")
-                            .font(.system(size: 14))
-                        Text("\(post.commentCount)")
-                            .font(.forestCaptionSmall)
-                    }
-                    .foregroundColor(.sageMuted)
-                    
-                    Spacer()
-                    
-                    Text(post.createdAt?.timeAgo() ?? "")
-                        .font(.forestCaptionSmall)
-                        .foregroundColor(.sageSubtle)
-                }
-            }
-            .padding(16)
-            .background(Color.modaicsSurface)
-            .cornerRadius(12)
-        }
-        .buttonStyle(PlainButtonStyle())
     }
 }
 

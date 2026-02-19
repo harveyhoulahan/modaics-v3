@@ -4,16 +4,7 @@ import SwiftUI
 /// Main community feed view with collapsable header, filter pills, and post cards
 public struct SocialFeedView: View {
     @StateObject private var viewModel: FeedViewModel
-    @State private var scrollOffset: CGFloat = 0
     @State private var showLocalHubBanner: Bool = true
-    
-    private let headerHeight: CGFloat = 110
-    private let filterSelectorHeight: CGFloat = 60
-    private let collapsedThreshold: CGFloat = 50
-    
-    private var headerCollapseProgress: CGFloat {
-        min(CGFloat(1), max(CGFloat(0), scrollOffset / collapsedThreshold))
-    }
     
     public init(viewModel: FeedViewModel? = nil) {
         _viewModel = StateObject(wrappedValue: viewModel ?? FeedViewModel())
@@ -24,21 +15,11 @@ public struct SocialFeedView: View {
             Color.modaicsBackground.ignoresSafeArea()
             
             ScrollView(showsIndicators: false) {
-                GeometryReader { proxy in
-                    Color.clear
-                        .preference(key: FeedScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("feedScroll")).minY)
-                }
-                .frame(height: 0)
-                
                 VStack(spacing: 0) {
-                    collapsableHeader
+                    filterSelector
                     feedContent
                     Color.clear.frame(height: 100)
                 }
-            }
-            .coordinateSpace(name: "feedScroll")
-            .onPreferenceChange(FeedScrollOffsetPreferenceKey.self) { value in
-                scrollOffset = -value
             }
             .refreshable {
                 viewModel.loadPosts()
@@ -53,44 +34,6 @@ public struct SocialFeedView: View {
         .onAppear {
             viewModel.loadPosts()
         }
-    }
-    
-    // MARK: - Collapsable Header
-    private var collapsableHeader: some View {
-        VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text("COMMUNITY")
-                        .font(.forestDisplaySmall)
-                        .foregroundColor(.sageWhite)
-                        .tracking(2)
-                    
-                    Spacer()
-                    
-                    Button(action: {}) {
-                        Image(systemName: "bell")
-                            .font(.system(size: 20))
-                            .foregroundColor(.sageMuted)
-                    }
-                }
-                
-                Text("Connect with the Modaics community")
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(.sageMuted)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
-            .padding(.bottom, 12)
-            .background(Color.modaicsBackground)
-            .frame(height: headerHeight * (CGFloat(1) - headerCollapseProgress * CGFloat(0.5)))
-            .opacity(CGFloat(1) - headerCollapseProgress)
-            .clipped()
-            
-            filterSelector
-                .frame(height: filterSelectorHeight * (CGFloat(1) - headerCollapseProgress * CGFloat(0.3)))
-                .opacity(CGFloat(1) - headerCollapseProgress * CGFloat(0.5))
-        }
-        .background(Color.modaicsBackground)
     }
     
     // MARK: - Filter Selector
