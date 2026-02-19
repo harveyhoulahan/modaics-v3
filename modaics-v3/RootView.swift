@@ -247,7 +247,7 @@ struct CustomTabBar: View {
                     )
                 }
             }
-            .frame(height: 70)
+            .frame(height: 55)
             .background(
                 Color.modaicsBackground.opacity(0.95)
                     .overlay(.ultraThinMaterial)

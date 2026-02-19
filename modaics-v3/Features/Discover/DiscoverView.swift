@@ -2,11 +2,21 @@ import SwiftUI
 import MapKit
 
 // MARK: - DiscoverView
-/// Main discovery view with static header, category tabs, and content switching
+/// Main discovery view with collapsable header, category tabs, and content switching
 public struct DiscoverView: View {
     @StateObject private var viewModel = DiscoverViewModel()
+    @State private var scrollOffset: CGFloat = 0
+    
+    private let headerHeight: CGFloat = 110
+    private let categorySelectorHeight: CGFloat = 60
+    private let collapsedThreshold: CGFloat = 50
     
     public init() {}
+    
+    private var headerCollapseProgress: CGFloat {
+        let progress = min(1, max(0, scrollOffset / collapsedThreshold))
+        return progress
+    }
     
     public var body: some View {
         ZStack {
@@ -14,16 +24,28 @@ public struct DiscoverView: View {
             Color.modaicsBackground
                 .ignoresSafeArea()
             
-            // Main Content
-            VStack(spacing: 0) {
-                // FIXED header — always visible, never collapses
-                discoverHeader
+            // Main Content with integrated scrolling
+            ScrollView(showsIndicators: false) {
+                GeometryReader { proxy in
+                    Color.clear
+                        .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("scroll")).minY)
+                }
+                .frame(height: 0)
                 
-                // Category selector — always visible below header
-                categorySelector
-                
-                // Content area — scrollable, changes based on category
-                contentArea
+                VStack(spacing: 0) {
+                    // Collapsable Header
+                    collapsableHeader
+                    
+                    // Content area - changes based on category
+                    contentArea
+                    
+                    // Bottom padding for tab bar
+                    Color.clear.frame(height: 100)
+                }
+            }
+            .coordinateSpace(name: "scroll")
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                scrollOffset = -value
             }
         }
         .sheet(isPresented: $viewModel.showFilterSheet) {
@@ -70,32 +92,45 @@ public struct DiscoverView: View {
         }
     }
     
-    // MARK: - Fixed Header
-    private var discoverHeader: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text("DISCOVER")
-                    .font(.forestDisplaySmall)
-                    .foregroundColor(.sageWhite)
-                    .tracking(2)
-                
-                Spacer()
-                
-                // Notification bell
-                Button(action: {}) {
-                    Image(systemName: "bell")
-                        .font(.system(size: 20))
-                        .foregroundColor(.sageMuted)
+    // MARK: - Collapsable Header
+    private var collapsableHeader: some View {
+        VStack(spacing: 0) {
+            // Title section that collapses
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("DISCOVER")
+                        .font(.forestDisplaySmall)
+                        .foregroundColor(.sageWhite)
+                        .tracking(2)
+                    
+                    Spacer()
+                    
+                    // Notification bell
+                    Button(action: {}) {
+                        Image(systemName: "bell")
+                            .font(.system(size: 20))
+                            .foregroundColor(.sageMuted)
+                    }
                 }
+                
+                Text("Find pieces, events & more nearby")
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.sageMuted)
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 12)
+            .background(Color.modaicsBackground)
+            // Collapse animation
+            .frame(height: headerHeight * (1 - headerCollapseProgress * 0.5))
+            .opacity(1 - headerCollapseProgress)
+            .clipped()
             
-            Text("Find pieces, events & more nearby")
-                .font(.forestCaptionMedium)
-                .foregroundColor(.sageMuted)
+            // Category selector - also collapses slightly
+            categorySelector
+                .frame(height: categorySelectorHeight * (1 - headerCollapseProgress * 0.3))
+                .opacity(1 - headerCollapseProgress * 0.5)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 12)
-        .padding(.bottom, 12)
         .background(Color.modaicsBackground)
     }
     
@@ -132,45 +167,38 @@ public struct DiscoverView: View {
     
     // MARK: - Clothing Content
     private var clothingContent: some View {
-        ScrollView(showsIndicators: false) {
-            LazyVStack(spacing: 16) {
-                // Search bar
-                searchBar
+        VStack(spacing: 16) {
+            // Search bar
+            searchBar
+                .padding(.horizontal, 20)
+            
+            // Sub-category filter strip
+            subcategoryStrip
+            
+            // Sort and filter controls
+            sortFilterBar
+                .padding(.horizontal, 20)
+            
+            // Results or empty/loading state
+            if viewModel.isLoading && viewModel.items.isEmpty {
+                shimmerGrid
                     .padding(.horizontal, 20)
-                
-                // Sub-category filter strip
-                subcategoryStrip
-                
-                // Sort and filter controls
-                sortFilterBar
+            } else if viewModel.isEmpty {
+                emptyStateView
                     .padding(.horizontal, 20)
-                
-                // Results or empty/loading state
-                if viewModel.isLoading && viewModel.items.isEmpty {
-                    shimmerGrid
-                        .padding(.horizontal, 20)
-                } else if viewModel.isEmpty {
-                    emptyStateView
-                        .padding(.horizontal, 20)
-                } else {
-                    resultsGrid
-                        .padding(.horizontal, 20)
-                }
-                
-                // Load more indicator
-                if viewModel.isLoadingMore {
-                    ProgressView()
-                        .tint(Color.luxeGold)
-                        .frame(height: 50)
-                }
-                
-                Color.clear.frame(height: 20)
+            } else {
+                resultsGrid
+                    .padding(.horizontal, 20)
             }
-            .padding(.top, 8)
+            
+            // Load more indicator
+            if viewModel.isLoadingMore {
+                ProgressView()
+                    .tint(Color.luxeGold)
+                    .frame(height: 50)
+            }
         }
-        .refreshable {
-            await viewModel.loadItems(reset: true)
-        }
+        .padding(.top, 8)
     }
     
     // MARK: - Search Bar
@@ -198,7 +226,8 @@ public struct DiscoverView: View {
             // Clear Button
             if !viewModel.searchQuery.isEmpty {
                 Button(action: {
-                    viewModel.clearSearch()
+                    viewModel.searchQuery = ""
+                    viewModel.performSearch()
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 18))
@@ -206,24 +235,21 @@ public struct DiscoverView: View {
                 }
             }
             
-            // Divider
-            Rectangle()
-                .fill(Color.luxeGold.opacity(0.3))
-                .frame(width: 1, height: 20)
-            
             // Visual Search Button
             Button(action: {
                 viewModel.showVisualSearch = true
             }) {
-                Image(systemName: "camera.viewfinder")
-                    .font(.system(size: 18, weight: .medium))
+                Image(systemName: "camera")
+                    .font(.system(size: 18))
                     .foregroundColor(.luxeGold)
             }
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.modaicsSurface)
-        .cornerRadius(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.modaicsSurface)
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.luxeGold.opacity(0.2), lineWidth: 1)
@@ -234,17 +260,20 @@ public struct DiscoverView: View {
     private var subcategoryStrip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                // All button
+                // All option
                 SubcategoryPill(
                     title: "ALL",
+                    icon: "square.grid.2x2",
                     isSelected: viewModel.selectedSubCategory == nil
                 ) {
                     viewModel.selectSubCategory(nil)
                 }
                 
+                // Category options
                 ForEach(Category.allCases) { category in
                     SubcategoryPill(
-                        title: category.displayName,
+                        title: category.rawValue,
+                        icon: category.icon,
                         isSelected: viewModel.selectedSubCategory == category
                     ) {
                         viewModel.selectSubCategory(category)
@@ -252,6 +281,7 @@ public struct DiscoverView: View {
                 }
             }
             .padding(.horizontal, 20)
+            .padding(.vertical, 4)
         }
     }
     
@@ -265,19 +295,19 @@ public struct DiscoverView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.up.arrow.down")
                         .font(.system(size: 12))
-                    
-                    Text(viewModel.sortOption.displayName)
+                    Text(viewModel.sortOption.displayName.uppercased())
                         .font(.forestCaptionSmall)
-                        .lineLimit(1)
                 }
                 .foregroundColor(.sageWhite)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Color.modaicsSurface)
-                .cornerRadius(6)
+                .background(
+                    Capsule()
+                        .fill(Color.modaicsSurface)
+                )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(Color.luxeGold.opacity(0.2), lineWidth: 1)
+                    Capsule()
+                        .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
                 )
             }
             
@@ -288,31 +318,27 @@ public struct DiscoverView: View {
                 viewModel.showFilterSheet = true
             }) {
                 HStack(spacing: 6) {
-                    Image(systemName: "slider.horizontal.3")
+                    Image(systemName: "line.3.horizontal.decrease")
                         .font(.system(size: 12))
-                    
                     Text("FILTERS")
                         .font(.forestCaptionSmall)
                     
-                    if viewModel.filterCriteria.activeFilterCount > 0 {
-                        Text("\(viewModel.filterCriteria.activeFilterCount)")
+                    if viewModel.activeFilterCount > 0 {
+                        Text("(\(viewModel.activeFilterCount))")
                             .font(.forestCaptionSmall)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color.modaicsBackground)
-                            .frame(minWidth: 18, minHeight: 18)
-                            .background(Color.luxeGold)
-                            .cornerRadius(9)
+                            .foregroundColor(.luxeGold)
                     }
                 }
                 .foregroundColor(.sageWhite)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Color.modaicsSurface)
-                .cornerRadius(6)
+                .background(
+                    Capsule()
+                        .fill(viewModel.activeFilterCount > 0 ? Color.luxeGold.opacity(0.15) : Color.modaicsSurface)
+                )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(viewModel.filterCriteria.activeFilterCount > 0 ? Color.luxeGold : Color.luxeGold.opacity(0.2), 
-                               lineWidth: viewModel.filterCriteria.activeFilterCount > 0 ? 1.5 : 1)
+                    Capsule()
+                        .stroke(viewModel.activeFilterCount > 0 ? Color.luxeGold : Color.modaicsSurfaceHighlight, lineWidth: 1)
                 )
             }
         }
@@ -320,95 +346,71 @@ public struct DiscoverView: View {
     
     // MARK: - Results Grid
     private var resultsGrid: some View {
-        LazyVGrid(
-            columns: [
-                GridItem(.flexible(), spacing: 12),
-                GridItem(.flexible(), spacing: 12)
-            ],
-            spacing: 16
-        ) {
+        LazyVGrid(columns: [
+            GridItem(.flexible(), spacing: 16),
+            GridItem(.flexible(), spacing: 16)
+        ], spacing: 20) {
             ForEach(viewModel.items) { item in
                 ItemCard(
                     item: item,
                     onLikeTapped: {
-                        viewModel.toggleLike(for: item)
+                        viewModel.toggleLike(item)
                     },
                     onCardTapped: {
-                        print("Tapped item: \(item.id)")
+                        // Show detail
                     }
                 )
-                .onAppear {
-                    if item.id == viewModel.items.last?.id {
-                        Task {
-                            await viewModel.loadMoreItems()
-                        }
-                    }
-                }
             }
         }
     }
     
-    // MARK: - Shimmer Loading Grid
+    // MARK: - Shimmer Grid (Loading)
     private var shimmerGrid: some View {
-        LazyVGrid(
-            columns: [
-                GridItem(.flexible(), spacing: 12),
-                GridItem(.flexible(), spacing: 12)
-            ],
-            spacing: 16
-        ) {
+        LazyVGrid(columns: [
+            GridItem(.flexible(), spacing: 16),
+            GridItem(.flexible(), spacing: 16)
+        ], spacing: 20) {
             ForEach(0..<6) { _ in
-                ItemCardSkeleton()
+                ItemCard(
+                    title: "Loading...",
+                    subtitle: nil,
+                    isLoading: true
+                )
             }
         }
     }
     
-    // MARK: - Empty State View
+    // MARK: - Empty State
     private var emptyStateView: some View {
         VStack(spacing: 24) {
             Spacer()
             
-            // Icon
-            ZStack {
-                Circle()
-                    .fill(Color.luxeGold.opacity(0.1))
-                    .frame(width: 100, height: 100)
-                
-                Image(systemName: "bag")
-                    .font(.system(size: 40))
-                    .foregroundColor(Color.luxeGold)
-            }
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 60))
+                .foregroundColor(.sageSubtle)
             
-            // Text
-            VStack(spacing: 8) {
-                Text(viewModel.emptyStateTitle)
-                    .font(.forestHeadlineSmall)
-                    .foregroundColor(Color.sageWhite)
-                    .tracking(1)
-                
-                Text(viewModel.emptyStateMessage)
-                    .font(.forestBodyMedium)
-                    .foregroundColor(Color.sageMuted)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-            }
+            Text(viewModel.emptyStateTitle)
+                .font(.forestHeadlineMedium)
+                .foregroundColor(.sageWhite)
+                .multilineTextAlignment(.center)
             
-            // Reset Button
-            if viewModel.filterCriteria.activeFilterCount > 0 || !viewModel.searchQuery.isEmpty {
-                Button(action: {
-                    viewModel.resetFilters()
-                    viewModel.clearSearch()
-                }) {
-                    Text("CLEAR ALL FILTERS")
-                        .font(.forestBodyLarge)
-                        .foregroundColor(Color.modaicsBackground)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(Color.luxeGold)
-                        .cornerRadius(12)
-                }
-                .padding(.top, 8)
+            Text("Try adjusting your search or filters")
+                .font(.forestCaptionMedium)
+                .foregroundColor(.sageMuted)
+                .multilineTextAlignment(.center)
+            
+            Button(action: {
+                viewModel.resetFilters()
+            }) {
+                Text("CLEAR FILTERS")
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.modaicsBackground)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.luxeGold)
+                    .cornerRadius(8)
             }
+            .padding(.top, 8)
             
             Spacer()
         }
@@ -417,78 +419,12 @@ public struct DiscoverView: View {
     
     // MARK: - Events Content
     private var eventsContent: some View {
-        VStack(spacing: 0) {
-            // Search bar for events
-            HStack(spacing: 12) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.sageMuted)
-                
-                TextField("", text: .constant(""))
-                    .font(.forestBodyMedium)
-                    .foregroundColor(.sageWhite)
-                    .placeholder(when: true) {
-                        Text("SEARCH EVENTS...")
-                            .font(.forestBodyMedium)
-                            .foregroundColor(.sageMuted)
-                    }
-                    .disabled(true)
-                
-                Spacer()
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 12)
-            .background(Color.modaicsSurface)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.luxeGold.opacity(0.2), lineWidth: 1)
-            )
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
+        VStack(spacing: 16) {
+            // View mode toggle (List / Map)
+            viewModeToggle
+                .padding(.horizontal, 20)
             
-            // List/Map toggle
-            HStack(spacing: 0) {
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        viewModel.eventViewMode = .list
-                    }
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "list.bullet")
-                            .font(.system(size: 14))
-                        Text("LIST")
-                            .font(.forestCaptionSmall)
-                    }
-                    .foregroundColor(viewModel.eventViewMode == .list ? .modaicsBackground : .sageWhite)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(viewModel.eventViewMode == .list ? Color.luxeGold : Color.modaicsSurface)
-                    .cornerRadius(8)
-                }
-                
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        viewModel.eventViewMode = .map
-                    }
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "map")
-                            .font(.system(size: 14))
-                        Text("MAP")
-                            .font(.forestCaptionSmall)
-                    }
-                    .foregroundColor(viewModel.eventViewMode == .map ? .modaicsBackground : .sageWhite)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(viewModel.eventViewMode == .map ? Color.luxeGold : Color.modaicsSurface)
-                    .cornerRadius(8)
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            
-            // Content based on view mode
+            // Content based on mode
             if viewModel.eventViewMode == .list {
                 eventsListView
             } else {
@@ -501,26 +437,65 @@ public struct DiscoverView: View {
                         viewModel.showEventDetail = true
                     }
                 )
+                .frame(height: 500)
             }
         }
     }
     
+    // MARK: - View Mode Toggle
+    private var viewModeToggle: some View {
+        HStack(spacing: 0) {
+            ForEach([EventViewMode.list, EventViewMode.map], id: \.self) { mode in
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.eventViewMode = mode
+                    }
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: mode == .list ? "list.bullet" : "map")
+                            .font(.system(size: 14))
+                        Text(mode == .list ? "LIST" : "MAP")
+                            .font(.forestCaptionSmall)
+                    }
+                    .foregroundColor(viewModel.eventViewMode == mode ? .modaicsBackground : .sageWhite)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        viewModel.eventViewMode == mode ? Color.luxeGold : Color.modaicsSurface
+                    )
+                }
+            }
+        }
+        .background(Color.modaicsSurface)
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+        )
+    }
+    
     // MARK: - Events List View
     private var eventsListView: some View {
-        ScrollView(showsIndicators: false) {
-            LazyVStack(spacing: 12) {
-                ForEach(viewModel.filteredEvents) { event in
-                    EventListCard(event: event, onTap: {
-                        viewModel.selectedEvent = event
-                        viewModel.showEventDetail = true
-                    })
-                }
-                
-                Color.clear.frame(height: 20)
+        VStack(spacing: 12) {
+            ForEach(viewModel.filteredEvents) { event in
+                EventListCard(event: event, onTap: {
+                    viewModel.selectedEvent = event
+                    viewModel.showEventDetail = true
+                })
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 4)
+            
+            Color.clear.frame(height: 20)
         }
+        .padding(.horizontal, 20)
+        .padding(.top, 4)
+    }
+}
+
+// MARK: - Scroll Offset Preference Key
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 
@@ -535,17 +510,16 @@ struct CategoryTabPill: View {
             HStack(spacing: 6) {
                 Image(systemName: category.icon)
                     .font(.system(size: 14))
-                
                 Text(category.rawValue.uppercased())
                     .font(.forestCaptionSmall)
-                    .fontWeight(isSelected ? .semibold : .regular)
             }
-            .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
-            .tracking(0.5)
+            .foregroundColor(isSelected ? .modaicsBackground : .sageMuted)
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
-            .clipShape(Capsule())
+            .background(
+                Capsule()
+                    .fill(isSelected ? Color.luxeGold : Color.modaicsSurface)
+            )
             .overlay(
                 Capsule()
                     .stroke(isSelected ? Color.clear : Color.modaicsSurfaceHighlight, lineWidth: 1)
@@ -558,98 +532,31 @@ struct CategoryTabPill: View {
 // MARK: - Subcategory Pill
 struct SubcategoryPill: View {
     let title: String
+    let icon: String
     let isSelected: Bool
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.forestCaptionSmall)
-                .fontWeight(isSelected ? .semibold : .regular)
-                .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
-                .tracking(0.5)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
-                .cornerRadius(20)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(isSelected ? Color.clear : Color.luxeGold.opacity(0.2), lineWidth: 1)
-                )
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                Text(title)
+                    .font(.forestCaptionSmall)
+            }
+            .foregroundColor(isSelected ? .modaicsBackground : .sageWhite)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                Capsule()
+                    .fill(isSelected ? Color.luxeGold : Color.modaicsSurface)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? Color.clear : Color.modaicsSurfaceHighlight, lineWidth: 1)
+            )
         }
         .buttonStyle(PlainButtonStyle())
-    }
-}
-
-// MARK: - Item Card Skeleton
-struct ItemCardSkeleton: View {
-    @State private var isAnimating = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Image placeholder
-            Rectangle()
-                .fill(Color.modaicsSurface)
-                .aspectRatio(3/4, contentMode: .fit)
-                .overlay(
-                    shimmerOverlay
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-            
-            // Text placeholders
-            VStack(alignment: .leading, spacing: 6) {
-                Rectangle()
-                    .fill(Color.modaicsSurface)
-                    .frame(height: 16)
-                    .overlay(shimmerOverlay)
-                    .cornerRadius(4)
-                
-                Rectangle()
-                    .fill(Color.modaicsSurface)
-                    .frame(width: 80, height: 14)
-                    .overlay(shimmerOverlay)
-                    .cornerRadius(4)
-                
-                HStack {
-                    Rectangle()
-                        .fill(Color.modaicsSurface)
-                        .frame(width: 50, height: 12)
-                        .overlay(shimmerOverlay)
-                        .cornerRadius(4)
-                    
-                    Spacer()
-                    
-                    Rectangle()
-                        .fill(Color.modaicsSurface)
-                        .frame(width: 40, height: 14)
-                        .overlay(shimmerOverlay)
-                        .cornerRadius(4)
-                }
-            }
-        }
-        .padding(12)
-        .background(Color.modaicsSurface.opacity(0.5))
-        .cornerRadius(12)
-        .onAppear {
-            withAnimation(Animation.linear(duration: 1.5).repeatForever(autoreverses: false)) {
-                isAnimating = true
-            }
-        }
-    }
-    
-    private var shimmerOverlay: some View {
-        GeometryReader { geometry in
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color.modaicsSurface,
-                    Color.modaicsSurfaceHighlight.opacity(0.5),
-                    Color.modaicsSurface
-                ]),
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-            .offset(x: isAnimating ? geometry.size.width : -geometry.size.width)
-        }
     }
 }
 

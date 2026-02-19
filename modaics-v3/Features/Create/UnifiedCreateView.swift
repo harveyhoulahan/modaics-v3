@@ -5,6 +5,15 @@ import SwiftUI
 public struct UnifiedCreateView: View {
     @StateObject private var viewModel = CreateViewModel()
     @State private var showSuccessAlert = false
+    @State private var scrollOffset: CGFloat = 0
+    
+    private let headerHeight: CGFloat = 80
+    private let collapsedThreshold: CGFloat = 40
+    
+    private var headerCollapseProgress: CGFloat {
+        let progress = min(1, max(0, scrollOffset / collapsedThreshold))
+        return progress
+    }
     
     public init() {}
     
@@ -13,13 +22,22 @@ public struct UnifiedCreateView: View {
             Color.modaicsBackground.ignoresSafeArea()
             
             ScrollView(showsIndicators: false) {
+                // Scroll offset tracker
+                GeometryReader { proxy in
+                    Color.clear
+                        .preference(key: CreateScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("createScroll")).minY)
+                }
+                .frame(height: 0)
+                
                 VStack(spacing: 32) {
+                    // Collapsable Header
+                    createHeader
+                    
                     // HERO: Smart Create CTA (Gold gradient, biggest element)
                     HeroSmartCreateCard {
                         viewModel.showSmartCreate = true
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 16)
                     
                     // Divider with "OR MANUAL" text
                     ManualDivider()
@@ -64,8 +82,12 @@ public struct UnifiedCreateView: View {
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 100)
                 }
+            }
+            .coordinateSpace(name: "createScroll")
+            .onPreferenceChange(CreateScrollOffsetPreferenceKey.self) { value in
+                scrollOffset = -value
             }
         }
         .sheet(isPresented: $viewModel.showSmartCreate) {
@@ -80,6 +102,47 @@ public struct UnifiedCreateView: View {
         .onChange(of: viewModel.submissionSuccess) { _, success in
             if success { showSuccessAlert = true }
         }
+    }
+    
+    // MARK: - Collapsable Header
+    private var createHeader: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("CREATE")
+                    .font(.forestDisplaySmall)
+                    .foregroundColor(.sageWhite)
+                    .tracking(2)
+                
+                Spacer()
+                
+                // Help button
+                Button(action: {}) {
+                    Image(systemName: "questionmark.circle")
+                        .font(.system(size: 20))
+                        .foregroundColor(.sageMuted)
+                }
+            }
+            
+            Text("List a piece or let AI do it")
+                .font(.forestCaptionMedium)
+                .foregroundColor(.sageMuted)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 12)
+        .background(Color.modaicsBackground)
+        // Collapse animation
+        .frame(height: headerHeight * (1 - headerCollapseProgress * 0.5))
+        .opacity(1 - headerCollapseProgress)
+        .clipped()
+    }
+}
+
+// MARK: - Scroll Offset Preference Key
+struct CreateScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 
