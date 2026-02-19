@@ -223,22 +223,6 @@ public struct CommunityView: View {
     }
 }
 
-// MARK: - Date Helper
-extension Date {
-    func timeAgo() -> String {
-        let interval = Date().timeIntervalSince(self)
-        if interval < 60 { return "Just now" }
-        else if interval < 3600 { return "\(Int(interval / 60))m ago" }
-        else if interval < 86400 { return "\(Int(interval / 3600))h ago" }
-        else if interval < 604800 { return "\(Int(interval / 86400))d ago" }
-        else {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .short
-            return formatter.string(from: self)
-        }
-    }
-}
-
 // MARK: - Preview
 struct CommunityView_Previews: PreviewProvider {
     static var previews: some View {

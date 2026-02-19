@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - SocialFeedView
 /// Main community feed view with collapsable header, filter pills, and post cards
 public struct SocialFeedView: View {
-    @StateObject private var viewModel = FeedViewModel()
+    @StateObject private var viewModel: FeedViewModel
     @State private var scrollOffset: CGFloat = 0
     @State private var showLocalHubBanner: Bool = true
     
@@ -15,7 +15,9 @@ public struct SocialFeedView: View {
         min(CGFloat(1), max(CGFloat(0), scrollOffset / collapsedThreshold))
     }
     
-    public init() {}
+    public init(viewModel: FeedViewModel? = nil) {
+        _viewModel = StateObject(wrappedValue: viewModel ?? FeedViewModel())
+    }
     
     public var body: some View {
         ZStack {
