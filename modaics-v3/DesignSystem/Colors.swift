@@ -1,107 +1,139 @@
 import SwiftUI
 
-// MARK: - Modaics Colors
-/// Mediterranean-inspired color palette
-/// Warm sand backgrounds, terracotta accents, deep olive details
+// MARK: - Modaics Industrial Colors
+/// Industrial design palette
+/// Dark blue backgrounds, red accents, chrome/silver details
 public extension Color {
     
-    // MARK: - Primary Colors
+    // MARK: - Background Colors
     
-    /// Warm sand - primary app background
-    static let modaicsWarmSand = Color(red: 0.96, green: 0.94, blue: 0.90)
+    /// Dark navy - primary app background
+    static let modaicsDarkNavy = Color(red: 0.08, green: 0.10, blue: 0.14)
     
-    /// Paper - card/elevated surface background
-    static let modaicsPaper = Color(red: 0.98, green: 0.97, blue: 0.95)
+    /// Darker blue - card/elevated surface background
+    static let modaicsDarkBlue = Color(red: 0.06, green: 0.08, blue: 0.11)
     
-    /// Cream - alternative light background
-    static let modaicsCream = Color(red: 0.99, green: 0.98, blue: 0.96)
+    /// Midnight blue - deepest background
+    static let modaicsMidnight = Color(red: 0.04, green: 0.06, blue: 0.09)
     
-    /// Oatmeal - subtle background variation
-    static let modaicsOatmeal = Color(red: 0.94, green: 0.92, blue: 0.88)
+    /// Panel blue - secondary background
+    static let modaicsPanelBlue = Color(red: 0.12, green: 0.15, blue: 0.19)
     
     // MARK: - Accent Colors
     
-    /// Terracotta - primary accent color
-    static let modaicsTerracotta = Color(red: 0.80, green: 0.38, blue: 0.27)
+    /// Industrial red - primary accent/CTA color
+    static let modaicsIndustrialRed = Color(red: 0.85, green: 0.18, blue: 0.18)
     
-    /// Deep olive - secondary accent
-    static let modaicsDeepOlive = Color(red: 0.35, green: 0.40, blue: 0.30)
+    /// Signal red - alert/active states
+    static let modaicsSignalRed = Color(red: 0.92, green: 0.22, blue: 0.22)
     
-    /// Sage - success states, eco-friendly indicators
-    static let modaicsSage = Color(red: 0.47, green: 0.58, blue: 0.47)
+    /// Warning amber - caution states
+    static let modaicsWarningAmber = Color(red: 0.95, green: 0.65, blue: 0.15)
     
-    /// Ochre - warning states
-    static let modaicsOchre = Color(red: 0.80, green: 0.52, blue: 0.25)
+    /// Success green - positive states
+    static let modaicsSuccessGreen = Color(red: 0.25, green: 0.75, blue: 0.45)
     
-    /// Rust - error states
-    static let modaicsRust = Color(red: 0.71, green: 0.28, blue: 0.21)
+    // MARK: - Chrome/Silver Colors
+    
+    /// Chrome - bright metallic
+    static let modaicsChrome = Color(red: 0.85, green: 0.87, blue: 0.89)
+    
+    /// Silver - inactive tab color
+    static let modaicsSilver = Color(red: 0.65, green: 0.68, blue: 0.72)
+    
+    /// Steel gray - secondary metallic
+    static let modaicsSteel = Color(red: 0.50, green: 0.53, blue: 0.57)
+    
+    /// Graphite - dark metallic accents
+    static let modaicsGraphite = Color(red: 0.35, green: 0.38, blue: 0.42)
+    
+    /// Gunmetal - borders and dividers
+    static let modaicsGunmetal = Color(red: 0.25, green: 0.28, blue: 0.32)
     
     // MARK: - Text Colors
     
-    /// Charcoal - primary text color
-    static let modaicsCharcoal = Color(red: 0.20, green: 0.18, blue: 0.16)
+    /// White - primary text on dark backgrounds
+    static let modaicsTextWhite = Color(red: 0.98, green: 0.98, blue: 0.98)
     
-    /// Charcoal clay - slightly warmer text variant
-    static let modaicsCharcoalClay = Color(red: 0.22, green: 0.20, blue: 0.17)
+    /// Light gray - secondary text
+    static let modaicsTextLight = Color(red: 0.75, green: 0.78, blue: 0.82)
     
-    /// Stone - secondary/muted text
-    static let modaicsStone = Color(red: 0.50, green: 0.47, blue: 0.44)
+    /// Medium gray - tertiary text
+    static let modaicsTextMedium = Color(red: 0.55, green: 0.58, blue: 0.62)
+    
+    /// Dimmed text - disabled/hint text
+    static let modaicsTextDimmed = Color(red: 0.40, green: 0.43, blue: 0.47)
     
     // MARK: - Semantic Aliases
     
     /// Primary background
-    static let modaicsBackgroundPrimary: Color = .modaicsWarmSand
+    static let modaicsBackgroundPrimary: Color = .modaicsDarkNavy
     
     /// Secondary background (cards, sheets)
-    static let modaicsBackgroundSecondary: Color = .modaicsPaper
+    static let modaicsBackgroundSecondary: Color = .modaicsDarkBlue
+    
+    /// Tertiary background (panels)
+    static let modaicsBackgroundTertiary: Color = .modaicsPanelBlue
     
     /// Primary text
-    static let modaicsTextPrimary: Color = .modaicsCharcoal
+    static let modaicsTextPrimary: Color = .modaicsTextWhite
     
     /// Secondary text
-    static let modaicsTextSecondary: Color = .modaicsStone
+    static let modaicsTextSecondary: Color = .modaicsTextLight
     
     /// Tertiary/subtle text
-    static let modaicsTextTertiary: Color = .modaicsCharcoal.opacity(0.5)
+    static let modaicsTextTertiary: Color = .modaicsTextMedium
     
-    /// Primary accent
-    static let modaicsAccent: Color = .modaicsTerracotta
+    /// Primary accent (active states, CTAs)
+    static let modaicsAccent: Color = .modaicsIndustrialRed
+    
+    /// Active color for tabs
+    static let modaicsActive: Color = .modaicsIndustrialRed
+    
+    /// Inactive color for tabs
+    static let modaicsInactive: Color = .modaicsSilver
     
     /// Success color
-    static let modaicsSuccess: Color = .modaicsSage
+    static let modaicsSuccess: Color = .modaicsSuccessGreen
     
     /// Error color
-    static let modaicsError: Color = .modaicsRust
+    static let modaicsError: Color = .modaicsSignalRed
     
     /// Warning color
-    static let modaicsWarning: Color = .modaicsOchre
+    static let modaicsWarning: Color = .modaicsWarningAmber
+    
+    /// Border color
+    static let modaicsBorder: Color = .modaicsGunmetal
 }
 
 // MARK: - Color Gradients
 
 public extension LinearGradient {
     
-    /// Warm gradient overlay for images
-    static let modaicsWarmOverlay = LinearGradient(
-        colors: [
-            Color.modaicsWarmSand.opacity(0),
-            Color.modaicsWarmSand.opacity(0.8),
-            Color.modaicsWarmSand
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-    
-    /// Terracotta accent gradient
-    static let modaicsTerracottaGradient = LinearGradient(
-        colors: [Color.modaicsTerracotta, Color.modaicsTerracotta.opacity(0.8)],
+    /// Industrial red gradient for active elements
+    static let modaicsIndustrialRedGradient = LinearGradient(
+        colors: [Color.modaicsIndustrialRed, Color.modaicsSignalRed],
         startPoint: .leading,
         endPoint: .trailing
     )
     
-    /// Subtle warm gradient for backgrounds
-    static let modaicsWarmGradient = LinearGradient(
-        colors: [Color.modaicsWarmSand, Color.modaicsOatmeal],
+    /// Chrome gradient for metallic accents
+    static let modaicsChromeGradient = LinearGradient(
+        colors: [Color.modaicsChrome, Color.modaicsSilver],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    /// Dark background gradient
+    static let modaicsDarkGradient = LinearGradient(
+        colors: [Color.modaicsDarkNavy, Color.modaicsMidnight],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+    
+    /// Panel gradient for elevated surfaces
+    static let modaicsPanelGradient = LinearGradient(
+        colors: [Color.modaicsPanelBlue, Color.modaicsDarkBlue],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )

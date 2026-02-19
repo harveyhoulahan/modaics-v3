@@ -7,7 +7,7 @@ class AppState: ObservableObject {
     @Published var isAuthenticated: Bool = false
     @Published var hasCompletedOnboarding: Bool = false
     @Published var isLoading: Bool = false
-    @Published var selectedTab: Tab = .discovery
+    @Published var selectedTab: Tab = .home
     
     init() {
         // TODO: Check actual auth state when Firebase is added
@@ -19,25 +19,61 @@ class AppState: ObservableObject {
     func completeOnboarding() {
         hasCompletedOnboarding = true
     }
+    
+    func selectTab(_ tab: Tab) {
+        selectedTab = tab
+    }
 }
 
 // MARK: - Tab Enumeration
-enum Tab: String, CaseIterable {
-    case discovery = "Discover"
-    case tellStory = "Tell Story"
-    case wardrobe = "Wardrobe"
+enum Tab: String, CaseIterable, Identifiable {
+    case home = "Home"
+    case discover = "Discover"
+    case create = "Create"
+    case community = "Community"
     case profile = "Profile"
     
+    var id: String { rawValue }
+    
+    /// SF Symbol icon name for the tab
     var icon: String {
         switch self {
-        case .discovery: return "magnifyingglass"
-        case .tellStory: return "plus.circle.fill"
-        case .wardrobe: return "square.grid.2x2"
-        case .profile: return "person"
+        case .home:
+            return "house.fill"
+        case .discover:
+            return "magnifyingglass"
+        case .create:
+            return "plus.circle.fill"
+        case .community:
+            return "person.3.fill"
+        case .profile:
+            return "person.fill"
         }
     }
     
-    var isCenter: Bool {
-        return self == .tellStory
+    /// Alternative icon when tab is not selected
+    var inactiveIcon: String {
+        switch self {
+        case .home:
+            return "house"
+        case .discover:
+            return "magnifyingglass"
+        case .create:
+            return "plus.circle"
+        case .community:
+            return "person.3"
+        case .profile:
+            return "person"
+        }
+    }
+    
+    /// Display label for the tab
+    var label: String {
+        return rawValue.uppercased()
+    }
+    
+    /// Whether this tab has special styling (Create button)
+    var isSpecial: Bool {
+        return self == .create
     }
 }
