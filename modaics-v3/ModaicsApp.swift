@@ -18,12 +18,6 @@ struct ModaicsApp: App {
     }
     
     private func configureAppearance() {
-        // Set dark mode as default
-        UITraitCollection.current = UITraitCollection(traitsFrom: [
-            UITraitCollection.current,
-            UITraitCollection(userInterfaceStyle: .dark)
-        ])
-        
         // Navigation bar appearance - transparent with dark green styling
         let navBarAppearance = UINavigationBarAppearance()
         navBarAppearance.configureWithTransparentBackground()

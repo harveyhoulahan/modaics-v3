@@ -389,12 +389,12 @@ struct PickedItemCard: View {
                 )
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(item.garment.brand.displayName.uppercased())
+                Text((item.garment.brand?.name ?? "Unknown").uppercased())
                     .font(.forestCaptionSmall)
                     .foregroundColor(.sageMuted)
                     .tracking(1)
                 
-                Text(item.garment.category.displayName)
+                Text(item.garment.category.rawValue.capitalized)
                     .font(.forestBodyMedium)
                     .foregroundColor(.sageWhite)
                     .lineLimit(1)
@@ -429,12 +429,12 @@ struct TrendingItemCard: View {
                 )
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(garment.brand.displayName.uppercased())
+                Text((garment.brand?.name ?? "Unknown").uppercased())
                     .font(.forestCaptionSmall)
                     .foregroundColor(.sageMuted)
                     .tracking(1)
                 
-                Text(garment.category.displayName)
+                Text(garment.category.rawValue.capitalized)
                     .font(.forestBodyMedium)
                     .foregroundColor(.sageWhite)
                     .lineLimit(1)

@@ -133,58 +133,66 @@ struct ModaicsEvent: Identifiable {
 // MARK: - Mock Data
 enum MockData {
     static let vintageDenimJacket = ModaicsGarment(
-        id: "1",
-        brand: .levis,
-        category: .outerwear,
-        size: .medium,
+        title: "Vintage Denim Jacket",
+        description: "Classic vintage Levi's denim jacket, perfect condition",
+        storyId: UUID(),
         condition: .good,
-        color: .blue,
-        images: [],
-        story: "Classic vintage find",
-        price: 85.00,
-        sellerId: "user1",
-        createdAt: Date()
+        originalPrice: 120.00,
+        listingPrice: 85.00,
+        category: .outerwear,
+        brand: ModaicsBrand(name: "Levi's", isLuxury: false, isSustainable: false),
+        size: ModaicsSize(label: "M", system: .us),
+        colors: [ModaicsGarmentColor(name: "Blue", hex: "#2E5C8A")],
+        ownerId: UUID(),
+        isListed: true,
+        exchangeType: .sell
     )
     
     static let silkBlouse = ModaicsGarment(
-        id: "2",
-        brand: .zimmermann,
-        category: .tops,
-        size: .small,
+        title: "Silk Blouse",
+        description: "Elegant silk blouse, worn once to a wedding",
+        storyId: UUID(),
         condition: .excellent,
-        color: .cream,
-        images: [],
-        story: "Worn once to a wedding",
-        price: 180.00,
-        sellerId: "user2",
-        createdAt: Date()
+        originalPrice: 280.00,
+        listingPrice: 180.00,
+        category: .tops,
+        brand: ModaicsBrand(name: "Zimmermann", isLuxury: true, isSustainable: false),
+        size: ModaicsSize(label: "S", system: .us),
+        colors: [ModaicsGarmentColor(name: "Cream", hex: "#F5F5DC")],
+        ownerId: UUID(),
+        isListed: true,
+        exchangeType: .sell
     )
     
     static let leatherBag = ModaicsGarment(
-        id: "3",
-        brand: .other("Vintage Coach"),
-        category: .accessories,
-        size: .oneSize,
+        title: "Vintage Leather Bag",
+        description: "Authentic vintage Coach leather bag",
+        storyId: UUID(),
         condition: .good,
-        color: .brown,
-        images: [],
-        story: "Authentic vintage piece",
-        price: 220.00,
-        sellerId: "user3",
-        createdAt: Date()
+        originalPrice: 350.00,
+        listingPrice: 220.00,
+        category: .bags,
+        brand: ModaicsBrand(name: "Vintage Coach", isLuxury: false, isSustainable: false),
+        size: ModaicsSize(label: "OS", system: .oneSize),
+        colors: [ModaicsGarmentColor(name: "Brown", hex: "#8B4513")],
+        ownerId: UUID(),
+        isListed: true,
+        exchangeType: .sellOrTrade
     )
     
     static let linenTrousers = ModaicsGarment(
-        id: "4",
-        brand: .zara,
+        title: "Linen Trousers",
+        description: "Perfect summer linen trousers, breathable and stylish",
+        storyId: UUID(),
+        condition: .veryGood,
+        originalPrice: 89.00,
+        listingPrice: 45.00,
         category: .bottoms,
-        size: .medium,
-        condition: .likeNew,
-        color: .beige,
-        images: [],
-        story: "Perfect for summer",
-        price: 45.00,
-        sellerId: "user4",
-        createdAt: Date()
+        brand: ModaicsBrand(name: "Zara", isLuxury: false, isSustainable: false),
+        size: ModaicsSize(label: "M", system: .us),
+        colors: [ModaicsGarmentColor(name: "Beige", hex: "#F5F5DC")],
+        ownerId: UUID(),
+        isListed: true,
+        exchangeType: .sell
     )
 }
