@@ -206,9 +206,9 @@ struct MainAppView: View {
                 case .home:
                     HomeView()
                 case .discover:
-                    DiscoveryPlaceholderView()
+                    DiscoverView()
                 case .create:
-                    CreatePlaceholderView()
+                    UnifiedCreateView()
                 case .community:
                     CommunityPlaceholderView()
                 case .profile:
