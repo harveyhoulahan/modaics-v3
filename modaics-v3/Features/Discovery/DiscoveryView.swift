@@ -185,7 +185,7 @@ public struct DiscoveryView: View {
     
     private var newArrivalsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader(title: "NEW ARRIVALS", subtitle: "Fresh finds just added")
+            DiscoverySectionHeader(title: "NEW ARRIVALS", subtitle: "Fresh finds just added")
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
@@ -212,7 +212,7 @@ public struct DiscoveryView: View {
     
     private var trendingSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader(title: "TRENDING", subtitle: "Popular right now")
+            DiscoverySectionHeader(title: "TRENDING", subtitle: "Popular right now")
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
@@ -309,9 +309,9 @@ public struct DiscoveryView: View {
     }
 }
 
-// MARK: - Section Header
+// MARK: - Discovery Section Header
 
-private struct SectionHeader: View {
+private struct DiscoverySectionHeader: View {
     let title: String
     let subtitle: String?
     

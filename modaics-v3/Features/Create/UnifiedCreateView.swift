@@ -237,20 +237,23 @@ struct ListingModeSection: View {
                 HStack(spacing: 16) {
                     PriceField(
                         title: "Listing Price",
-                        price: $viewModel.form.listingPrice,
+                        placeholder: "0.00",
+                        text: $viewModel.form.listingPrice,
                         isRequired: true
                     )
                     
                     PriceField(
                         title: "Original Price",
-                        price: $viewModel.form.originalPrice,
+                        placeholder: "0.00",
+                        text: $viewModel.form.originalPrice,
                         isRequired: false
                     )
                 }
             } else if viewModel.form.listingMode == .rent {
                 PriceField(
                     title: "Daily Rate",
-                    price: $viewModel.form.listingPrice,
+                    placeholder: "0.00",
+                    text: $viewModel.form.listingPrice,
                     isRequired: true
                 )
             }
@@ -483,7 +486,7 @@ struct DescriptionSection: View {
                 subtitle: "Describe your item's features, fit, and style"
             )
             
-            FormField.textArea(
+            TextAreaField(
                 title: "Description",
                 placeholder: "Tell buyers about your item...",
                 text: $viewModel.form.description,
