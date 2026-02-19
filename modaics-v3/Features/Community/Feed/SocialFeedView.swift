@@ -403,14 +403,6 @@ private struct StatItem: View {
     }
 }
 
-// MARK: - Scroll Offset Preference Key
-private struct FeedScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
-
 // MARK: - Preview
 struct SocialFeedView_Previews: PreviewProvider {
     static var previews: some View {
