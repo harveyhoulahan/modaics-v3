@@ -309,6 +309,10 @@ public class DiscoverViewModel: ObservableObject {
         items.isEmpty && !isLoading
     }
     
+    public var activeFilterCount: Int {
+        filterCriteria.activeFilterCount
+    }
+    
     public var emptyStateTitle: String {
         if !searchQuery.isEmpty {
             return "NO RESULTS FOUND"
