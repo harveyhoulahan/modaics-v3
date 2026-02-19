@@ -7,6 +7,12 @@ struct HomeView: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var showNavTitle = false
     
+    // Detail sheet states
+    @State private var selectedItem: ModaicsGarment?
+    @State private var selectedEvent: ModaicsEvent?
+    @State private var showItemDetail = false
+    @State private var showEventDetail = false
+    
     var body: some View {
         ZStack(alignment: .top) {
             // Background
@@ -51,6 +57,16 @@ struct HomeView: View {
             collapsingHeader
         }
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showItemDetail) {
+            if let item = selectedItem {
+                ItemDetailSheet(item: item)
+            }
+        }
+        .sheet(isPresented: $showEventDetail) {
+            if let event = selectedEvent {
+                EventDetailSheet(event: event)
+            }
+        }
         .onAppear {
             viewModel.loadHomeData()
         }
@@ -185,6 +201,10 @@ struct HomeView: View {
                 HStack(spacing: 16) {
                     ForEach(viewModel.nearbyEvents) { event in
                         EventCard(event: event)
+                            .onTapGesture {
+                                selectedEvent = event
+                                showEventDetail = true
+                            }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -232,7 +252,8 @@ struct HomeView: View {
                     ForEach(viewModel.pickedForYou) { item in
                         PickedItemCard(item: item)
                             .onTapGesture {
-                                // Show item detail
+                                selectedItem = item.garment
+                                showItemDetail = true
                             }
                     }
                 }
@@ -266,7 +287,8 @@ struct HomeView: View {
                 ForEach(viewModel.trendingPieces.prefix(4)) { garment in
                     TrendingItemCard(garment: garment)
                         .onTapGesture {
-                            // Show item detail
+                            selectedItem = garment
+                            showItemDetail = true
                         }
                 }
             }
