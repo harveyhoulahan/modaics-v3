@@ -27,7 +27,7 @@ public struct DiscoverView: View {
     public var body: some View {
         ZStack {
             // Background
-            ModaicsTheme.background
+            Color.modaicsBackground
                 .ignoresSafeArea()
             
             // Main Content
@@ -122,7 +122,7 @@ public struct DiscoverView: View {
                     // Load More Indicator
                     if viewModel.isLoadingMore {
                         ProgressView()
-                            .tint(ModaicsTheme.gold)
+                            .tint(Color.luxeGold)
                             .frame(height: 50)
                     }
                     
@@ -141,8 +141,8 @@ public struct DiscoverView: View {
                 // Title (shows when collapsed)
                 if viewModel.isHeaderCollapsed {
                     Text("DISCOVER")
-                        .font(ModaicsTheme.headline())
-                        .foregroundColor(ModaicsTheme.sageWhite)
+                        .font(.font(.forestBodyLarge))
+                        .foregroundColor(Color.sageWhite)
                         .tracking(2)
                         .transition(.opacity)
                 }
@@ -151,13 +151,13 @@ public struct DiscoverView: View {
                 
                 // Gold accent line
                 Rectangle()
-                    .fill(ModaicsTheme.gold)
+                    .fill(Color.luxeGold)
                     .frame(width: 40, height: 2)
                     .opacity(viewModel.isHeaderCollapsed ? 1 : 0)
             }
             .padding(.horizontal, 16)
             .frame(height: viewModel.isHeaderCollapsed ? collapsedHeaderHeight : 0)
-            .background(ModaicsTheme.background)
+            .background(Color.modaicsBackground)
             
             // Expanded Header Content
             if !viewModel.isHeaderCollapsed {
@@ -165,14 +165,14 @@ public struct DiscoverView: View {
                     // Title
                     HStack {
                         Text("DISCOVER")
-                            .font(ModaicsTheme.largeTitle())
-                            .foregroundColor(ModaicsTheme.sageWhite)
+                            .font(.font(.forestDisplayLarge))
+                            .foregroundColor(Color.sageWhite)
                             .tracking(2)
                         
                         Spacer()
                         
                         Rectangle()
-                            .fill(ModaicsTheme.gold)
+                            .fill(Color.luxeGold)
                             .frame(width: 60, height: 3)
                     }
                     
@@ -182,11 +182,11 @@ public struct DiscoverView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
                 .padding(.bottom, 12)
-                .background(ModaicsTheme.background)
+                .background(Color.modaicsBackground)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .background(ModaicsTheme.background)
+        .background(Color.modaicsBackground)
     }
     
     // MARK: - Search Bar
@@ -196,16 +196,16 @@ public struct DiscoverView: View {
             // Search Icon
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(ModaicsTheme.sageGray)
+                .foregroundColor(Color.sageMuted)
             
             // Search TextField
             TextField("", text: $viewModel.searchQuery)
-                .font(ModaicsTheme.body())
-                .foregroundColor(ModaicsTheme.sageWhite)
+                .font(.font(.forestBodyMedium))
+                .foregroundColor(Color.sageWhite)
                 .placeholder(when: viewModel.searchQuery.isEmpty) {
                     Text("SEARCH BRANDS, STYLES...")
-                        .font(ModaicsTheme.body())
-                        .foregroundColor(ModaicsTheme.sageGray)
+                        .font(.font(.forestBodyMedium))
+                        .foregroundColor(Color.sageMuted)
                 }
                 .submitLabel(.search)
                 .onSubmit {
@@ -219,13 +219,13 @@ public struct DiscoverView: View {
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 18))
-                        .foregroundColor(ModaicsTheme.sageGray)
+                        .foregroundColor(Color.sageMuted)
                 }
             }
             
             // Divider
             Rectangle()
-                .fill(ModaicsTheme.gold.opacity(0.3))
+                .fill(Color.luxeGold.opacity(0.3))
                 .frame(width: 1, height: 20)
             
             // Visual Search Button
@@ -234,16 +234,16 @@ public struct DiscoverView: View {
             }) {
                 Image(systemName: "camera.viewfinder")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(ModaicsTheme.gold)
+                    .foregroundColor(Color.luxeGold)
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
-        .background(ModaicsTheme.surface)
-        .cornerRadius(ModaicsTheme.cornerRadius)
+        .background(Color.modaicsSurface)
+        .cornerRadius(12)
         .overlay(
-            RoundedRectangle(cornerRadius: ModaicsTheme.cornerRadius)
-                .stroke(ModaicsTheme.gold.opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.luxeGold.opacity(0.2), lineWidth: 1)
         )
     }
     
@@ -261,8 +261,8 @@ public struct DiscoverView: View {
             // Suggestions List
             VStack(alignment: .leading, spacing: 0) {
                 Text("SUGGESTIONS")
-                    .font(ModaicsTheme.caption())
-                    .foregroundColor(ModaicsTheme.gold)
+                    .font(.font(.forestCaptionSmall))
+                    .foregroundColor(Color.luxeGold)
                     .tracking(1.5)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
@@ -274,21 +274,21 @@ public struct DiscoverView: View {
                         HStack(spacing: 12) {
                             Image(systemName: suggestionIcon(for: suggestion.type))
                                 .font(.system(size: 14))
-                                .foregroundColor(ModaicsTheme.gold)
+                                .foregroundColor(Color.luxeGold)
                             
                             Text(suggestion.text)
-                                .font(ModaicsTheme.body())
-                                .foregroundColor(ModaicsTheme.sageWhite)
+                                .font(.font(.forestBodyMedium))
+                                .foregroundColor(Color.sageWhite)
                             
                             Spacer()
                             
                             if suggestion.type == .trending {
                                 Text("TRENDING")
-                                    .font(ModaicsTheme.caption())
-                                    .foregroundColor(ModaicsTheme.ecoGreen)
+                                    .font(.font(.forestCaptionSmall))
+                                    .foregroundColor(Color.modaicsEco)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 2)
-                                    .background(ModaicsTheme.ecoGreen.opacity(0.15))
+                                    .background(Color.modaicsEco.opacity(0.15))
                                     .cornerRadius(4)
                             }
                         }
@@ -297,15 +297,15 @@ public struct DiscoverView: View {
                     }
                     
                     Divider()
-                        .background(ModaicsTheme.gold.opacity(0.1))
+                        .background(Color.luxeGold.opacity(0.1))
                         .padding(.horizontal, 16)
                 }
                 
                 // Trending Section
                 if !viewModel.trendingSearches.isEmpty && viewModel.searchSuggestions.isEmpty {
                     Text("TRENDING NOW")
-                        .font(ModaicsTheme.caption())
-                        .foregroundColor(ModaicsTheme.gold)
+                        .font(.font(.forestCaptionSmall))
+                        .foregroundColor(Color.luxeGold)
                         .tracking(1.5)
                         .padding(.horizontal, 16)
                         .padding(.top, 16)
@@ -321,16 +321,16 @@ public struct DiscoverView: View {
                                         .font(.system(size: 10))
                                     
                                     Text(search.text)
-                                        .font(ModaicsTheme.caption())
+                                        .font(.font(.forestCaptionSmall))
                                 }
-                                .foregroundColor(ModaicsTheme.sageWhite)
+                                .foregroundColor(Color.sageWhite)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
-                                .background(ModaicsTheme.surface)
+                                .background(Color.modaicsSurface)
                                 .cornerRadius(6)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 6)
-                                        .stroke(ModaicsTheme.gold.opacity(0.3), lineWidth: 1)
+                                        .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1)
                                 )
                             }
                         }
@@ -339,14 +339,14 @@ public struct DiscoverView: View {
                     .padding(.bottom, 16)
                 }
             }
-            .background(ModaicsTheme.background)
-            .cornerRadius(ModaicsTheme.cornerRadius)
+            .background(Color.modaicsBackground)
+            .cornerRadius(12)
             .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
             .padding(.horizontal, 16)
             
             Spacer()
         }
-        .background(ModaicsTheme.background.opacity(0.95).ignoresSafeArea())
+        .background(Color.modaicsBackground.opacity(0.95).ignoresSafeArea())
         .onTapGesture {
             viewModel.showSearchSuggestions = false
         }
@@ -391,17 +391,17 @@ public struct DiscoverView: View {
                         .font(.system(size: 12))
                     
                     Text(viewModel.sortOption.rawValue)
-                        .font(ModaicsTheme.caption())
+                        .font(.font(.forestCaptionSmall))
                         .lineLimit(1)
                 }
-                .foregroundColor(ModaicsTheme.sageWhite)
+                .foregroundColor(Color.sageWhite)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(ModaicsTheme.surface)
+                .background(Color.modaicsSurface)
                 .cornerRadius(6)
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(ModaicsTheme.gold.opacity(0.2), lineWidth: 1)
+                        .stroke(Color.luxeGold.opacity(0.2), lineWidth: 1)
                 )
             }
             
@@ -416,26 +416,26 @@ public struct DiscoverView: View {
                         .font(.system(size: 12))
                     
                     Text("FILTERS")
-                        .font(ModaicsTheme.caption())
+                        .font(.font(.forestCaptionSmall))
                     
                     if viewModel.activeFilterCount > 0 {
                         Text("\(viewModel.activeFilterCount)")
-                            .font(ModaicsTheme.caption())
+                            .font(.font(.forestCaptionSmall))
                             .fontWeight(.bold)
-                            .foregroundColor(ModaicsTheme.background)
+                            .foregroundColor(Color.modaicsBackground)
                             .frame(minWidth: 18, minHeight: 18)
-                            .background(ModaicsTheme.gold)
+                            .background(Color.luxeGold)
                             .cornerRadius(9)
                     }
                 }
-                .foregroundColor(ModaicsTheme.sageWhite)
+                .foregroundColor(Color.sageWhite)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(ModaicsTheme.surface)
+                .background(Color.modaicsSurface)
                 .cornerRadius(6)
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(viewModel.activeFilterCount > 0 ? ModaicsTheme.gold : ModaicsTheme.gold.opacity(0.2), lineWidth: viewModel.activeFilterCount > 0 ? 1.5 : 1)
+                        .stroke(viewModel.activeFilterCount > 0 ? Color.luxeGold : Color.luxeGold.opacity(0.2), lineWidth: viewModel.activeFilterCount > 0 ? 1.5 : 1)
                 )
             }
         }
@@ -500,24 +500,24 @@ public struct DiscoverView: View {
             // Icon
             ZStack {
                 Circle()
-                    .fill(ModaicsTheme.gold.opacity(0.1))
+                    .fill(Color.luxeGold.opacity(0.1))
                     .frame(width: 100, height: 100)
                 
                 Image(systemName: "bag")
                     .font(.system(size: 40))
-                    .foregroundColor(ModaicsTheme.gold)
+                    .foregroundColor(Color.luxeGold)
             }
             
             // Text
             VStack(spacing: 8) {
                 Text(viewModel.emptyStateTitle)
-                    .font(ModaicsTheme.title3())
-                    .foregroundColor(ModaicsTheme.sageWhite)
+                    .font(.font(.forestHeadlineSmall))
+                    .foregroundColor(Color.sageWhite)
                     .tracking(1)
                 
                 Text(viewModel.emptyStateMessage)
-                    .font(ModaicsTheme.body())
-                    .foregroundColor(ModaicsTheme.sageGray)
+                    .font(.font(.forestBodyMedium))
+                    .foregroundColor(Color.sageMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
@@ -529,12 +529,12 @@ public struct DiscoverView: View {
                     viewModel.clearSearch()
                 }) {
                     Text("CLEAR ALL FILTERS")
-                        .font(ModaicsTheme.headline())
-                        .foregroundColor(ModaicsTheme.background)
+                        .font(.font(.forestBodyLarge))
+                        .foregroundColor(Color.modaicsBackground)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 12)
-                        .background(ModaicsTheme.gold)
-                        .cornerRadius(ModaicsTheme.cornerRadius)
+                        .background(Color.luxeGold)
+                        .cornerRadius(12)
                 }
                 .padding(.top, 8)
             }
@@ -571,17 +571,17 @@ struct CategoryPill: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(ModaicsTheme.caption())
+                .font(.font(.forestCaptionSmall))
                 .fontWeight(isSelected ? .semibold : .regular)
-                .foregroundColor(isSelected ? ModaicsTheme.background : ModaicsTheme.sageWhite)
+                .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
                 .tracking(0.5)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(isSelected ? ModaicsTheme.gold : ModaicsTheme.surface)
+                .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
                 .cornerRadius(20)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(isSelected ? Color.clear : ModaicsTheme.gold.opacity(0.2), lineWidth: 1)
+                        .stroke(isSelected ? Color.clear : Color.luxeGold.opacity(0.2), lineWidth: 1)
                 )
         }
     }

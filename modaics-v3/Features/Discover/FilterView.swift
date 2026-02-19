@@ -29,25 +29,25 @@ public struct FilterView: View {
                     priceSection
                     
                     Divider()
-                        .background(ModaicsTheme.gold.opacity(0.2))
+                        .background(Color.luxeGold.opacity(0.2))
                     
                     // MARK: Categories
                     categorySection
                     
                     Divider()
-                        .background(ModaicsTheme.gold.opacity(0.2))
+                        .background(Color.luxeGold.opacity(0.2))
                     
                     // MARK: Sizes
                     sizeSection
                     
                     Divider()
-                        .background(ModaicsTheme.gold.opacity(0.2))
+                        .background(Color.luxeGold.opacity(0.2))
                     
                     // MARK: Conditions
                     conditionSection
                     
                     Divider()
-                        .background(ModaicsTheme.gold.opacity(0.2))
+                        .background(Color.luxeGold.opacity(0.2))
                     
                     // MARK: Sustainability
                     sustainabilitySection
@@ -58,7 +58,7 @@ public struct FilterView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
             }
-            .background(ModaicsTheme.background.ignoresSafeArea())
+            .background(Color.modaicsBackground.ignoresSafeArea())
             .navigationTitle("FILTERS")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -66,16 +66,16 @@ public struct FilterView: View {
                     Button("CLOSE") {
                         isPresented = false
                     }
-                    .font(ModaicsTheme.subheadline())
-                    .foregroundColor(ModaicsTheme.sageWhite)
+                    .font(.font(.forestCaptionMedium))
+                    .foregroundColor(Color.sageWhite)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("RESET") {
                         resetFilters()
                     }
-                    .font(ModaicsTheme.subheadline())
-                    .foregroundColor(ModaicsTheme.gold)
+                    .font(.font(.forestCaptionMedium))
+                    .foregroundColor(Color.luxeGold)
                     .disabled(!hasActiveFilters)
                     .opacity(hasActiveFilters ? 1.0 : 0.5)
                 }
@@ -84,22 +84,22 @@ public struct FilterView: View {
                 // Apply Button
                 VStack(spacing: 0) {
                     Divider()
-                        .background(ModaicsTheme.gold.opacity(0.2))
+                        .background(Color.luxeGold.opacity(0.2))
                     
                     Button(action: {
                         onApply()
                         isPresented = false
                     }) {
                         Text("APPLY FILTERS")
-                            .font(ModaicsTheme.headline())
-                            .foregroundColor(ModaicsTheme.background)
+                            .font(.font(.forestBodyLarge))
+                            .foregroundColor(Color.modaicsBackground)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(ModaicsTheme.gold)
-                            .cornerRadius(ModaicsTheme.cornerRadius)
+                            .background(Color.luxeGold)
+                            .cornerRadius(12)
                     }
                     .padding()
-                    .background(ModaicsTheme.background)
+                    .background(Color.modaicsBackground)
                 }
             }
         }
@@ -112,29 +112,29 @@ public struct FilterView: View {
     private var priceSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("PRICE RANGE")
-                .font(ModaicsTheme.caption())
-                .foregroundColor(ModaicsTheme.gold)
+                .font(.font(.forestCaptionSmall))
+                .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
             // Custom Range Slider (simplified version)
             VStack(spacing: 12) {
                 HStack {
                     Text("$\(Int(filters.minPrice))")
-                        .font(ModaicsTheme.subheadline())
-                        .foregroundColor(ModaicsTheme.sageWhite)
+                        .font(.font(.forestCaptionMedium))
+                        .foregroundColor(Color.sageWhite)
                         .frame(width: 60, alignment: .leading)
                     
                     Spacer()
                     
                     Text("$\(Int(filters.maxPrice))")
-                        .font(ModaicsTheme.subheadline())
-                        .foregroundColor(ModaicsTheme.sageWhite)
+                        .font(.font(.forestCaptionMedium))
+                        .foregroundColor(Color.sageWhite)
                         .frame(width: 60, alignment: .trailing)
                 }
                 
                 // Price slider using Slider
                 Slider(value: $filters.maxPrice, in: filters.minPrice...2000, step: 10)
-                    .tint(ModaicsTheme.gold)
+                    .tint(Color.luxeGold)
                 
                 // Preset buttons
                 HStack(spacing: 8) {
@@ -143,11 +143,11 @@ public struct FilterView: View {
                             filters.maxPrice = Double(price)
                         }) {
                             Text("$\(price)")
-                                .font(ModaicsTheme.caption())
-                                .foregroundColor(filters.maxPrice == Double(price) ? ModaicsTheme.background : ModaicsTheme.sageWhite)
+                                .font(.font(.forestCaptionSmall))
+                                .foregroundColor(filters.maxPrice == Double(price) ? Color.modaicsBackground : Color.sageWhite)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
-                                .background(filters.maxPrice == Double(price) ? ModaicsTheme.gold : ModaicsTheme.surface)
+                                .background(filters.maxPrice == Double(price) ? Color.luxeGold : Color.modaicsSurface)
                                 .cornerRadius(4)
                         }
                     }
@@ -159,8 +159,8 @@ public struct FilterView: View {
     private var categorySection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("CATEGORY")
-                .font(ModaicsTheme.caption())
-                .foregroundColor(ModaicsTheme.gold)
+                .font(.font(.forestCaptionSmall))
+                .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
             FlowLayout(spacing: 8) {
@@ -184,14 +184,14 @@ public struct FilterView: View {
     private var sizeSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("SIZE")
-                .font(ModaicsTheme.caption())
-                .foregroundColor(ModaicsTheme.gold)
+                .font(.font(.forestCaptionSmall))
+                .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
             // Clothing sizes
             Text("CLOTHING")
-                .font(ModaicsTheme.footnote())
-                .foregroundColor(ModaicsTheme.sageGray)
+                .font(.font(.forestCaptionSmall))
+                .foregroundColor(Color.sageMuted)
             
             HStack(spacing: 8) {
                 ForEach([Size.xs, .s, .m, .l, .xl, .xxl, .xxxl, .os], id: \.self) { size in
@@ -210,8 +210,8 @@ public struct FilterView: View {
             
             // Shoe sizes - Women's
             Text("WOMEN'S SHOES")
-                .font(ModaicsTheme.footnote())
-                .foregroundColor(ModaicsTheme.sageGray)
+                .font(.font(.forestCaptionSmall))
+                .foregroundColor(Color.sageMuted)
                 .padding(.top, 8)
             
             HStack(spacing: 8) {
@@ -231,8 +231,8 @@ public struct FilterView: View {
             
             // Shoe sizes - Men's
             Text("MEN'S SHOES")
-                .font(ModaicsTheme.footnote())
-                .foregroundColor(ModaicsTheme.sageGray)
+                .font(.font(.forestCaptionSmall))
+                .foregroundColor(Color.sageMuted)
                 .padding(.top, 8)
             
             HStack(spacing: 8) {
@@ -255,8 +255,8 @@ public struct FilterView: View {
     private var conditionSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("CONDITION")
-                .font(ModaicsTheme.caption())
-                .foregroundColor(ModaicsTheme.gold)
+                .font(.font(.forestCaptionSmall))
+                .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
             VStack(spacing: 8) {
@@ -279,46 +279,46 @@ public struct FilterView: View {
     private var sustainabilitySection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("SUSTAINABILITY")
-                .font(ModaicsTheme.caption())
-                .foregroundColor(ModaicsTheme.gold)
+                .font(.font(.forestCaptionSmall))
+                .foregroundColor(Color.luxeGold)
                 .tracking(1.5)
             
             VStack(spacing: 12) {
                 Toggle(isOn: $filters.sustainabilityOnly) {
                     HStack(spacing: 12) {
                         Image(systemName: "leaf.fill")
-                            .foregroundColor(ModaicsTheme.ecoGreen)
+                            .foregroundColor(Color.modaicsEco)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("ECO-FRIENDLY ONLY")
-                                .font(ModaicsTheme.subheadline())
-                                .foregroundColor(ModaicsTheme.sageWhite)
+                                .font(.font(.forestCaptionMedium))
+                                .foregroundColor(Color.sageWhite)
                             
                             Text("Items with sustainability score 60+")
-                                .font(ModaicsTheme.caption())
-                                .foregroundColor(ModaicsTheme.sageGray)
+                                .font(.font(.forestCaptionSmall))
+                                .foregroundColor(Color.sageMuted)
                         }
                     }
                 }
-                .tint(ModaicsTheme.gold)
+                .tint(Color.luxeGold)
                 
                 Toggle(isOn: $filters.vintageOnly) {
                     HStack(spacing: 12) {
                         Image(systemName: "clock.arrow.circlepath")
-                            .foregroundColor(ModaicsTheme.gold)
+                            .foregroundColor(Color.luxeGold)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("VINTAGE ONLY")
-                                .font(ModaicsTheme.subheadline())
-                                .foregroundColor(ModaicsTheme.sageWhite)
+                                .font(.font(.forestCaptionMedium))
+                                .foregroundColor(Color.sageWhite)
                             
                             Text("Pre-loved vintage items")
-                                .font(ModaicsTheme.caption())
-                                .foregroundColor(ModaicsTheme.sageGray)
+                                .font(.font(.forestCaptionSmall))
+                                .foregroundColor(Color.sageMuted)
                         }
                     }
                 }
-                .tint(ModaicsTheme.gold)
+                .tint(Color.luxeGold)
             }
         }
     }
@@ -405,17 +405,17 @@ struct FilterChip: View {
                     .font(.system(size: 12))
                 
                 Text(title)
-                    .font(ModaicsTheme.caption())
+                    .font(.font(.forestCaptionSmall))
                     .fontWeight(isSelected ? .semibold : .regular)
             }
-            .foregroundColor(isSelected ? ModaicsTheme.background : ModaicsTheme.sageWhite)
+            .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(isSelected ? ModaicsTheme.gold : ModaicsTheme.surface)
+            .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
             .cornerRadius(6)
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
-                    .stroke(isSelected ? Color.clear : ModaicsTheme.gold.opacity(0.2), lineWidth: 1)
+                    .stroke(isSelected ? Color.clear : Color.luxeGold.opacity(0.2), lineWidth: 1)
             )
         }
     }
@@ -430,15 +430,15 @@ struct SizeChip: View {
     var body: some View {
         Button(action: action) {
             Text(size)
-                .font(ModaicsTheme.caption())
+                .font(.font(.forestCaptionSmall))
                 .fontWeight(isSelected ? .semibold : .regular)
-                .foregroundColor(isSelected ? ModaicsTheme.background : ModaicsTheme.sageWhite)
+                .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
                 .frame(minWidth: 40, minHeight: 36)
-                .background(isSelected ? ModaicsTheme.gold : ModaicsTheme.surface)
+                .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
                 .cornerRadius(6)
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(isSelected ? Color.clear : ModaicsTheme.gold.opacity(0.2), lineWidth: 1)
+                        .stroke(isSelected ? Color.clear : Color.luxeGold.opacity(0.2), lineWidth: 1)
                 )
         }
     }
@@ -455,32 +455,32 @@ struct ConditionRow: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(condition.displayName)
-                        .font(ModaicsTheme.subheadline())
-                        .foregroundColor(ModaicsTheme.sageWhite)
+                        .font(.font(.forestCaptionMedium))
+                        .foregroundColor(Color.sageWhite)
                     
                     Text(conditionDescription)
-                        .font(ModaicsTheme.caption())
-                        .foregroundColor(ModaicsTheme.sageGray)
+                        .font(.font(.forestCaptionSmall))
+                        .foregroundColor(Color.sageMuted)
                 }
                 
                 Spacer()
                 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(ModaicsTheme.gold)
+                        .foregroundColor(Color.luxeGold)
                         .font(.system(size: 22))
                 } else {
                     Circle()
-                        .stroke(ModaicsTheme.gold.opacity(0.3), lineWidth: 1.5)
+                        .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1.5)
                         .frame(width: 22, height: 22)
                 }
             }
             .padding()
-            .background(ModaicsTheme.surface)
+            .background(Color.modaicsSurface)
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isSelected ? ModaicsTheme.gold.opacity(0.5) : Color.clear, lineWidth: 1)
+                    .stroke(isSelected ? Color.luxeGold.opacity(0.5) : Color.clear, lineWidth: 1)
             )
         }
     }
