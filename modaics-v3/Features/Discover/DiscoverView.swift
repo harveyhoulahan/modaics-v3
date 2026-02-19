@@ -122,14 +122,14 @@ public struct DiscoverView: View {
             .padding(.bottom, 12)
             .background(Color.modaicsBackground)
             // Collapse animation
-            .frame(height: headerHeight * (1 - headerCollapseProgress * 0.5))
-            .opacity(1 - headerCollapseProgress)
+            .frame(height: headerHeight * (CGFloat(1) - headerCollapseProgress * CGFloat(0.5)))
+            .opacity(CGFloat(1) - headerCollapseProgress)
             .clipped()
             
             // Category selector - also collapses slightly
             categorySelector
-                .frame(height: categorySelectorHeight * (1 - headerCollapseProgress * 0.3))
-                .opacity(1 - headerCollapseProgress * 0.5)
+                .frame(height: categorySelectorHeight * (CGFloat(1) - headerCollapseProgress * CGFloat(0.3)))
+                .opacity(CGFloat(1) - headerCollapseProgress * CGFloat(0.5))
         }
         .background(Color.modaicsBackground)
     }
