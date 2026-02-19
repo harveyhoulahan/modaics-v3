@@ -120,45 +120,88 @@ public struct CommunityPostCard: View {
     
     // MARK: - Editorial Image Grid
     private var editorialImageGrid: some View {
-        let columns = post.imageURLs.count == 1 ? 1 : 2
-        let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
-        
-        return LazyVGrid(columns: layout, spacing: 2) {
-            ForEach(0..<min(post.imageURLs.count, 4), id: \.self) { index in
-                if let url = URL(string: post.imageURLs[index]) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            Rectangle()
-                                .fill(Color.modaicsSurfaceHighlight)
-                                .overlay(
-                                    ProgressView()
-                                        .tint(Color.luxeGold)
-                                )
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFill()
-                        case .failure:
-                            Rectangle()
-                                .fill(Color.modaicsSurfaceHighlight)
-                                .overlay(
-                                    Image(systemName: "photo")
-                                        .foregroundColor(.sageMuted)
-                                )
-                        @unknown default:
-                            EmptyView()
+        Group {
+            if post.imageURLs.count == 1 {
+                // Single image - full width, constrained height
+                singleImageView(url: post.imageURLs[0])
+                    .frame(height: 280)
+                    .clipped()
+            } else if post.imageURLs.count == 2 {
+                // Two images - side by side
+                HStack(spacing: 2) {
+                    ForEach(0..<2, id: \.self) { index in
+                        singleImageView(url: post.imageURLs[index])
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 200)
+                            .clipped()
+                    }
+                }
+            } else {
+                // 3+ images - 2x2 grid
+                VStack(spacing: 2) {
+                    HStack(spacing: 2) {
+                        ForEach(0..<min(2, post.imageURLs.count), id: \.self) { index in
+                            singleImageView(url: post.imageURLs[index])
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 140)
+                                .clipped()
                         }
                     }
-                    .aspectRatio(1, contentMode: .fill)
-                    .clipped()
-                    .onTapGesture {
-                        onImageTapped?(index)
+                    if post.imageURLs.count > 2 {
+                        HStack(spacing: 2) {
+                            ForEach(2..<min(4, post.imageURLs.count), id: \.self) { index in
+                                singleImageView(url: post.imageURLs[index])
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 140)
+                                    .clipped()
+                                    .overlay(
+                                        post.imageURLs.count > 4 && index == 3 ?
+                                        ZStack {
+                                            Color.black.opacity(0.5)
+                                            Text("+\(post.imageURLs.count - 4)")
+                                                .font(.system(size: 20, weight: .bold, design: .monospaced))
+                                                .foregroundColor(.white)
+                                        }
+                                        : nil
+                                    )
+                            }
+                        }
                     }
                 }
             }
         }
-        .frame(height: post.imageURLs.count == 1 ? 400 : 200)
+    }
+    
+    private func singleImageView(url: String) -> some View {
+        Group {
+            if let imageURL = URL(string: url) {
+                AsyncImage(url: imageURL) { phase in
+                    switch phase {
+                    case .empty:
+                        Rectangle()
+                            .fill(Color.modaicsSurfaceHighlight)
+                            .overlay(
+                                ProgressView()
+                                    .tint(Color.luxeGold)
+                            )
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    case .failure:
+                        Rectangle()
+                            .fill(Color.modaicsSurfaceHighlight)
+                            .overlay(
+                                Image(systemName: "photo")
+                                    .font(.system(size: 30))
+                                    .foregroundColor(.sageMuted)
+                            )
+                    @unknown default:
+                        EmptyView()
+                    }
+                }
+            }
+        }
     }
     
     // MARK: - Story Section
