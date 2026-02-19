@@ -1,66 +1,84 @@
 import Foundation
 import SwiftUI
 import Combine
+import MapKit
+
+// MARK: - DiscoverCategory
+/// Top-level discovery categories
+public enum DiscoverCategory: String, CaseIterable, Identifiable {
+    case clothing = "Clothing"
+    case events = "Events"
+    case workshops = "Workshops"
+    case popUps = "Pop-Ups"
+    
+    public var id: String { rawValue }
+    
+    public var icon: String {
+        switch self {
+        case .clothing: return "tshirt.fill"
+        case .events: return "calendar"
+        case .workshops: return "hammer.fill"
+        case .popUps: return "sparkles"
+        }
+    }
+}
+
+// MARK: - EventViewMode
+public enum EventViewMode {
+    case list, map
+}
 
 // MARK: - DiscoverViewModel
-// ViewModel with search, filtering, sorting logic for the Discover page
-
 @MainActor
 public class DiscoverViewModel: ObservableObject {
     
-    // MARK: - Published Properties
+    // MARK: - Top-level category
+    @Published public var selectedDiscoverCategory: DiscoverCategory = .clothing
     
-    // Search
+    // MARK: - Clothing mode
     @Published public var searchQuery: String = ""
     @Published public var searchSuggestions: [SearchSuggestion] = []
     @Published public var showSearchSuggestions: Bool = false
     @Published public var trendingSearches: [SearchSuggestion] = []
-    
-    // Results
     @Published public var items: [FashionItem] = []
-    @Published public var isLoading: Bool = false
-    @Published public var isLoadingMore: Bool = false
-    @Published public var errorMessage: String?
-    @Published public var hasMoreItems: Bool = false
-    
-    // Category Filter
-    @Published public var selectedCategory: Category? = nil
-    @Published public var categoryFilters: [Category] = Category.allCases
-    
-    // Sort
+    @Published public var selectedSubCategory: Category? = nil
     @Published public var sortOption: SortOption = .recent
     @Published public var showSortOptions: Bool = false
-    
-    // Filters
     @Published public var filterCriteria: FilterCriteria = FilterCriteria()
     @Published public var showFilterSheet: Bool = false
-    @Published public var activeFilterCount: Int = 0
+    @Published public var isLoading: Bool = false
+    @Published public var isLoadingMore: Bool = false
+    @Published public var hasMoreItems: Bool = false
     
-    // Visual Search
+    // MARK: - Events/Map mode
+    @Published public var eventViewMode: EventViewMode = .list
+    @Published public var events: [CommunityEvent] = []
+    @Published public var mapRegion = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: -37.8136, longitude: 144.9631),
+        span: MKCoordinateSpan(latitudeDelta: 0.06, longitudeDelta: 0.06)
+    )
+    @Published public var selectedEvent: CommunityEvent? = nil
+    @Published public var showEventDetail: Bool = false
+    
+    // MARK: - Visual search
     @Published public var showVisualSearch: Bool = false
-    @Published public var visualSearchImage: UIImage?
     
-    // Header
-    @Published public var isHeaderCollapsed: Bool = false
-    
-    // Pagination
+    // MARK: - Pagination
     private var currentPage: Int = 1
     private let itemsPerPage: Int = 20
     
-    // Dependencies
+    // MARK: - Dependencies
     private let apiClient: SearchAPIClient
     private var cancellables = Set<AnyCancellable>()
     private var searchTask: Task<Void, Never>?
     
     // MARK: - Initialization
-    
     public init(apiClient: SearchAPIClient = .shared) {
         self.apiClient = apiClient
         setupBindings()
     }
     
     // MARK: - Setup
-    
     private func setupBindings() {
         // Debounce search query
         $searchQuery
@@ -71,18 +89,13 @@ public class DiscoverViewModel: ObservableObject {
                 self?.fetchSearchSuggestions(query: query)
             }
             .store(in: &cancellables)
-        
-        // Update active filter count
-        $filterCriteria
-            .map { $0.activeFilterCount }
-            .assign(to: &$activeFilterCount)
     }
     
     // MARK: - Data Loading
-    
     public func loadInitialData() async {
         await loadItems(reset: true)
         await loadTrendingSearches()
+        loadEvents()
     }
     
     public func loadItems(reset: Bool = false) async {
@@ -93,12 +106,10 @@ public class DiscoverViewModel: ObservableObject {
             isLoadingMore = true
         }
         
-        errorMessage = nil
-        
         do {
             let parameters = SearchParameters(
                 query: searchQuery.isEmpty ? nil : searchQuery,
-                category: selectedCategory,
+                category: selectedSubCategory,
                 condition: filterCriteria.condition,
                 minPrice: filterCriteria.minPrice > 0 ? filterCriteria.minPrice : nil,
                 maxPrice: filterCriteria.maxPrice < 2000 ? filterCriteria.maxPrice : nil,
@@ -120,7 +131,6 @@ public class DiscoverViewModel: ObservableObject {
             hasMoreItems = response.hasMore
             
         } catch {
-            errorMessage = "Failed to load items. Please try again."
             print("Search error: \(error)")
         }
         
@@ -134,8 +144,11 @@ public class DiscoverViewModel: ObservableObject {
         await loadItems(reset: false)
     }
     
-    // MARK: - Search Suggestions
+    public func loadEvents() {
+        events = CommunityEvent.mockEvents
+    }
     
+    // MARK: - Search Suggestions
     private func fetchSearchSuggestions(query: String) {
         searchTask?.cancel()
         
@@ -161,6 +174,15 @@ public class DiscoverViewModel: ObservableObject {
     }
     
     // MARK: - Actions
+    public func selectDiscoverCategory(_ category: DiscoverCategory) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            selectedDiscoverCategory = category
+        }
+        
+        if category != .clothing && events.isEmpty {
+            loadEvents()
+        }
+    }
     
     public func performSearch() {
         showSearchSuggestions = false
@@ -175,8 +197,8 @@ public class DiscoverViewModel: ObservableObject {
         performSearch()
     }
     
-    public func selectCategory(_ category: Category?) {
-        selectedCategory = category
+    public func selectSubCategory(_ category: Category?) {
+        selectedSubCategory = category
         Task {
             await loadItems(reset: true)
         }
@@ -212,10 +234,7 @@ public class DiscoverViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Like Action
-    
     public func toggleLike(for item: FashionItem) {
-        // In real implementation, this would call an API
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             var updatedItem = items[index]
             updatedItem = FashionItem(
@@ -245,14 +264,12 @@ public class DiscoverViewModel: ObservableObject {
     }
     
     // MARK: - Visual Search
-    
     public func performVisualSearch(image: UIImage) async {
         isLoading = true
-        visualSearchImage = image
         
         do {
             let parameters = SearchParameters(
-                category: selectedCategory,
+                category: selectedSubCategory,
                 sortBy: sortOption,
                 page: 1,
                 limit: itemsPerPage
@@ -263,7 +280,6 @@ public class DiscoverViewModel: ObservableObject {
             hasMoreItems = response.hasMore
             
         } catch {
-            errorMessage = "Visual search failed. Please try again."
             print("Visual search error: \(error)")
         }
         
@@ -271,21 +287,24 @@ public class DiscoverViewModel: ObservableObject {
         showVisualSearch = false
     }
     
-    // MARK: - Header
-    
-    public func updateHeaderState(isCollapsed: Bool) {
-        isHeaderCollapsed = isCollapsed
+    // MARK: - Computed Properties
+    public var filteredEvents: [CommunityEvent] {
+        let typeFilter: [CommunityEventType]
+        switch selectedDiscoverCategory {
+        case .clothing:
+            return []
+        case .events:
+            typeFilter = [.market, .exhibition, .talk, .party, .swapMeet]
+        case .workshops:
+            typeFilter = [.workshop, .classSession]
+        case .popUps:
+            typeFilter = [.popUp]
+        }
+        return events
+            .filter { typeFilter.contains($0.type) }
+            .sorted { $0.date < $1.date }
     }
     
-    // MARK: - Pull to Refresh
-    
-    public func refresh() async {
-        await loadItems(reset: true)
-    }
-}
-
-// MARK: - Empty State
-extension DiscoverViewModel {
     public var isEmpty: Bool {
         items.isEmpty && !isLoading
     }

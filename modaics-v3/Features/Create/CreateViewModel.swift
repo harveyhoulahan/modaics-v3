@@ -89,7 +89,9 @@ public struct CreateFormState {
         !description.isEmpty &&
         category != nil &&
         condition != nil &&
-        !images.isEmpty
+        !images.isEmpty &&
+        !sizeLabel.isEmpty &&
+        (listingMode == .swap || !listingPrice.isEmpty)
     }
     
     var listingPriceDecimal: Decimal? {
@@ -122,7 +124,7 @@ public struct MaterialEntry: Identifiable, Equatable {
 }
 
 // MARK: - Validation Error
-public enum ValidationError: Error, LocalizedError {
+public enum ValidationError: Error, LocalizedError, Hashable {
     case missingTitle
     case missingDescription
     case missingCategory
@@ -134,14 +136,14 @@ public enum ValidationError: Error, LocalizedError {
     
     public var errorDescription: String? {
         switch self {
-        case .missingTitle: return "TITLE IS REQUIRED"
-        case .missingDescription: return "DESCRIPTION IS REQUIRED"
-        case .missingCategory: return "PLEASE SELECT A CATEGORY"
-        case .missingCondition: return "PLEASE SELECT CONDITION"
-        case .missingImages: return "AT LEAST ONE IMAGE IS REQUIRED"
-        case .missingSize: return "SIZE IS REQUIRED"
-        case .invalidPrice: return "PLEASE ENTER A VALID PRICE"
-        case .missingMaterials: return "PLEASE ADD AT LEAST ONE MATERIAL"
+        case .missingTitle: return "Title is required"
+        case .missingDescription: return "Description is required"
+        case .missingCategory: return "Please select a category"
+        case .missingCondition: return "Please select condition"
+        case .missingImages: return "At least one image is required"
+        case .missingSize: return "Size is required"
+        case .invalidPrice: return "Please enter a valid price"
+        case .missingMaterials: return "Please add at least one material"
         }
     }
 }
@@ -170,19 +172,14 @@ public enum AIAnalysisState: Equatable {
 }
 
 // MARK: - Create ViewModel
+/// Single form state - NO step navigation
 @MainActor
 public final class CreateViewModel: ObservableObject {
     
     // MARK: - Published Properties
     
-    /// Current creation type
-    @Published public var creationType: CreationType = .item
-    
-    /// Form state
+    /// Form state (single unified form)
     @Published public var form = CreateFormState()
-    
-    /// Current step in creation flow
-    @Published public var currentStep: CreateStep = .basic
     
     /// Validation errors
     @Published public var validationErrors: [ValidationError] = []
@@ -226,28 +223,9 @@ public final class CreateViewModel: ObservableObject {
             .assign(to: &$isFormValid)
     }
     
-    // MARK: - Navigation
-    
-    public func goToStep(_ step: CreateStep) {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentStep = step
-        }
-    }
-    
-    public func nextStep() {
-        if let next = CreateStep.allCases.first(where: { $0.rawValue > currentStep.rawValue }) {
-            goToStep(next)
-        }
-    }
-    
-    public func previousStep() {
-        if let prev = CreateStep.allCases.last(where: { $0.rawValue < currentStep.rawValue }) {
-            goToStep(prev)
-        }
-    }
-    
     // MARK: - Validation
     
+    @discardableResult
     public func validate() -> [ValidationError] {
         var errors: [ValidationError] = []
         
@@ -273,6 +251,10 @@ public final class CreateViewModel: ObservableObject {
         
         if form.sizeLabel.isEmpty {
             errors.append(.missingSize)
+        }
+        
+        if form.listingMode != .swap && form.listingPrice.isEmpty {
+            errors.append(.invalidPrice)
         }
         
         validationErrors = errors
@@ -370,6 +352,7 @@ public final class CreateViewModel: ObservableObject {
     }
     
     public func applyAIAnalysis(_ analysis: AIGarmentAnalysis) async {
+        // Only fill empty fields to preserve user edits
         if form.title.isEmpty || form.title.count < 5 {
             form.title = analysis.title
         }
@@ -410,6 +393,9 @@ public final class CreateViewModel: ObservableObject {
         if form.description.isEmpty && !analysis.suggestions.isEmpty {
             form.description = analysis.suggestions.joined(separator: "\n")
         }
+        
+        // Recalculate score with new data
+        calculateSustainabilityScore()
     }
     
     // MARK: - Submission
@@ -435,44 +421,11 @@ public final class CreateViewModel: ObservableObject {
     
     public func resetForm() {
         form = CreateFormState()
-        currentStep = .basic
         validationErrors = []
         aiAnalysisState = .idle
         sustainabilityScore = 50
         submissionSuccess = false
         submissionError = nil
-    }
-}
-
-// MARK: - Create Step
-public enum CreateStep: Int, CaseIterable {
-    case type = 0
-    case basic = 1
-    case details = 2
-    case story = 3
-    case sustainability = 4
-    case review = 5
-    
-    public var title: String {
-        switch self {
-        case .type: return "SELECT TYPE"
-        case .basic: return "BASIC INFO"
-        case .details: return "DETAILS"
-        case .story: return "STORY"
-        case .sustainability: return "SUSTAINABILITY"
-        case .review: return "REVIEW"
-        }
-    }
-    
-    public var icon: String {
-        switch self {
-        case .type: return "square.grid.2x2"
-        case .basic: return "doc.text"
-        case .details: return "slider.horizontal.3"
-        case .story: return "text.quote"
-        case .sustainability: return "leaf"
-        case .review: return "checkmark.circle"
-        }
     }
 }
 

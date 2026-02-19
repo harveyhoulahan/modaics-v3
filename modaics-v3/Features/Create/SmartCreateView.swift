@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - SmartCreateView
-/// AI-assisted listing flow (separate sheet)
+/// AI-assisted listing flow - opens as sheet, populates main form on "Edit in Full Form"
 public struct SmartCreateView: View {
     @ObservedObject var viewModel: CreateViewModel
     @Environment(\.dismiss) private var dismiss
@@ -24,41 +24,58 @@ public struct SmartCreateView: View {
                     VStack(spacing: 24) {
                         switch currentPhase {
                         case .photo:
-                            PhotoPhaseView(viewModel: viewModel, onNext: { 
-                                withAnimation { currentPhase = .analyzing }
+                            PhotoPhaseView(viewModel: viewModel, onNext: {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    currentPhase = .analyzing
+                                }
                                 Task { await viewModel.analyzeWithAI() }
                             })
+                            
                         case .analyzing:
                             AnalyzingPhaseView()
+                            
                         case .review:
                             ReviewPhaseView(viewModel: viewModel, onNext: {
-                                withAnimation { currentPhase = .finalReview }
-                            })
-                        case .finalReview:
-                            FinalReviewPhaseView(viewModel: viewModel, onSubmit: {
-                                Task {
-                                    try? await viewModel.submit()
-                                    if viewModel.submissionSuccess {
-                                        dismiss()
-                                    }
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    currentPhase = .finalReview
                                 }
-                            }, onEdit: {
-                                viewModel.showSmartCreate = false
+                            }, onEditInFullForm: {
+                                // Populate main form and dismiss
+                                dismiss()
                             })
+                            
+                        case .finalReview:
+                            FinalReviewPhaseView(
+                                viewModel: viewModel,
+                                onSubmit: {
+                                    Task {
+                                        try? await viewModel.submit()
+                                        if viewModel.submissionSuccess {
+                                            dismiss()
+                                        }
+                                    }
+                                },
+                                onEditInFullForm: {
+                                    // Dismiss sheet - form is already populated
+                                    dismiss()
+                                }
+                            )
                         }
                     }
                     .padding(.bottom, 100)
                 }
-                
-                Spacer()
             }
         }
-        .onChange(of: viewModel.aiAnalysisState) { oldState, newState in
+        .onChange(of: viewModel.aiAnalysisState) { _, newState in
             if case .completed = newState {
-                withAnimation { currentPhase = .review }
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    currentPhase = .review
+                }
             } else if case .failed = newState {
                 // Show error, go back to photo
-                withAnimation { currentPhase = .photo }
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    currentPhase = .photo
+                }
             }
         }
     }
@@ -74,10 +91,15 @@ public struct SmartCreateView: View {
                 
                 Spacer()
                 
-                Text("SMART CREATE")
-                    .font(.forestHeadlineSmall)
-                    .foregroundColor(.sageWhite)
-                    .tracking(2)
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 16))
+                        .foregroundColor(.luxeGold)
+                    Text("SMART CREATE")
+                        .font(.forestHeadlineSmall)
+                        .foregroundColor(.sageWhite)
+                        .tracking(2)
+                }
                 
                 Spacer()
                 
@@ -115,27 +137,20 @@ struct SmartProgressBar: View {
     let currentPhase: SmartCreatePhase
     
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 4) {
             ForEach(SmartCreatePhase.allCases, id: \.self) { phase in
                 HStack(spacing: 0) {
                     // Segment
-                    Rectangle()
+                    RoundedRectangle(cornerRadius: 2)
                         .fill(phase.rawValue <= currentPhase.rawValue ? Color.luxeGold : Color.modaicsSurface)
                         .frame(height: 4)
-                    
-                    // Connector (except for last)
-                    if phase != .finalReview {
-                        Rectangle()
-                            .fill(phase.rawValue < currentPhase.rawValue ? Color.luxeGold : Color.modaicsSurface)
-                            .frame(width: 8, height: 4)
-                    }
                 }
             }
         }
     }
 }
 
-// MARK: - Photo Phase View (C8)
+// MARK: - Photo Phase View
 struct PhotoPhaseView: View {
     @ObservedObject var viewModel: CreateViewModel
     let onNext: () -> Void
@@ -150,15 +165,22 @@ struct PhotoPhaseView: View {
                 
                 if viewModel.form.images.isEmpty {
                     VStack(spacing: 16) {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 48))
-                            .foregroundColor(.luxeGold)
+                        ZStack {
+                            Circle()
+                                .fill(Color.luxeGold.opacity(0.2))
+                                .frame(width: 80, height: 80)
+                            
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(.luxeGold)
+                        }
                         
                         Text("ADD PHOTOS")
                             .font(.forestHeadlineSmall)
                             .foregroundColor(.sageWhite)
+                            .tracking(1)
                         
-                        Text("Take or select photos of your item. AI will analyze them.")
+                        Text("Take or select photos of your item.\nAI will analyze them and auto-fill details.")
                             .font(.forestCaptionMedium)
                             .foregroundColor(.sageMuted)
                             .multilineTextAlignment(.center)
@@ -175,15 +197,15 @@ struct PhotoPhaseView: View {
             }
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.luxeGold.opacity(0.3), lineWidth: viewModel.form.images.isEmpty ? 2 : 0)
+                    .stroke(Color.luxeGold.opacity(viewModel.form.images.isEmpty ? 0.3 : 0), lineWidth: viewModel.form.images.isEmpty ? 2 : 0)
                     .stroke(Color.modaicsSurfaceHighlight, lineWidth: viewModel.form.images.isEmpty ? 0 : 1)
             )
             .padding(.horizontal, 20)
             
-            // Image picker grid
+            // Image picker row
             if !viewModel.form.images.isEmpty {
-                ImagePicker(
-                    selectedImages: $viewModel.form.images,
+                ImageUploadRow(
+                    images: $viewModel.form.images,
                     heroImageIndex: $viewModel.form.heroImageIndex,
                     maxImages: 8
                 )
@@ -191,19 +213,18 @@ struct PhotoPhaseView: View {
             } else {
                 // Quick add button
                 Button(action: {
-                    // Trigger image picker - in real app this would open picker
-                    // For demo, we'll just add a placeholder
+                    // In real implementation, this would trigger image picker
                 }) {
                     HStack(spacing: 8) {
-                        Image(systemName: "plus")
-                        Text("ADD PHOTOS")
+                        Image(systemName: "photo.stack")
+                        Text("SELECT FROM LIBRARY")
                     }
                     .font(.forestBodyMedium)
                     .foregroundColor(.modaicsBackground)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(Color.luxeGold)
-                    .cornerRadius(8)
+                    .cornerRadius(12)
                 }
                 .padding(.horizontal, 20)
             }
@@ -219,9 +240,9 @@ struct PhotoPhaseView: View {
                 .font(.forestBodyMedium)
                 .foregroundColor(.modaicsBackground)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
+                .padding(.vertical, 18)
                 .background(viewModel.form.images.isEmpty ? Color.luxeGold.opacity(0.3) : Color.luxeGold)
-                .cornerRadius(8)
+                .cornerRadius(12)
             }
             .disabled(viewModel.form.images.isEmpty)
             .padding(.horizontal, 20)
@@ -230,38 +251,63 @@ struct PhotoPhaseView: View {
     }
 }
 
-// MARK: - Analyzing Phase View (C8)
+// MARK: - Analyzing Phase View
 struct AnalyzingPhaseView: View {
     @State private var rotation: Double = 0
+    @State private var pulse: Bool = false
     
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 40) {
             Spacer()
             
             ZStack {
-                // Outer ring
-                Circle()
-                    .stroke(Color.luxeGold.opacity(0.2), lineWidth: 4)
-                    .frame(width: 120, height: 120)
+                // Outer glow rings
+                ForEach(0..<3) { i in
+                    Circle()
+                        .stroke(Color.luxeGold.opacity(0.1), lineWidth: 1)
+                        .frame(width: 120 + CGFloat(i * 40), height: 120 + CGFloat(i * 40))
+                        .scaleEffect(pulse ? 1.1 : 1.0)
+                        .opacity(pulse ? 0.3 : 0.6)
+                        .animation(
+                            .easeInOut(duration: 1.5)
+                            .repeatForever(autoreverses: true)
+                            .delay(Double(i) * 0.2),
+                            value: pulse
+                        )
+                }
                 
-                // Spinning arc
-                Circle()
-                    .trim(from: 0, to: 0.3)
-                    .stroke(Color.luxeGold, style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                    .frame(width: 120, height: 120)
-                    .rotationEffect(.degrees(rotation))
-                
-                Image(systemName: "sparkles")
-                    .font(.system(size: 40))
-                    .foregroundColor(.luxeGold)
+                // Main spinner
+                ZStack {
+                    Circle()
+                        .stroke(Color.luxeGold.opacity(0.2), lineWidth: 4)
+                        .frame(width: 100, height: 100)
+                    
+                    Circle()
+                        .trim(from: 0, to: 0.3)
+                        .stroke(
+                            LinearGradient(
+                                colors: [.luxeGold, .luxeGoldBright],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ),
+                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                        )
+                        .frame(width: 100, height: 100)
+                        .rotationEffect(.degrees(rotation))
+                    
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 32))
+                        .foregroundColor(.luxeGold)
+                }
             }
             
             VStack(spacing: 12) {
                 Text("ANALYZING...")
                     .font(.forestDisplaySmall)
                     .foregroundColor(.sageWhite)
+                    .tracking(2)
                 
-                Text("Our AI is examining your photos and extracting details")
+                Text("Our AI is examining your photos\nand extracting garment details")
                     .font(.forestCaptionMedium)
                     .foregroundColor(.sageMuted)
                     .multilineTextAlignment(.center)
@@ -272,6 +318,7 @@ struct AnalyzingPhaseView: View {
         }
         .padding(.horizontal, 20)
         .onAppear {
+            pulse = true
             withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
                 rotation = 360
             }
@@ -279,134 +326,170 @@ struct AnalyzingPhaseView: View {
     }
 }
 
-// MARK: - Review Phase View (C8)
+// MARK: - Review Phase View
 struct ReviewPhaseView: View {
     @ObservedObject var viewModel: CreateViewModel
     let onNext: () -> Void
+    let onEditInFullForm: () -> Void
     
     var body: some View {
         VStack(spacing: 24) {
             if case .completed(let analysis) = viewModel.aiAnalysisState {
-                // AI Results
-                VStack(spacing: 16) {
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.modaicsEco)
-                        
-                        Text("AI ANALYSIS COMPLETE")
+                // AI Results Header
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(.modaicsEco)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("ANALYSIS COMPLETE")
                             .font(.forestHeadlineSmall)
                             .foregroundColor(.sageWhite)
                         
-                        Spacer()
+                        Text("\(Int(analysis.confidence * 100))% confidence")
+                            .font(.forestCaptionSmall)
+                            .foregroundColor(.sageMuted)
                     }
                     
-                    Text("Confidence: \(Int(analysis.confidence * 100))%")
-                        .font(.forestCaptionSmall)
-                        .foregroundColor(.sageMuted)
+                    Spacer()
                 }
                 .padding(16)
                 .background(Color.modaicsSurface)
                 .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.modaicsEco.opacity(0.3), lineWidth: 1)
+                )
                 .padding(.horizontal, 20)
                 
                 // Detected Details
-                ScrollView {
-                    VStack(spacing: 16) {
-                        AIResultRow(icon: "tag", label: "TITLE", value: analysis.title)
-                        AIResultRow(icon: "square.grid.2x2", label: "CATEGORY", value: analysis.category.displayName)
-                        AIResultRow(icon: "star", label: "CONDITION", value: analysis.condition.displayName)
-                        
-                        // Materials
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Image(systemName: "leaf")
-                                    .foregroundColor(.modaicsEco)
-                                Text("MATERIALS")
-                                    .font(.forestCaptionSmall)
-                                    .foregroundColor(.sageMuted)
-                            }
-                            
-                            ForEach(analysis.materials) { material in
-                                HStack {
-                                    Text(material.name)
-                                        .font(.forestBodySmall)
-                                        .foregroundColor(.sageWhite)
-                                    Spacer()
-                                    Text("\(material.percentage)%")
-                                        .font(.forestCaptionSmall)
-                                        .foregroundColor(.sageMuted)
-                                    if material.isSustainable {
-                                        Image(systemName: "checkmark.seal.fill")
-                                            .font(.system(size: 12))
-                                            .foregroundColor(.modaicsEco)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(16)
-                        .background(Color.modaicsSurface)
-                        .cornerRadius(12)
-                        
-                        // Estimated price
-                        AIResultRow(icon: "dollarsign.circle", label: "ESTIMATED PRICE", value: "\(analysis.estimatedPrice)")
-                        
-                        // Sustainability score
-                        HStack {
-                            Image(systemName: "leaf.circle")
+                VStack(spacing: 12) {
+                    AIResultRow(icon: "tag.fill", label: "TITLE", value: analysis.title)
+                    AIResultRow(icon: "square.grid.2x2", label: "CATEGORY", value: analysis.category.displayName)
+                    AIResultRow(icon: "star.fill", label: "CONDITION", value: analysis.condition.displayName)
+                    
+                    // Materials
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "leaf.fill")
                                 .foregroundColor(.modaicsEco)
-                            Text("SUSTAINABILITY SCORE")
+                            Text("MATERIALS")
                                 .font(.forestCaptionSmall)
                                 .foregroundColor(.sageMuted)
-                            Spacer()
-                            Text("\(analysis.sustainabilityScore)/100")
-                                .font(.forestBodyMedium)
+                                .tracking(1)
+                        }
+                        
+                        ForEach(analysis.materials) { material in
+                            HStack {
+                                Text(material.name)
+                                    .font(.forestBodySmall)
+                                    .foregroundColor(.sageWhite)
+                                Spacer()
+                                Text("\(material.percentage)%")
+                                    .font(.forestCaptionSmall)
+                                    .foregroundColor(.sageMuted)
+                                if material.isSustainable {
+                                    Image(systemName: "checkmark.seal.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.modaicsEco)
+                                }
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .background(Color.modaicsSurface)
+                    .cornerRadius(12)
+                    
+                    // Estimated price
+                    AIResultRow(
+                        icon: "dollarsign.circle.fill",
+                        label: "ESTIMATED PRICE",
+                        value: "\(analysis.estimatedPrice)",
+                        highlight: true
+                    )
+                    
+                    // Sustainability score
+                    HStack {
+                        HStack(spacing: 8) {
+                            Image(systemName: "leaf.circle.fill")
                                 .foregroundColor(.modaicsEco)
+                            Text("SUSTAINABILITY")
+                                .font(.forestCaptionSmall)
+                                .foregroundColor(.sageMuted)
+                                .tracking(1)
+                        }
+                        
+                        Spacer()
+                        
+                        Text("\(analysis.sustainabilityScore)/100")
+                            .font(.forestHeadlineSmall)
+                            .foregroundColor(.modaicsEco)
+                    }
+                    .padding(16)
+                    .background(Color.modaicsSurface)
+                    .cornerRadius(12)
+                    
+                    // AI Suggestions
+                    if !analysis.suggestions.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "lightbulb.fill")
+                                    .foregroundColor(.luxeGold)
+                                Text("AI SUGGESTIONS")
+                                    .font(.forestCaptionSmall)
+                                    .foregroundColor(.sageMuted)
+                                    .tracking(1)
+                            }
+                            
+                            ForEach(analysis.suggestions, id: \.self) { suggestion in
+                                HStack(alignment: .top, spacing: 8) {
+                                    Text("•")
+                                        .foregroundColor(.luxeGold)
+                                    Text(suggestion)
+                                        .font(.forestBodySmall)
+                                        .foregroundColor(.sageWhite)
+                                }
+                            }
                         }
                         .padding(16)
                         .background(Color.modaicsSurface)
                         .cornerRadius(12)
-                        
-                        // AI Suggestions
-                        if !analysis.suggestions.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Image(systemName: "lightbulb")
-                                        .foregroundColor(.luxeGold)
-                                    Text("AI SUGGESTIONS")
-                                        .font(.forestCaptionSmall)
-                                        .foregroundColor(.sageMuted)
-                                }
-                                
-                                ForEach(analysis.suggestions, id: \.self) { suggestion in
-                                    HStack(alignment: .top, spacing: 8) {
-                                        Text("•")
-                                            .foregroundColor(.luxeGold)
-                                        Text(suggestion)
-                                            .font(.forestBodySmall)
-                                            .foregroundColor(.sageWhite)
-                                    }
-                                }
-                            }
-                            .padding(16)
-                            .background(Color.modaicsSurface)
-                            .cornerRadius(12)
-                        }
                     }
-                    .padding(.horizontal, 20)
                 }
+                .padding(.horizontal, 20)
                 
                 Spacer()
                 
-                // Continue button
-                Button(action: onNext) {
-                    Text("REVIEW & SUBMIT")
+                // Action buttons
+                VStack(spacing: 12) {
+                    Button(action: onNext) {
+                        HStack(spacing: 8) {
+                            Text("REVIEW & SUBMIT")
+                            Image(systemName: "arrow.right")
+                        }
                         .font(.forestBodyMedium)
                         .foregroundColor(.modaicsBackground)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .padding(.vertical, 18)
                         .background(Color.luxeGold)
-                        .cornerRadius(8)
+                        .cornerRadius(12)
+                    }
+                    
+                    Button(action: onEditInFullForm) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "pencil")
+                            Text("EDIT IN FULL FORM")
+                        }
+                        .font(.forestCaptionMedium)
+                        .foregroundColor(.luxeGold)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.luxeGold.opacity(0.5), lineWidth: 1)
+                        )
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
@@ -420,18 +503,24 @@ struct AIResultRow: View {
     let icon: String
     let label: String
     let value: String
+    var highlight: Bool = false
     
     var body: some View {
         HStack {
-            Image(systemName: icon)
-                .foregroundColor(.luxeGold)
-            Text(label)
-                .font(.forestCaptionSmall)
-                .foregroundColor(.sageMuted)
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .foregroundColor(highlight ? .luxeGold : .luxeGold.opacity(0.8))
+                Text(label)
+                    .font(.forestCaptionSmall)
+                    .foregroundColor(.sageMuted)
+                    .tracking(1)
+            }
+            
             Spacer()
+            
             Text(value)
                 .font(.forestBodyMedium)
-                .foregroundColor(.sageWhite)
+                .foregroundColor(highlight ? .luxeGold : .sageWhite)
         }
         .padding(16)
         .background(Color.modaicsSurface)
@@ -439,101 +528,162 @@ struct AIResultRow: View {
     }
 }
 
-// MARK: - Final Review Phase View (C8)
+// MARK: - Final Review Phase View
 struct FinalReviewPhaseView: View {
     @ObservedObject var viewModel: CreateViewModel
     let onSubmit: () -> Void
-    let onEdit: () -> Void
+    let onEditInFullForm: () -> Void
     
     var body: some View {
         VStack(spacing: 24) {
-            // Preview
-            PreviewCard(
-                images: viewModel.form.images,
-                title: viewModel.form.title,
-                category: viewModel.form.category,
-                price: viewModel.form.listingPriceDecimal as Decimal?,
-                condition: viewModel.form.condition
-            )
-            .padding(.horizontal, 20)
+            // Preview Card
+            if let firstImage = viewModel.form.images.first {
+                VStack(spacing: 0) {
+                    // Image
+                    Image(uiImage: firstImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 200)
+                        .clipped()
+                    
+                    // Info
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(viewModel.form.title.isEmpty ? "Untitled Item" : viewModel.form.title)
+                            .font(.forestHeadlineSmall)
+                            .foregroundColor(.sageWhite)
+                        
+                        HStack {
+                            if let category = viewModel.form.category {
+                                Text(category.displayName.uppercased())
+                                    .font(.forestCaptionSmall)
+                                    .foregroundColor(.sageMuted)
+                            }
+                            
+                            Spacer()
+                            
+                            if let condition = viewModel.form.condition {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "star.fill")
+                                        .font(.system(size: 10))
+                                    Text(condition.displayName.uppercased())
+                                }
+                                .font(.forestCaptionSmall)
+                                .foregroundColor(.luxeGold)
+                            }
+                        }
+                        
+                        if viewModel.form.listingMode == .sell, !viewModel.form.listingPrice.isEmpty {
+                            HStack(spacing: 4) {
+                                Text("$")
+                                    .font(.forestHeadlineMedium)
+                                Text(viewModel.form.listingPrice)
+                                    .font(.forestHeadlineMedium)
+                            }
+                            .foregroundColor(.luxeGold)
+                        }
+                    }
+                    .padding(16)
+                    .background(Color.modaicsSurface)
+                }
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+                )
+                .padding(.horizontal, 20)
+            }
             
-            // Quick edit options
+            // Listing Mode Selection
             VStack(alignment: .leading, spacing: 12) {
-                Text("QUICK ACTIONS")
+                Text("LISTING MODE")
                     .font(.forestCaptionMedium)
                     .foregroundColor(.sageMuted)
                     .tracking(1)
                 
-                Button(action: onEdit) {
-                    HStack {
-                        Image(systemName: "pencil")
-                        Text("EDIT IN FULL FORM")
-                            .font(.forestBodyMedium)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                    }
-                    .foregroundColor(.sageWhite)
-                    .padding(16)
-                    .background(Color.modaicsSurface)
-                    .cornerRadius(12)
-                }
-                
-                // Listing mode
                 HStack(spacing: 12) {
                     ForEach(ListingMode.allCases) { mode in
                         ListingModeButton(
                             mode: mode,
                             isSelected: viewModel.form.listingMode == mode
                         ) {
-                            viewModel.form.listingMode = mode
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                viewModel.form.listingMode = mode
+                            }
                         }
                     }
                 }
-                
-                // Price input if selling
-                if viewModel.form.listingMode == .sell {
+            }
+            .padding(.horizontal, 20)
+            
+            // Price input if selling/renting
+            if viewModel.form.listingMode != .swap {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(viewModel.form.listingMode == .rent ? "DAILY RATE" : "PRICE")
+                        .font(.forestCaptionMedium)
+                        .foregroundColor(.sageMuted)
+                        .tracking(1)
+                    
                     HStack(spacing: 12) {
                         Text("$")
                             .font(.forestBodyMedium)
                             .foregroundColor(.sageWhite)
                         
-                        TextField("Price", text: $viewModel.form.listingPrice)
+                        TextField("0.00", text: $viewModel.form.listingPrice)
                             .font(.forestBodyMedium)
                             .foregroundColor(.sageWhite)
                             .keyboardType(.decimalPad)
                     }
-                    .padding(16)
+                    .padding(14)
                     .background(Color.modaicsSurface)
                     .cornerRadius(12)
                 }
+                .padding(.horizontal, 20)
             }
-            .padding(.horizontal, 20)
             
             Spacer()
             
-            // Submit button
-            Button(action: onSubmit) {
-                if viewModel.isSubmitting {
-                    ProgressView()
-                        .tint(.modaicsBackground)
+            // Action buttons
+            VStack(spacing: 12) {
+                Button(action: onSubmit) {
+                    if viewModel.isSubmitting {
+                        ProgressView()
+                            .tint(.modaicsBackground)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(Color.luxeGold)
+                            .cornerRadius(12)
+                    } else {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                            Text("SUBMIT LISTING")
+                                .tracking(1)
+                        }
+                        .font(.forestBodyMedium)
+                        .foregroundColor(.modaicsBackground)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .padding(.vertical, 18)
                         .background(Color.luxeGold)
-                        .cornerRadius(8)
-                } else {
-                    HStack(spacing: 8) {
-                        Image(systemName: "checkmark")
-                        Text("SUBMIT LISTING")
+                        .cornerRadius(12)
                     }
-                    .font(.forestBodyMedium)
-                    .foregroundColor(.modaicsBackground)
+                }
+                .disabled(viewModel.isSubmitting)
+                
+                Button(action: onEditInFullForm) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "pencil")
+                        Text("EDIT IN FULL FORM")
+                    }
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.luxeGold)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.luxeGold)
-                    .cornerRadius(8)
+                    .padding(.vertical, 14)
+                    .background(Color.clear)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.luxeGold.opacity(0.5), lineWidth: 1)
+                    )
                 }
             }
-            .disabled(viewModel.isSubmitting)
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }

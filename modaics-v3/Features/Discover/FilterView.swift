@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - FilterView
 // Filter sheet with price, category, size, condition, sustainability filters
+// Uses shared FlowLayout component from Core/Components
 
 public struct FilterView: View {
     @Binding var isPresented: Bool

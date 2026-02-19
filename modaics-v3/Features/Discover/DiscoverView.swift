@@ -1,26 +1,10 @@
 import SwiftUI
+import MapKit
 
 // MARK: - DiscoverView
-// Main view with:
-// D1: Collapsing header with TrackableScrollView
-// D2: Search bar with text + visual (camera) search
-// D3: Category filter strip
-// D4: Sort controls
-// D5: 2-column grid with ItemCard
-// D6: FilterView sheet
-// D7: Empty state
-// D8: Shimmer loading
-// D9: Pull-to-refresh
-// D10: Search suggestions dropdown
-
+/// Main discovery view with static header, category tabs, and content switching
 public struct DiscoverView: View {
     @StateObject private var viewModel = DiscoverViewModel()
-    @State private var scrollOffset: CGPoint = .zero
-    @State private var isRefreshing = false
-    
-    // Constants for header collapse
-    private let headerHeight: CGFloat = 180
-    private let collapsedHeaderHeight: CGFloat = 60
     
     public init() {}
     
@@ -31,11 +15,15 @@ public struct DiscoverView: View {
                 .ignoresSafeArea()
             
             // Main Content
-            mainContent
-            
-            // Search Suggestions Overlay
-            if viewModel.showSearchSuggestions && !viewModel.searchSuggestions.isEmpty {
-                searchSuggestionsOverlay
+            VStack(spacing: 0) {
+                // FIXED header — always visible, never collapses
+                discoverHeader
+                
+                // Category selector — always visible below header
+                categorySelector
+                
+                // Content area — scrollable, changes based on category
+                contentArea
             }
         }
         .sheet(isPresented: $viewModel.showFilterSheet) {
@@ -60,6 +48,11 @@ public struct DiscoverView: View {
                 }
             )
         }
+        .sheet(isPresented: $viewModel.showEventDetail) {
+            if let event = viewModel.selectedEvent {
+                EventDetailSheet(event: event)
+            }
+        }
         .actionSheet(isPresented: $viewModel.showSortOptions) {
             ActionSheet(
                 title: Text("SORT BY").font(.system(.headline, design: .monospaced)),
@@ -77,135 +70,125 @@ public struct DiscoverView: View {
         }
     }
     
-    // MARK: - Main Content
-    
-    private var mainContent: some View {
-        VStack(spacing: 0) {
-            // Collapsible Header
-            headerView
-            
-            // Content with TrackableScrollView
-            TrackableScrollView(
-                .vertical,
-                showIndicators: false,
-                threshold: -10,
-                scrollOffset: $scrollOffset,
-                onScrollNearTop: { isNearTop in
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        viewModel.updateHeaderState(isCollapsed: !isNearTop)
-                    }
-                }
-            ) {
-                VStack(spacing: 0) {
-                    // Category Filter Strip
-                    categoryFilterStrip
-                        .padding(.top, 8)
-                        .padding(.bottom, 12)
-                    
-                    // Sort and Filter Controls
-                    sortFilterBar
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 12)
-                    
-                    // Results Grid or Empty State
-                    if viewModel.isLoading && viewModel.items.isEmpty {
-                        // Shimmer Loading State
-                        shimmerGrid
-                    } else if viewModel.isEmpty {
-                        // Empty State
-                        emptyStateView
-                    } else {
-                        // Results Grid
-                        resultsGrid
-                    }
-                    
-                    // Load More Indicator
-                    if viewModel.isLoadingMore {
-                        ProgressView()
-                            .tint(Color.luxeGold)
-                            .frame(height: 50)
-                    }
-                    
-                    // Bottom padding
-                    Color.clear.frame(height: 20)
-                }
-            }
-        }
-    }
-    
-    // MARK: - Header View
-    
-    private var headerView: some View {
-        VStack(spacing: 0) {
+    // MARK: - Fixed Header
+    private var discoverHeader: some View {
+        VStack(alignment: .leading, spacing: 4) {
             HStack {
-                // Title (shows when collapsed)
-                if viewModel.isHeaderCollapsed {
-                    Text("DISCOVER")
-                        .font(.forestBodyLarge)
-                        .foregroundColor(Color.sageWhite)
-                        .tracking(2)
-                        .transition(.opacity)
-                }
+                Text("DISCOVER")
+                    .font(.forestDisplaySmall)
+                    .foregroundColor(.sageWhite)
+                    .tracking(2)
                 
                 Spacer()
                 
-                // Gold accent line
-                Rectangle()
-                    .fill(Color.luxeGold)
-                    .frame(width: 40, height: 2)
-                    .opacity(viewModel.isHeaderCollapsed ? 1 : 0)
-            }
-            .padding(.horizontal, 16)
-            .frame(height: viewModel.isHeaderCollapsed ? collapsedHeaderHeight : 0)
-            .background(Color.modaicsBackground)
-            
-            // Expanded Header Content
-            if !viewModel.isHeaderCollapsed {
-                VStack(spacing: 16) {
-                    // Title
-                    HStack {
-                        Text("DISCOVER")
-                            .font(.forestDisplayLarge)
-                            .foregroundColor(Color.sageWhite)
-                            .tracking(2)
-                        
-                        Spacer()
-                        
-                        Rectangle()
-                            .fill(Color.luxeGold)
-                            .frame(width: 60, height: 3)
-                    }
-                    
-                    // Search Bar
-                    searchBar
+                // Notification bell
+                Button(action: {}) {
+                    Image(systemName: "bell")
+                        .font(.system(size: 20))
+                        .foregroundColor(.sageMuted)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
-                .padding(.bottom, 12)
-                .background(Color.modaicsBackground)
-                .transition(.move(edge: .top).combined(with: .opacity))
             }
+            
+            Text("Find pieces, events & more nearby")
+                .font(.forestCaptionMedium)
+                .foregroundColor(.sageMuted)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 12)
+        .background(Color.modaicsBackground)
+    }
+    
+    // MARK: - Category Selector
+    private var categorySelector: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(DiscoverCategory.allCases) { category in
+                    CategoryTabPill(
+                        category: category,
+                        isSelected: viewModel.selectedDiscoverCategory == category
+                    ) {
+                        viewModel.selectDiscoverCategory(category)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 8)
         }
         .background(Color.modaicsBackground)
     }
     
-    // MARK: - Search Bar
+    // MARK: - Content Area
+    private var contentArea: some View {
+        Group {
+            switch viewModel.selectedDiscoverCategory {
+            case .clothing:
+                clothingContent
+            case .events, .workshops, .popUps:
+                eventsContent
+            }
+        }
+    }
     
+    // MARK: - Clothing Content
+    private var clothingContent: some View {
+        ScrollView(showsIndicators: false) {
+            LazyVStack(spacing: 16) {
+                // Search bar
+                searchBar
+                    .padding(.horizontal, 20)
+                
+                // Sub-category filter strip
+                subcategoryStrip
+                
+                // Sort and filter controls
+                sortFilterBar
+                    .padding(.horizontal, 20)
+                
+                // Results or empty/loading state
+                if viewModel.isLoading && viewModel.items.isEmpty {
+                    shimmerGrid
+                        .padding(.horizontal, 20)
+                } else if viewModel.isEmpty {
+                    emptyStateView
+                        .padding(.horizontal, 20)
+                } else {
+                    resultsGrid
+                        .padding(.horizontal, 20)
+                }
+                
+                // Load more indicator
+                if viewModel.isLoadingMore {
+                    ProgressView()
+                        .tint(Color.luxeGold)
+                        .frame(height: 50)
+                }
+                
+                Color.clear.frame(height: 20)
+            }
+            .padding(.top, 8)
+        }
+        .refreshable {
+            await viewModel.loadItems(reset: true)
+        }
+    }
+    
+    // MARK: - Search Bar
     private var searchBar: some View {
         HStack(spacing: 12) {
             // Search Icon
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(Color.sageMuted)
+                .foregroundColor(.sageMuted)
             
             // Search TextField
             TextField("", text: $viewModel.searchQuery)
                 .font(.forestBodyMedium)
-                .foregroundColor(Color.sageWhite)
+                .foregroundColor(.sageWhite)
                 .placeholder(when: viewModel.searchQuery.isEmpty) {
-                    Text("SEARCH BRANDS, STYLES...")
+                    Text("SEARCH GARMENTS...")
                         .font(.forestBodyMedium)
-                        .foregroundColor(Color.sageMuted)
+                        .foregroundColor(.sageMuted)
                 }
                 .submitLabel(.search)
                 .onSubmit {
@@ -219,7 +202,7 @@ public struct DiscoverView: View {
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 18))
-                        .foregroundColor(Color.sageMuted)
+                        .foregroundColor(.sageMuted)
                 }
             }
             
@@ -234,7 +217,7 @@ public struct DiscoverView: View {
             }) {
                 Image(systemName: "camera.viewfinder")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(Color.luxeGold)
+                    .foregroundColor(.luxeGold)
             }
         }
         .padding(.horizontal, 12)
@@ -247,139 +230,32 @@ public struct DiscoverView: View {
         )
     }
     
-    // MARK: - Search Suggestions Overlay
-    
-    private var searchSuggestionsOverlay: some View {
-        VStack(spacing: 0) {
-            // Spacer to push below search bar
-            if !viewModel.isHeaderCollapsed {
-                Color.clear.frame(height: 140)
-            } else {
-                Color.clear.frame(height: 70)
-            }
-            
-            // Suggestions List
-            VStack(alignment: .leading, spacing: 0) {
-                Text("SUGGESTIONS")
-                    .font(.forestCaptionSmall)
-                    .foregroundColor(Color.luxeGold)
-                    .tracking(1.5)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                
-                ForEach(viewModel.searchSuggestions.prefix(5)) { suggestion in
-                    Button(action: {
-                        viewModel.selectSearchSuggestion(suggestion)
-                    }) {
-                        HStack(spacing: 12) {
-                            Image(systemName: suggestionIcon(for: suggestion.type))
-                                .font(.system(size: 14))
-                                .foregroundColor(Color.luxeGold)
-                            
-                            Text(suggestion.text)
-                                .font(.forestBodyMedium)
-                                .foregroundColor(Color.sageWhite)
-                            
-                            Spacer()
-                            
-                            if suggestion.type == .trending {
-                                Text("TRENDING")
-                                    .font(.forestCaptionSmall)
-                                    .foregroundColor(Color.modaicsEco)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 2)
-                                    .background(Color.modaicsEco.opacity(0.15))
-                                    .cornerRadius(4)
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                    }
-                    
-                    Divider()
-                        .background(Color.luxeGold.opacity(0.1))
-                        .padding(.horizontal, 16)
-                }
-                
-                // Trending Section
-                if !viewModel.trendingSearches.isEmpty && viewModel.searchSuggestions.isEmpty {
-                    Text("TRENDING NOW")
-                        .font(.forestCaptionSmall)
-                        .foregroundColor(Color.luxeGold)
-                        .tracking(1.5)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 16)
-                        .padding(.bottom, 12)
-                    
-                    FlowLayout(spacing: 8) {
-                        ForEach(viewModel.trendingSearches.prefix(6)) { search in
-                            Button(action: {
-                                viewModel.selectSearchSuggestion(search)
-                            }) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "arrow.up.right")
-                                        .font(.system(size: 10))
-                                    
-                                    Text(search.text)
-                                        .font(.forestCaptionSmall)
-                                }
-                                .foregroundColor(Color.sageWhite)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(Color.modaicsSurface)
-                                .cornerRadius(6)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1)
-                                )
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
-                }
-            }
-            .background(Color.modaicsBackground)
-            .cornerRadius(12)
-            .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
-            .padding(.horizontal, 16)
-            
-            Spacer()
-        }
-        .background(Color.modaicsBackground.opacity(0.95).ignoresSafeArea())
-        .onTapGesture {
-            viewModel.showSearchSuggestions = false
-        }
-    }
-    
-    // MARK: - Category Filter Strip
-    
-    private var categoryFilterStrip: some View {
+    // MARK: - Subcategory Strip
+    private var subcategoryStrip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 // All button
-                CategoryPill(
+                SubcategoryPill(
                     title: "ALL",
-                    isSelected: viewModel.selectedCategory == nil
+                    isSelected: viewModel.selectedSubCategory == nil
                 ) {
-                    viewModel.selectCategory(nil)
+                    viewModel.selectSubCategory(nil)
                 }
                 
                 ForEach(Category.allCases) { category in
-                    CategoryPill(
+                    SubcategoryPill(
                         title: category.displayName,
-                        isSelected: viewModel.selectedCategory == category
+                        isSelected: viewModel.selectedSubCategory == category
                     ) {
-                        viewModel.selectCategory(category)
+                        viewModel.selectSubCategory(category)
                     }
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 20)
         }
     }
     
     // MARK: - Sort and Filter Bar
-    
     private var sortFilterBar: some View {
         HStack(spacing: 12) {
             // Sort Button
@@ -394,7 +270,7 @@ public struct DiscoverView: View {
                         .font(.forestCaptionSmall)
                         .lineLimit(1)
                 }
-                .foregroundColor(Color.sageWhite)
+                .foregroundColor(.sageWhite)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(Color.modaicsSurface)
@@ -418,8 +294,8 @@ public struct DiscoverView: View {
                     Text("FILTERS")
                         .font(.forestCaptionSmall)
                     
-                    if viewModel.activeFilterCount > 0 {
-                        Text("\(viewModel.activeFilterCount)")
+                    if viewModel.filterCriteria.activeFilterCount > 0 {
+                        Text("\(viewModel.filterCriteria.activeFilterCount)")
                             .font(.forestCaptionSmall)
                             .fontWeight(.bold)
                             .foregroundColor(Color.modaicsBackground)
@@ -428,21 +304,21 @@ public struct DiscoverView: View {
                             .cornerRadius(9)
                     }
                 }
-                .foregroundColor(Color.sageWhite)
+                .foregroundColor(.sageWhite)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(Color.modaicsSurface)
                 .cornerRadius(6)
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(viewModel.activeFilterCount > 0 ? Color.luxeGold : Color.luxeGold.opacity(0.2), lineWidth: viewModel.activeFilterCount > 0 ? 1.5 : 1)
+                        .stroke(viewModel.filterCriteria.activeFilterCount > 0 ? Color.luxeGold : Color.luxeGold.opacity(0.2), 
+                               lineWidth: viewModel.filterCriteria.activeFilterCount > 0 ? 1.5 : 1)
                 )
             }
         }
     }
     
     // MARK: - Results Grid
-    
     private var resultsGrid: some View {
         LazyVGrid(
             columns: [
@@ -458,7 +334,6 @@ public struct DiscoverView: View {
                         viewModel.toggleLike(for: item)
                     },
                     onCardTapped: {
-                        // Navigate to item detail
                         print("Tapped item: \(item.id)")
                     }
                 )
@@ -471,11 +346,9 @@ public struct DiscoverView: View {
                 }
             }
         }
-        .padding(.horizontal, 16)
     }
     
     // MARK: - Shimmer Loading Grid
-    
     private var shimmerGrid: some View {
         LazyVGrid(
             columns: [
@@ -488,11 +361,9 @@ public struct DiscoverView: View {
                 ItemCardSkeleton()
             }
         }
-        .padding(.horizontal, 16)
     }
     
     // MARK: - Empty State View
-    
     private var emptyStateView: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -523,7 +394,7 @@ public struct DiscoverView: View {
             }
             
             // Reset Button
-            if viewModel.activeFilterCount > 0 || !viewModel.searchQuery.isEmpty {
+            if viewModel.filterCriteria.activeFilterCount > 0 || !viewModel.searchQuery.isEmpty {
                 Button(action: {
                     viewModel.resetFilters()
                     viewModel.clearSearch()
@@ -544,24 +415,148 @@ public struct DiscoverView: View {
         .frame(minHeight: 400)
     }
     
-    // MARK: - Helpers
+    // MARK: - Events Content
+    private var eventsContent: some View {
+        VStack(spacing: 0) {
+            // Search bar for events
+            HStack(spacing: 12) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.sageMuted)
+                
+                TextField("", text: .constant(""))
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageWhite)
+                    .placeholder(when: true) {
+                        Text("SEARCH EVENTS...")
+                            .font(.forestBodyMedium)
+                            .foregroundColor(.sageMuted)
+                    }
+                    .disabled(true)
+                
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
+            .background(Color.modaicsSurface)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.luxeGold.opacity(0.2), lineWidth: 1)
+            )
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            
+            // List/Map toggle
+            HStack(spacing: 0) {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.eventViewMode = .list
+                    }
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "list.bullet")
+                            .font(.system(size: 14))
+                        Text("LIST")
+                            .font(.forestCaptionSmall)
+                    }
+                    .foregroundColor(viewModel.eventViewMode == .list ? .modaicsBackground : .sageWhite)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(viewModel.eventViewMode == .list ? Color.luxeGold : Color.modaicsSurface)
+                    .cornerRadius(8)
+                }
+                
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.eventViewMode = .map
+                    }
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "map")
+                            .font(.system(size: 14))
+                        Text("MAP")
+                            .font(.forestCaptionSmall)
+                    }
+                    .foregroundColor(viewModel.eventViewMode == .map ? .modaicsBackground : .sageWhite)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(viewModel.eventViewMode == .map ? Color.luxeGold : Color.modaicsSurface)
+                    .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            
+            // Content based on view mode
+            if viewModel.eventViewMode == .list {
+                eventsListView
+            } else {
+                DiscoverMapView(
+                    region: $viewModel.mapRegion,
+                    events: viewModel.filteredEvents,
+                    selectedEvent: $viewModel.selectedEvent,
+                    onEventTap: { event in
+                        viewModel.selectedEvent = event
+                        viewModel.showEventDetail = true
+                    }
+                )
+            }
+        }
+    }
     
-    private func suggestionIcon(for type: SuggestionType) -> String {
-        switch type {
-        case .brand:
-            return "tag"
-        case .category:
-            return "folder"
-        case .style:
-            return "sparkles"
-        case .trending:
-            return "flame"
+    // MARK: - Events List View
+    private var eventsListView: some View {
+        ScrollView(showsIndicators: false) {
+            LazyVStack(spacing: 12) {
+                ForEach(viewModel.filteredEvents) { event in
+                    EventListCard(event: event) {
+                        viewModel.selectedEvent = event
+                        viewModel.showEventDetail = true
+                    }
+                }
+                
+                Color.clear.frame(height: 20)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 4)
         }
     }
 }
 
-// MARK: - Category Pill
-struct CategoryPill: View {
+// MARK: - Category Tab Pill
+struct CategoryTabPill: View {
+    let category: DiscoverCategory
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: category.icon)
+                    .font(.system(size: 14))
+                
+                Text(category.rawValue.uppercased())
+                    .font(.forestCaptionSmall)
+                    .fontWeight(isSelected ? .semibold : .regular)
+            }
+            .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
+            .tracking(0.5)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? Color.clear : Color.modaicsSurfaceHighlight, lineWidth: 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// MARK: - Subcategory Pill
+struct SubcategoryPill: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
@@ -573,8 +568,8 @@ struct CategoryPill: View {
                 .fontWeight(isSelected ? .semibold : .regular)
                 .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
                 .tracking(0.5)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
                 .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
                 .cornerRadius(20)
                 .overlay(
@@ -582,159 +577,7 @@ struct CategoryPill: View {
                         .stroke(isSelected ? Color.clear : Color.luxeGold.opacity(0.2), lineWidth: 1)
                 )
         }
-    }
-}
-
-// MARK: - TextField Placeholder Extension
-extension View {
-    func placeholder<Content: View>(
-        when shouldShow: Bool,
-        alignment: Alignment = .leading,
-        @ViewBuilder placeholder: () -> Content
-    ) -> some View {
-        ZStack(alignment: alignment) {
-            placeholder().opacity(shouldShow ? 1 : 0)
-            self
-        }
-    }
-}
-
-// MARK: - Visual Search Camera View
-struct VisualSearchCameraView: View {
-    @Binding var isPresented: Bool
-    let onImageSelected: (UIImage) -> Void
-    @State private var selectedImage: UIImage?
-    @State private var showImagePicker = false
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 24) {
-                Text("VISUAL SEARCH")
-                    .font(.forestHeadlineMedium)
-                    .foregroundColor(.sageWhite)
-                    .padding(.top, 20)
-                
-                Text("Take a photo or upload an image to find similar items")
-                    .font(.forestBodyMedium)
-                    .foregroundColor(.sageMuted)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                
-                if let image = selectedImage {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 300)
-                        .cornerRadius(12)
-                        .padding(.horizontal, 20)
-                } else {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.modaicsSurface)
-                        .frame(height: 300)
-                        .overlay(
-                            VStack(spacing: 16) {
-                                Image(systemName: "camera.viewfinder")
-                                    .font(.system(size: 60))
-                                    .foregroundColor(.luxeGold)
-                                Text("No image selected")
-                                    .font(.forestBodyMedium)
-                                    .foregroundColor(.sageMuted)
-                            }
-                        )
-                        .padding(.horizontal, 20)
-                }
-                
-                VStack(spacing: 12) {
-                    Button(action: {
-                        showImagePicker = true
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "photo")
-                            Text("Choose from Library")
-                        }
-                        .font(.forestBodyMedium)
-                        .foregroundColor(.modaicsBackground)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.luxeGold)
-                        .cornerRadius(12)
-                    }
-                    
-                    if selectedImage != nil {
-                        Button(action: {
-                            if let image = selectedImage {
-                                onImageSelected(image)
-                            }
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "magnifyingglass")
-                                Text("Search")
-                            }
-                            .font(.forestBodyMedium)
-                            .foregroundColor(.luxeGold)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.modaicsSurface)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.luxeGold, lineWidth: 1)
-                            )
-                            .cornerRadius(12)
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                
-                Spacer()
-            }
-            .background(Color.modaicsBackground.ignoresSafeArea())
-            .navigationBarItems(
-                leading: Button("Cancel") { isPresented = false }
-                    .foregroundColor(.sageWhite)
-            )
-            .sheet(isPresented: $showImagePicker) {
-                ImagePickerView(selectedImage: $selectedImage)
-            }
-        }
-        .preferredColorScheme(.dark)
-    }
-}
-
-// MARK: - Image Picker View
-struct ImagePickerView: UIViewControllerRepresentable {
-    @Binding var selectedImage: UIImage?
-    @Environment(\.presentationMode) var presentationMode
-    
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.delegate = context.coordinator
-        picker.sourceType = .photoLibrary
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: ImagePickerView
-        
-        init(_ parent: ImagePickerView) {
-            self.parent = parent
-        }
-        
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                parent.selectedImage = image
-            }
-            parent.presentationMode.wrappedValue.dismiss()
-        }
-        
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.presentationMode.wrappedValue.dismiss()
-        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -806,6 +649,20 @@ struct ItemCardSkeleton: View {
                 endPoint: .trailing
             )
             .offset(x: isAnimating ? geometry.size.width : -geometry.size.width)
+        }
+    }
+}
+
+// MARK: - TextField Placeholder Extension
+extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .leading,
+        @ViewBuilder placeholder: () -> Content
+    ) -> some View {
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
         }
     }
 }
