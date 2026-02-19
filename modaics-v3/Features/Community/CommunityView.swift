@@ -16,10 +16,8 @@ public enum CommunitySegment: String, CaseIterable, Identifiable {
 }
 
 // MARK: - Community View
-/// Main Community tab with Feed and Sketchbook segments
 public struct CommunityView: View {
     @StateObject private var feedViewModel = FeedViewModel()
-    @StateObject private var sketchbookViewModel = ConsumerSketchbookViewModel()
     @State private var selectedSegment: CommunitySegment = .feed
     @State private var scrollOffset: CGFloat = 0
     
@@ -115,15 +113,6 @@ public struct CommunityView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 8)
     }
-    
-    // MARK: - Content Area
-    private var contentArea: some View {
-        Group {
-            switch selectedSegment {
-            case .feed:
-                SocialFeedView(viewModel: feedViewModel)
-            case .sketchbook:
-                sketchbookContent
     
     // MARK: - Content Area
     private var contentArea: some View {
