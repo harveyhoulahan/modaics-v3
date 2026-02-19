@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // MARK: - Profile Wardrobe Content View
 public struct ProfileWardrobeContentView: View {
@@ -348,8 +349,8 @@ public struct ActivityView: View {
         .padding(.top, 8)
     }
     
-    private func groupActivitiesByDate() -> [String: [ActivityItem]] {
-        var grouped: [String: [ActivityItem]] = [:]
+    private func groupActivitiesByDate() -> [String: [ProfileActivityItem]] {
+        var grouped: [String: [ProfileActivityItem]] = [:]
         
         let calendar = Calendar.current
         let now = Date()
@@ -376,19 +377,28 @@ public struct ActivityView: View {
 
 // MARK: - Activity Row
 private struct ActivityRow: View {
-    let activity: ActivityItem
+    let activity: ProfileActivityItem
+    
+    private var iconColor: Color {
+        switch activity.iconColorName {
+        case "modaicsEco": return .modaicsEco
+        case "luxeGold": return .luxeGold
+        case "modaicsWarning": return .modaicsWarning
+        default: return .luxeGold
+        }
+    }
     
     var body: some View {
         HStack(spacing: 12) {
             // Icon
             ZStack {
                 Circle()
-                    .fill(activity.iconColor.opacity(0.15))
+                    .fill(iconColor.opacity(0.15))
                     .frame(width: 36, height: 36)
                 
                 Image(systemName: activity.icon)
                     .font(.system(size: 16))
-                    .foregroundColor(activity.iconColor)
+                    .foregroundColor(iconColor)
             }
             
             // Content

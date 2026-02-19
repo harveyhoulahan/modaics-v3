@@ -1,7 +1,8 @@
 import SwiftUI
+import Combine
 
 // MARK: - Sustainability Badge
-public enum SustainabilityBadge: String, CaseIterable, Codable {
+public enum ModaicsSustainabilityBadge: String, CaseIterable, Codable {
     case seedling = "Seedling"
     case circulator = "Circulator"
     case localShopper = "Local Shopper"
@@ -91,8 +92,8 @@ public class SustainabilityViewModel: ObservableObject {
     @Published public var waterSavedLiters: Double = 0
     @Published public var carbonSavedKg: Double = 0
     @Published public var itemsCirculated: Int = 0
-    @Published public var earnedBadges: Set<SustainabilityBadge> = []
-    @Published public var badgeProgress: [SustainabilityBadge: Double] = [:]
+    @Published public var earnedBadges: Set<ModaicsSustainabilityBadge> = []
+    @Published public var badgeProgress: [ModaicsSustainabilityBadge: Double] = [:]
     @Published public var monthlyChange: (water: Double, carbon: Double, items: Int) = (0, 0, 0)
     @Published public var isLoading: Bool = false
     
@@ -122,7 +123,7 @@ public class SustainabilityViewModel: ObservableObject {
         monthlyChange = (water: 12, carbon: 8, items: 5)
         
         // Calculate badge progress
-        for badge in SustainabilityBadge.allCases {
+        for badge in ModaicsSustainabilityBadge.allCases {
             if earnedBadges.contains(badge) {
                 badgeProgress[badge] = 1.0
             } else {
@@ -141,7 +142,7 @@ public class SustainabilityViewModel: ObservableObject {
     
     public func checkBadgeEligibility() {
         // Check each badge threshold
-        for badge in SustainabilityBadge.allCases {
+        for badge in ModaicsSustainabilityBadge.allCases {
             switch badge {
             case .seedling:
                 if itemsCirculated >= 1 { earnedBadges.insert(badge) }

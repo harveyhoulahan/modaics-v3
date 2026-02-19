@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // MARK: - Sustainability Dashboard View
 public struct SustainabilityDashboardView: View {
@@ -205,7 +206,7 @@ public struct SustainabilityDashboardView: View {
             // Badges Grid
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
-                    ForEach(SustainabilityBadge.allCases, id: \.self) { badge in
+                    ForEach(ModaicsSustainabilityBadge.allCases, id: \.self) { badge in
                         BadgeView(
                             badge: badge,
                             isEarned: viewModel.earnedBadges.contains(badge),
@@ -295,7 +296,7 @@ private struct EcoPointRow: View {
 
 // MARK: - Badge View
 private struct BadgeView: View {
-    let badge: SustainabilityBadge
+    let badge: ModaicsSustainabilityBadge
     let isEarned: Bool
     let progress: Double
     

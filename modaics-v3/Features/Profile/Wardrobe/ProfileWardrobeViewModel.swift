@@ -1,13 +1,50 @@
 import SwiftUI
 import Combine
 
+// MARK: - Activity Item
+public struct ProfileActivityItem: Identifiable, Hashable {
+    public let id: UUID
+    public var type: ActivityType
+    public var title: String
+    public var subtitle: String?
+    public var timestamp: Date
+    public var icon: String
+    public var iconColorName: String
+    
+    public enum ActivityType: String, Codable {
+        case listed, sold, swapped, rented
+        case liked, commented, followed
+        case badgeEarned, pointsEarned
+        case priceDrop, eventRSVP
+        case joinedSketchbook
+    }
+    
+    public init(
+        id: UUID = UUID(),
+        type: ActivityType,
+        title: String,
+        subtitle: String? = nil,
+        timestamp: Date,
+        icon: String,
+        iconColorName: String
+    ) {
+        self.id = id
+        self.type = type
+        self.title = title
+        self.subtitle = subtitle
+        self.timestamp = timestamp
+        self.icon = icon
+        self.iconColorName = iconColorName
+    }
+}
+
 // MARK: - Profile Wardrobe View Model
 @MainActor
 public class ProfileWardrobeViewModel: ObservableObject {
     @Published public var wardrobeItems: [WardrobeItem] = []
     @Published public var savedItems: [WardrobeItem] = []
     @Published public var savedEvents: [SavedEvent] = []
-    @Published public var activityFeed: [ActivityItem] = []
+    @Published public var activityFeed: [ProfileActivityItem] = []
     @Published public var selectedWardrobeTab: WardrobeTab = .active
     @Published public var selectedSavedFilter: SavedFilter = .all
     @Published public var isLoading: Bool = false
@@ -152,50 +189,50 @@ public class ProfileWardrobeViewModel: ObservableObject {
         
         // Mock activity feed
         activityFeed = [
-            ActivityItem(
+            ProfileActivityItem(
                 id: UUID(),
                 type: .listed,
                 title: "You listed \"Vintage Denim...\"",
                 subtitle: nil,
                 timestamp: Date(),
                 icon: "bag.fill",
-                iconColor: .modaicsEco
+                iconColorName: "modaicsEco"
             ),
-            ActivityItem(
+            ProfileActivityItem(
                 id: UUID(),
                 type: .liked,
                 title: "You liked a post by @styleguru",
                 subtitle: nil,
                 timestamp: Date().addingTimeInterval(-3600),
                 icon: "heart.fill",
-                iconColor: .luxeGold
+                iconColorName: "luxeGold"
             ),
-            ActivityItem(
+            ProfileActivityItem(
                 id: UUID(),
                 type: .badgeEarned,
                 title: "You earned the Seedling badge",
                 subtitle: nil,
                 timestamp: Date().addingTimeInterval(-7200),
                 icon: "leaf.fill",
-                iconColor: .modaicsEco
+                iconColorName: "modaicsEco"
             ),
-            ActivityItem(
+            ProfileActivityItem(
                 id: UUID(),
                 type: .priceDrop,
                 title: "Price drop on saved item",
                 subtitle: "Vintage Band Tee - now $45",
                 timestamp: Date().addingTimeInterval(-86400),
                 icon: "tag.fill",
-                iconColor: .modaicsWarning
+                iconColorName: "modaicsWarning"
             ),
-            ActivityItem(
+            ProfileActivityItem(
                 id: UUID(),
                 type: .eventRSVP,
                 title: "You RSVP'd to Fitzroy Market",
                 subtitle: nil,
                 timestamp: Date().addingTimeInterval(-172800),
                 icon: "calendar",
-                iconColor: .luxeGold
+                iconColorName: "luxeGold"
             )
         ]
     }
@@ -290,42 +327,5 @@ public struct SavedEvent: Identifiable, Codable, Hashable {
         self.title = title
         self.date = date
         self.location = location
-    }
-}
-
-// MARK: - Activity Item
-public struct ActivityItem: Identifiable, Codable, Hashable {
-    public let id: UUID
-    public var type: ActivityType
-    public var title: String
-    public var subtitle: String?
-    public var timestamp: Date
-    public var icon: String
-    public var iconColor: Color
-    
-    public enum ActivityType: String, Codable {
-        case listed, sold, swapped, rented
-        case liked, commented, followed
-        case badgeEarned, pointsEarned
-        case priceDrop, eventRSVP
-        case joinedSketchbook
-    }
-    
-    public init(
-        id: UUID = UUID(),
-        type: ActivityType,
-        title: String,
-        subtitle: String? = nil,
-        timestamp: Date,
-        icon: String,
-        iconColor: Color
-    ) {
-        self.id = id
-        self.type = type
-        self.title = title
-        self.subtitle = subtitle
-        self.timestamp = timestamp
-        self.icon = icon
-        self.iconColor = iconColor
     }
 }
