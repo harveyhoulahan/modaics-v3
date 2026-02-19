@@ -13,34 +13,28 @@ struct ModaicsApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(appState)
+                .preferredColorScheme(.dark)
         }
     }
     
     private func configureAppearance() {
-        // Tab bar appearance - warm sand background
-        let tabBarAppearance = UITabBarAppearance()
-        tabBarAppearance.configureWithOpaqueBackground()
-        tabBarAppearance.backgroundColor = UIColor(Color.modaicsWarmSand)
+        // Set dark mode as default
+        UITraitCollection.current = UITraitCollection(traitsFrom: [
+            UITraitCollection.current,
+            UITraitCollection(userInterfaceStyle: .dark)
+        ])
         
-        tabBarAppearance.stackedLayoutAppearance.normal.iconColor = UIColor(Color.modaicsStone)
-        tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [
-            .foregroundColor: UIColor(Color.modaicsStone)
-        ]
-        tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.modaicsTerracotta)
-        tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [
-            .foregroundColor: UIColor(Color.modaicsTerracotta)
-        ]
-        
-        UITabBar.appearance().standardAppearance = tabBarAppearance
-        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-        
-        // Navigation bar appearance
+        // Navigation bar appearance - transparent with dark green styling
         let navBarAppearance = UINavigationBarAppearance()
-        navBarAppearance.configureWithOpaqueBackground()
-        navBarAppearance.backgroundColor = UIColor(Color.modaicsWarmSand)
+        navBarAppearance.configureWithTransparentBackground()
+        navBarAppearance.backgroundColor = UIColor(Color.modaicsBackground)
         navBarAppearance.titleTextAttributes = [
-            .foregroundColor: UIColor(Color.modaicsCharcoal),
-            .font: UIFont(name: "PlayfairDisplay-Bold", size: 20) ?? UIFont.systemFont(ofSize: 20, weight: .bold)
+            .foregroundColor: UIColor(Color.sageWhite),
+            .font: UIFont.monospacedSystemFont(ofSize: 17, weight: .medium)
+        ]
+        navBarAppearance.largeTitleTextAttributes = [
+            .foregroundColor: UIColor(Color.sageWhite),
+            .font: UIFont.monospacedSystemFont(ofSize: 34, weight: .bold)
         ]
         
         UINavigationBar.appearance().standardAppearance = navBarAppearance

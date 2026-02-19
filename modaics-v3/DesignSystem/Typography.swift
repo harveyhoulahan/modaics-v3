@@ -1,128 +1,69 @@
 import SwiftUI
 
 // MARK: - Modaics Typography
-/// Editorial typography system
-/// Playfair Display for headings (elegant, editorial)
-/// Inter for body text (clean, readable)
+/// Monospaced fonts throughout — clean, technical, luxury aesthetic
 public extension Font {
     
-    // MARK: - Display Fonts (Playfair Display)
+    // MARK: - Display (Large Titles)
+    static func forestDisplay(_ size: CGFloat) -> Font {
+        .system(size: size, weight: .medium, design: .monospaced)
+    }
     
-    /// Splash/hero title - 42pt bold
-    static let modaicsSplashTitle = Font.custom("PlayfairDisplay-Bold", size: 42)
+    static var forestDisplayLarge: Font { forestDisplay(36) }
+    static var forestDisplayMedium: Font { forestDisplay(28) }
+    static var forestDisplaySmall: Font { forestDisplay(22) }
     
-    /// Large display - 36pt bold
-    static let modaicsDisplayLarge = Font.custom("PlayfairDisplay-Bold", size: 36)
+    // MARK: - Headlines (Section Titles)
+    static func forestHeadline(_ size: CGFloat) -> Font {
+        .system(size: size, weight: .medium, design: .monospaced)
+    }
     
-    /// Medium display - 32pt bold
-    static let modaicsDisplayMedium = Font.custom("PlayfairDisplay-Bold", size: 32)
+    static var forestHeadlineLarge: Font { forestHeadline(20) }
+    static var forestHeadlineMedium: Font { forestHeadline(18) }
+    static var forestHeadlineSmall: Font { forestHeadline(16) }
     
-    /// Small display - 28pt bold
-    static let modaicsDisplaySmall = Font.custom("PlayfairDisplay-Bold", size: 28)
+    // MARK: - Body
+    static func forestBody(_ size: CGFloat) -> Font {
+        .system(size: size, weight: .medium, design: .monospaced)
+    }
     
-    // MARK: - Heading Fonts (Playfair Display)
+    static var forestBodyLarge: Font { forestBody(16) }
+    static var forestBodyMedium: Font { forestBody(14) }
+    static var forestBodySmall: Font { forestBody(12) }
     
-    /// Large heading - 24pt semi-bold
-    static let modaicsHeadingLarge = Font.custom("PlayfairDisplay-SemiBold", size: 24)
+    // MARK: - Captions / Labels (ALL CAPS with tracking)
+    static func forestCaption(_ size: CGFloat) -> Font {
+        .system(size: size, weight: .medium, design: .monospaced)
+    }
     
-    /// Medium heading - 20pt semi-bold
-    static let modaicsHeadingSemiBold = Font.custom("PlayfairDisplay-SemiBold", size: 20)
+    static var forestCaptionLarge: Font { forestCaption(13) }
+    static var forestCaptionMedium: Font { forestCaption(11) }
+    static var forestCaptionSmall: Font { forestCaption(10) }
     
-    /// Heading 1 - 22pt medium
-    static let modaicsHeadline1 = Font.custom("PlayfairDisplay-Medium", size: 22)
-    
-    /// Heading 2 - 20pt medium
-    static let modaicsHeadline2 = Font.custom("PlayfairDisplay-Medium", size: 20)
-    
-    /// Heading 3 - 18pt medium
-    static let modaicsHeadline3 = Font.custom("PlayfairDisplay-Medium", size: 18)
-    
-    /// Card title - 18pt medium
-    static let modaicsCardTitle = Font.custom("PlayfairDisplay-Medium", size: 18)
-    
-    // MARK: - Body Fonts (Inter)
-    
-    /// Large body - 17pt regular
-    static let modaicsBodyLarge = Font.custom("Inter-Regular", size: 17)
-    
-    /// Body - 15pt regular
-    static let modaicsBodyRegular = Font.custom("Inter-Regular", size: 15)
-    
-    /// Body emphasis - 15pt medium
-    static let modaicsBodyEmphasis = Font.custom("Inter-Medium", size: 15)
-    
-    /// Body semi-bold - 15pt semi-bold
-    static let modaicsBodySemiBold = Font.custom("Inter-SemiBold", size: 15)
-    
-    /// Label - 14pt medium
-    static let modaicsLabel = Font.custom("Inter-Medium", size: 14)
-    
-    // MARK: - Supporting Fonts (Inter)
-    
-    /// Button text - 16pt semi-bold
-    static let modaicsButton = Font.custom("Inter-SemiBold", size: 16)
-    
-    /// Caption - 13pt medium
-    static let modaicsCaption = Font.custom("Inter-Medium", size: 13)
-    
-    /// Caption regular - 13pt regular
-    static let modaicsCaptionRegular = Font.custom("Inter-Regular", size: 13)
-    
-    /// Fine print - 12pt medium (for tags, labels)
-    static let modaicsFinePrint = Font.custom("Inter-Medium", size: 12)
-    
-    /// Small - 12pt regular
-    static let modaicsSmall = Font.custom("Inter-Regular", size: 12)
-    
-    /// Micro - 11pt regular
-    static let modaicsMicro = Font.custom("Inter-Regular", size: 11)
+    // MARK: - Tab Labels (All caps, spaced)
+    static var forestTabLabel: Font {
+        .system(size: 10, weight: .semibold, design: .monospaced)
+    }
 }
 
-// MARK: - Font Modifiers
-
+// MARK: - Text Modifiers
 public extension View {
-    
-    /// Applies splash title style
-    func modaicsSplashTitleStyle() -> some View {
-        self.font(.modaicsSplashTitle)
-            .foregroundColor(.modaicsTextPrimary)
+    func forestCapsuleStyle() -> some View {
+        self
+            .font(.forestCaptionMedium)
+            .textCase(.uppercase)
+            .tracking(1.2)
     }
     
-    /// Applies heading style
-    func modaicsHeadingStyle(size: ModaicsHeadingSize = .medium) -> some View {
-        self.font(size.font)
-            .foregroundColor(.modaicsTextPrimary)
+    func forestSectionTitle() -> some View {
+        self
+            .font(.forestHeadlineMedium)
+            .foregroundColor(.sageWhite)
     }
     
-    /// Applies body style
-    func modaicsBodyStyle(emphasis: ModaicsBodyEmphasis = .regular) -> some View {
-        self.font(emphasis.font)
-            .foregroundColor(.modaicsTextPrimary)
-    }
-}
-
-// MARK: - Typography Enums
-
-public enum ModaicsHeadingSize {
-    case large, medium, small
-    
-    var font: Font {
-        switch self {
-        case .large: return .modaicsHeadingLarge
-        case .medium: return .modaicsHeadingSemiBold
-        case .small: return .modaicsHeadline3
-        }
-    }
-}
-
-public enum ModaicsBodyEmphasis {
-    case regular, medium, semibold
-    
-    var font: Font {
-        switch self {
-        case .regular: return .modaicsBodyRegular
-        case .medium: return .modaicsBodyEmphasis
-        case .semibold: return .modaicsBodySemiBold
-        }
+    func forestSectionSubtitle() -> some View {
+        self
+            .font(.forestCaptionMedium)
+            .foregroundColor(.sageMuted)
     }
 }

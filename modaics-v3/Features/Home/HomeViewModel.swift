@@ -10,6 +10,8 @@ class HomeViewModel: ObservableObject {
     @Published var nearbyEvents: [ModaicsEvent] = []
     @Published var wardrobePreview: [ModaicsGarment] = []
     @Published var trendingPieces: [ModaicsGarment] = []
+    @Published var wardrobeCount: Int = 0
+    @Published var savedCount: Int = 0
     @Published var isLoading: Bool = false
     @Published var error: String?
     
@@ -104,6 +106,10 @@ class HomeViewModel: ObservableObject {
         
         // Mock eco score
         ecoScore = 1250
+        
+        // Stats
+        wardrobeCount = 12
+        savedCount = 8
     }
 }
 

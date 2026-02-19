@@ -35,12 +35,26 @@ enum Tab: String, CaseIterable, Identifiable {
     
     var id: String { rawValue }
     
+    var label: String {
+        return rawValue.uppercased()
+    }
+    
     var icon: String {
         switch self {
         case .home: return "house.fill"
         case .discover: return "magnifyingglass"
         case .create: return "plus.circle.fill"
         case .community: return "person.3.fill"
+        case .profile: return "square.grid.2x2"
+        }
+    }
+    
+    var inactiveIcon: String {
+        switch self {
+        case .home: return "house"
+        case .discover: return "magnifyingglass"
+        case .create: return "plus.circle"
+        case .community: return "person.3"
         case .profile: return "square.grid.2x2"
         }
     }
