@@ -87,12 +87,12 @@ class FirebaseAuthService: AuthServiceProtocol {
         try Auth.auth().signOut()
         NotificationCenter.default.post(name: .authStateChanged, object: nil)
     }
-#endif
     
     func resetPassword(email: String) async throws {
         try await Auth.auth().sendPasswordReset(withEmail: email)
     }
 }
+#endif
 
 enum AuthError: Error {
     case notImplemented
@@ -103,6 +103,7 @@ enum AuthError: Error {
 
 // MARK: - Firebase Auth Token Provider
 
+#if canImport(FirebaseAuth)
 class FirebaseAuthTokenProvider: AuthTokenProvider {
     func getToken() async throws -> String {
         guard let user = Auth.auth().currentUser else {
@@ -122,6 +123,7 @@ class FirebaseAuthTokenProvider: AuthTokenProvider {
         // Token is managed by Firebase
     }
 }
+#endif
 
 // MARK: - Legacy API Client (v1)
 /// Maintained for backward compatibility during migration
