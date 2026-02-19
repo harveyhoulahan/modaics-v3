@@ -1,180 +1,108 @@
 import SwiftUI
 
-// MARK: - Modaics v3.0 Color System
-// Mediterranean warmth aesthetic: Aesop + Kinfolk + Le Labo
-// Rules: NO gradients, NO pure white/black, warm tones only
-
-public struct MosaicColors {
+// MARK: - Modaics Colors
+/// Mediterranean-inspired color palette
+/// Warm sand backgrounds, terracotta accents, deep olive details
+public extension Color {
     
-    // MARK: - Primary Palette
+    // MARK: - Primary Colors
     
-    /// Terracotta - Primary accent for CTAs, highlights, brand moments
-    public static let terracotta = Color(hex: "#C2703E")
+    /// Warm sand - primary app background
+    static let modaicsWarmSand = Color(red: 0.96, green: 0.94, blue: 0.90)
     
-    /// Warm Sand - Primary background, creates that sun-baked Mediterranean feel
-    public static let warmSand = Color(hex: "#E8D5B7")
+    /// Paper - card/elevated surface background
+    static let modaicsPaper = Color(red: 0.98, green: 0.97, blue: 0.95)
     
-    /// Deep Olive - Secondary accent for sophistication and depth
-    public static let deepOlive = Color(hex: "#5B6B4A")
+    /// Cream - alternative light background
+    static let modaicsCream = Color(red: 0.99, green: 0.98, blue: 0.96)
     
-    /// Charcoal Clay - Primary text color, warm and grounded
-    public static let charcoalClay = Color(hex: "#3B3632")
+    /// Oatmeal - subtle background variation
+    static let modaicsOatmeal = Color(red: 0.94, green: 0.92, blue: 0.88)
     
-    /// Cream - Light backgrounds, cards, elevated surfaces
-    public static let cream = Color(hex: "#F5F0E8")
+    // MARK: - Accent Colors
     
-    // MARK: - Supporting Colors
+    /// Terracotta - primary accent color
+    static let modaicsTerracotta = Color(red: 0.80, green: 0.38, blue: 0.27)
     
-    /// Burnt Sienna - Warm accent for emphasis, complementary to terracotta
-    public static let burntSienna = Color(hex: "#A0522D")
+    /// Deep olive - secondary accent
+    static let modaicsDeepOlive = Color(red: 0.35, green: 0.40, blue: 0.30)
     
-    /// Sage - Natural, calming accent for secondary elements
-    public static let sage = Color(hex: "#9CAF88")
+    /// Sage - success states, eco-friendly indicators
+    static let modaicsSage = Color(red: 0.47, green: 0.58, blue: 0.47)
     
-    /// Oatmeal - Neutral background alternative, softer than cream
-    public static let oatmeal = Color(hex: "#E6DCC8")
+    /// Ochre - warning states
+    static let modaicsOchre = Color(red: 0.80, green: 0.52, blue: 0.25)
     
-    /// Burgundy - Deep accent for luxury moments, sparing use
-    public static let burgundy = Color(hex: "#722F37")
+    /// Rust - error states
+    static let modaicsRust = Color(red: 0.71, green: 0.28, blue: 0.21)
     
-    // MARK: - Semantic Colors
+    // MARK: - Text Colors
     
-    /// Primary background for screens
-    public static let backgroundPrimary = warmSand
+    /// Charcoal - primary text color
+    static let modaicsCharcoal = Color(red: 0.20, green: 0.18, blue: 0.16)
     
-    /// Secondary background for cards and elevated surfaces
-    public static let backgroundSecondary = cream
+    /// Charcoal clay - slightly warmer text variant
+    static let modaicsCharcoalClay = Color(red: 0.22, green: 0.20, blue: 0.17)
     
-    /// Tertiary background for subtle differentiation
-    public static let backgroundTertiary = oatmeal
+    /// Stone - secondary/muted text
+    static let modaicsStone = Color(red: 0.50, green: 0.47, blue: 0.44)
     
-    /// Primary text color
-    public static let textPrimary = charcoalClay
+    // MARK: - Semantic Aliases
     
-    /// Secondary text for captions, metadata
-    public static let textSecondary = charcoalClay.opacity(0.65)
+    /// Primary background
+    static let modaicsBackgroundPrimary: Color = .modaicsWarmSand
     
-    /// Tertiary text for hints, placeholders
-    public static let textTertiary = charcoalClay.opacity(0.40)
+    /// Secondary background (cards, sheets)
+    static let modaicsBackgroundSecondary: Color = .modaicsPaper
     
-    /// Accent for interactive elements
-    public static let accentPrimary = terracotta
+    /// Primary text
+    static let modaicsTextPrimary: Color = .modaicsCharcoal
     
-    /// Secondary accent for variety
-    public static let accentSecondary = deepOlive
+    /// Secondary text
+    static let modaicsTextSecondary: Color = .modaicsStone
     
-    /// Success states - muted sage green
-    public static let success = sage
+    /// Tertiary/subtle text
+    static let modaicsTextTertiary: Color = .modaicsCharcoal.opacity(0.5)
     
-    /// Error states - muted terracotta
-    public static let error = burntSienna
+    /// Primary accent
+    static let modaicsAccent: Color = .modaicsTerracotta
     
-    /// Warning states - warm amber
-    public static let warning = Color(hex: "#D4A574")
+    /// Success color
+    static let modaicsSuccess: Color = .modaicsSage
     
-    // MARK: - Divider & Border
+    /// Error color
+    static let modaicsError: Color = .modaicsRust
     
-    /// Subtle dividers
-    public static let divider = charcoalClay.opacity(0.08)
-    
-    /// Border for inputs and cards
-    public static let border = charcoalClay.opacity(0.12)
-    
-    /// Focused border
-    public static let borderFocused = terracotta.opacity(0.50)
-    
-    // MARK: - Shadow
-    
-    /// Subtle shadow color - warm tinted
-    public static let shadow = Color(hex: "#3B3632").opacity(0.08)
+    /// Warning color
+    static let modaicsWarning: Color = .modaicsOchre
 }
 
-// MARK: - Color Extension for Hex Support
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
-    }
-}
+// MARK: - Color Gradients
 
-// MARK: - SwiftUI Preview
-#Preview {
-    ScrollView {
-        VStack(spacing: 24) {
-            Text("Modaics Color Palette")
-                .font(.system(.title, design: .serif))
-                .foregroundColor(MosaicColors.textPrimary)
-            
-            ColorSection(title: "Primary", colors: [
-                ("Terracotta", MosaicColors.terracotta),
-                ("Warm Sand", MosaicColors.warmSand),
-                ("Deep Olive", MosaicColors.deepOlive),
-                ("Charcoal Clay", MosaicColors.charcoalClay),
-                ("Cream", MosaicColors.cream),
-            ])
-            
-            ColorSection(title: "Supporting", colors: [
-                ("Burnt Sienna", MosaicColors.burntSienna),
-                ("Sage", MosaicColors.sage),
-                ("Oatmeal", MosaicColors.oatmeal),
-                ("Burgundy", MosaicColors.burgundy),
-            ])
-            
-            ColorSection(title: "Semantic", colors: [
-                ("Background Primary", MosaicColors.backgroundPrimary),
-                ("Background Secondary", MosaicColors.backgroundSecondary),
-                ("Text Primary", MosaicColors.textPrimary),
-                ("Accent Primary", MosaicColors.accentPrimary),
-                ("Success", MosaicColors.success),
-            ])
-        }
-        .padding()
-    }
-    .background(MosaicColors.backgroundPrimary)
-}
-
-struct ColorSection: View {
-    let title: String
-    let colors: [(String, Color)]
+public extension LinearGradient {
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.system(.headline, design: .serif))
-                .foregroundColor(MosaicColors.textPrimary)
-            
-            ForEach(colors, id: \.0) { name, color in
-                HStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(color)
-                        .frame(width: 48, height: 48)
-                    
-                    Text(name)
-                        .font(.system(.body, design: .serif))
-                        .foregroundColor(MosaicColors.textPrimary)
-                    
-                    Spacer()
-                }
-            }
-        }
-    }
+    /// Warm gradient overlay for images
+    static let modaicsWarmOverlay = LinearGradient(
+        colors: [
+            Color.modaicsWarmSand.opacity(0),
+            Color.modaicsWarmSand.opacity(0.8),
+            Color.modaicsWarmSand
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+    
+    /// Terracotta accent gradient
+    static let modaicsTerracottaGradient = LinearGradient(
+        colors: [Color.modaicsTerracotta, Color.modaicsTerracotta.opacity(0.8)],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+    
+    /// Subtle warm gradient for backgrounds
+    static let modaicsWarmGradient = LinearGradient(
+        colors: [Color.modaicsWarmSand, Color.modaicsOatmeal],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
 }

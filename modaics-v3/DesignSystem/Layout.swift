@@ -1,77 +1,96 @@
 import SwiftUI
 
-// MARK: - Modaics v3.0 Layout System
-// Generous margins, asymmetric layouts, mosaic motif helpers
-// Mediterranean warmth: spacious, intentional, artful
-
-public struct MosaicLayout {
+// MARK: - Modaics Layout
+/// Consistent spacing, sizing, and layout values
+public enum ModaicsLayout {
     
-    // MARK: - Margins & Spacing
+    // MARK: - Spacing
     
-    /// Generous screen margins (15%+ on each side)
-    public static let margin: CGFloat = 24
+    /// 2pt - micro spacing
+    public static let microSpacing: CGFloat = 2
     
-    /// Extra generous margins for editorial moments
-    public static let marginGenerous: CGFloat = 40
+    /// 4pt - extra extra small
+    public static let xxsmall: CGFloat = 4
     
-    /// Compact margins for dense content
-    public static let marginCompact: CGFloat = 16
+    /// 6pt - extra small tight
+    public static let tightSpacing: CGFloat = 6
     
-    /// Edge padding for full-bleed content
-    public static let edgePadding: CGFloat = 20
+    /// 8pt - extra small
+    public static let xsmall: CGFloat = 8
     
-    // MARK: - Section Spacing
+    /// 12pt - small (item spacing)
+    public static let small: CGFloat = 12
     
-    /// Space between major sections
-    public static let sectionSpacing: CGFloat = 48
+    /// 12pt - item spacing alias
+    public static let itemSpacing: CGFloat = 12
     
-    /// Space between content groups
-    public static let groupSpacing: CGFloat = 32
+    /// 16pt - medium
+    public static let medium: CGFloat = 16
     
-    /// Space between related items
-    public static let itemSpacing: CGFloat = 16
+    /// 20pt - standard margin
+    public static let margin: CGFloat = 20
     
-    /// Space between tight elements
-    public static let tightSpacing: CGFloat = 8
+    /// 24pt - large
+    public static let large: CGFloat = 24
     
-    /// Space for micro adjustments
-    public static let microSpacing: CGFloat = 4
+    /// 32pt - extra large
+    public static let xlarge: CGFloat = 32
     
-    // MARK: - Corner Radii
+    /// 48pt - extra extra large
+    public static let xxlarge: CGFloat = 48
     
-    /// Standard corner radius for cards
+    /// 64pt - extra extra extra large
+    public static let xxxlarge: CGFloat = 64
+    
+    // MARK: - Corner Radius
+    
+    /// 4pt - small radius
+    public static let cornerRadiusSmall: CGFloat = 4
+    
+    /// 8pt - medium radius
+    public static let cornerRadiusMedium: CGFloat = 8
+    
+    /// 12pt - large radius (cards)
     public static let cornerRadius: CGFloat = 12
     
-    /// Generous corner radius for featured elements
-    public static let cornerRadiusLarge: CGFloat = 20
+    /// 16pt - extra large radius
+    public static let cornerRadiusLarge: CGFloat = 16
     
-    /// Subtle corner radius for minimal elements
-    public static let cornerRadiusSmall: CGFloat = 8
+    /// 24pt - button radius
+    public static let cornerRadiusButton: CGFloat = 24
     
-    /// Pill-shaped corners
-    public static let cornerRadiusPill: CGFloat = 100
+    /// 999pt - fully rounded
+    public static let cornerRadiusRound: CGFloat = 999
     
     // MARK: - Shadows
     
-    /// Subtle shadow for cards (flat, not gradient)
+    /// Small shadow for subtle elevation
     public static let shadowSmall = ShadowStyle(
-        color: MosaicColors.shadow,
+        color: Color.black.opacity(0.08),
+        radius: 4,
+        x: 0,
+        y: 2
+    )
+    
+    /// Medium shadow for cards
+    public static let shadowMedium = ShadowStyle(
+        color: Color.black.opacity(0.1),
         radius: 8,
         x: 0,
         y: 4
     )
     
-    /// Medium shadow for elevated elements
-    public static let shadowMedium = ShadowStyle(
-        color: MosaicColors.shadow,
+    /// Large shadow for prominent elevation
+    public static let shadowLarge = ShadowStyle(
+        color: Color.black.opacity(0.12),
         radius: 16,
         x: 0,
         y: 8
     )
     
-    /// Large shadow for modal/overlays
-    public static let shadowLarge = ShadowStyle(
-        color: MosaicColors.shadow,
+    /// Extra large shadow for modals
+    public static let shadowXLarge = ShadowStyle(
+        color: Color.black.opacity(0.15),
         radius: 24,
         x: 0,
         y: 12
@@ -79,14 +98,16 @@ public struct MosaicLayout {
     
     // MARK: - Grid
     
-    /// Standard grid columns count
-    public static let gridColumns = 2
+    /// Standard grid columns for mosaic layout
+    public static let mosaicColumns = [
+        GridItem(.adaptive(minimum: 100, maximum: 120), spacing: 12)
+    ]
     
-    /// Grid spacing
-    public static let gridSpacing: CGFloat = 16
-    
-    /// Asymmetric golden ratio (for split layouts)
-    public static let goldenRatio: CGFloat = 0.618
+    /// Collection grid columns
+    public static let collectionColumns = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
 }
 
 // MARK: - Shadow Style
@@ -105,255 +126,55 @@ public struct ShadowStyle {
     }
 }
 
-// MARK: - Mosaic Motif Helpers
+// MARK: - View Extensions for Layout
 
-public struct MosaicMotif {
+public extension View {
     
-    /// Offset for asymmetric layouts (shifts content off-center)
-    public static let asymmetricOffset: CGFloat = 32
-    
-    /// Creates an asymmetric padding where leading is larger than trailing
-    public static func asymmetricLeading(_ value: CGFloat = MosaicLayout.marginGenerous) -> EdgeInsets {
-        EdgeInsets(
-            top: 0,
-            leading: value,
-            bottom: 0,
-            trailing: MosaicLayout.margin
-        )
+    /// Applies a mosaic shadow style
+    func modaicsShadow(_ style: ShadowStyle) -> some View {
+        self.shadow(color: style.color, radius: style.radius, x: style.x, y: style.y)
     }
     
-    /// Creates an asymmetric padding where trailing is larger than leading
-    public static func asymmetricTrailing(_ value: CGFloat = MosaicLayout.marginGenerous) -> EdgeInsets {
-        EdgeInsets(
-            top: 0,
-            leading: MosaicLayout.margin,
-            bottom: 0,
-            trailing: value
-        )
+    /// Applies small shadow
+    func modaicsShadowSmall() -> some View {
+        modaicsShadow(ModaicsLayout.shadowSmall)
     }
     
-    /// Creates a staggered offset for grid items
-    public static func staggeredOffset(for index: Int) -> CGFloat {
-        index % 2 == 0 ? 0 : 24
+    /// Applies medium shadow
+    func modaicsShadowMedium() -> some View {
+        modaicsShadow(ModaicsLayout.shadowMedium)
     }
     
-    /// Creates a mosaic grid layout with varying item sizes
-    public static func mosaicGrid() -> [GridItem] {
-        [
-            GridItem(.flexible(), spacing: MosaicLayout.gridSpacing),
-            GridItem(.flexible(), spacing: MosaicLayout.gridSpacing)
-        ]
+    /// Applies large shadow
+    func modaicsShadowLarge() -> some View {
+        modaicsShadow(ModaicsLayout.shadowLarge)
     }
     
-    /// Creates an editorial offset layout (content slightly off-center for artful feel)
-    public static func editorialOffset() -> CGFloat {
-        -20
+    /// Standard card padding
+    func modaicsCardPadding() -> some View {
+        self.padding(ModaicsLayout.margin)
+    }
+    
+    /// Standard screen padding
+    func modaicsScreenPadding() -> some View {
+        self.padding(.horizontal, ModaicsLayout.large)
+            .padding(.vertical, ModaicsLayout.medium)
     }
 }
 
-// MARK: - View Modifiers
+// MARK: - Animations
 
-public struct GenerousMarginModifier: ViewModifier {
-    public func body(content: Content) -> some View {
-        content
-            .padding(.horizontal, MosaicLayout.margin)
-    }
-}
-
-public struct CardStyleModifier: ViewModifier {
-    public func body(content: Content) -> some View {
-        content
-            .padding(MosaicLayout.margin)
-            .background(MosaicColors.backgroundSecondary)
-            .cornerRadius(MosaicLayout.cornerRadius)
-            .shadow(
-                color: MosaicLayout.shadowSmall.color,
-                radius: MosaicLayout.shadowSmall.radius,
-                x: MosaicLayout.shadowSmall.x,
-                y: MosaicLayout.shadowSmall.y
-            )
-    }
-}
-
-public struct AsymmetricLayoutModifier: ViewModifier {
-    let favorLeading: Bool
+public extension Animation {
     
-    public func body(content: Content) -> some View {
-        content
-            .padding(
-                favorLeading ?
-                MosaicMotif.asymmetricLeading() :
-                MosaicMotif.asymmetricTrailing()
-            )
-    }
-}
-
-// MARK: - SwiftUI Extensions
-
-extension View {
-    /// Apply generous horizontal margins
-    public func generousMargins() -> some View {
-        modifier(GenerousMarginModifier())
-    }
+    /// Quick animation (0.15s)
+    static let modaicsQuick = Animation.easeInOut(duration: 0.15)
     
-    /// Apply standard card styling
-    public func cardStyle() -> some View {
-        modifier(CardStyleModifier())
-    }
+    /// Standard animation (0.3s)
+    static let modaicsStandard = Animation.easeInOut(duration: 0.3)
     
-    /// Apply asymmetric layout with more space on one side
-    public func asymmetric(favorLeading: Bool = true) -> some View {
-        modifier(AsymmetricLayoutModifier(favorLeading: favorLeading))
-    }
+    /// Smooth spring animation
+    static let modaicsSmooth = Animation.spring(response: 0.4, dampingFraction: 0.8)
     
-    /// Apply mosaic shadow
-    public func mosaicShadow(_ style: ShadowStyle = MosaicLayout.shadowSmall) -> some View {
-        self.shadow(
-            color: style.color,
-            radius: style.radius,
-            x: style.x,
-            y: style.y
-        )
-    }
-    
-    /// Apply editorial offset for artful positioning
-    public func editorialOffset() -> some View {
-        self.offset(x: MosaicMotif.editorialOffset())
-    }
-}
-
-// MARK: - Layout Containers
-
-public struct GenerousVStack<Content: View>: View {
-    let spacing: CGFloat
-    let content: Content
-    
-    public init(spacing: CGFloat = MosaicLayout.groupSpacing, @ViewBuilder content: () -> Content) {
-        self.spacing = spacing
-        self.content = content()
-    }
-    
-    public var body: some View {
-        VStack(alignment: .leading, spacing: spacing) {
-            content
-        }
-        .padding(.horizontal, MosaicLayout.margin)
-    }
-}
-
-public struct AsymmetricContainer<Content: View>: View {
-    let favorLeading: Bool
-    let content: Content
-    
-    public init(favorLeading: Bool = true, @ViewBuilder content: () -> Content) {
-        self.favorLeading = favorLeading
-        self.content = content()
-    }
-    
-    public var body: some View {
-        content
-            .padding(favorLeading ? .leading : .trailing, MosaicLayout.marginGenerous)
-            .padding(favorLeading ? .trailing : .leading, MosaicLayout.margin)
-    }
-}
-
-public struct MosaicGrid<Content: View>: View {
-    let columns: Int
-    let spacing: CGFloat
-    let content: Content
-    
-    public init(
-        columns: Int = MosaicLayout.gridColumns,
-        spacing: CGFloat = MosaicLayout.gridSpacing,
-        @ViewBuilder content: () -> Content
-    ) {
-        self.columns = columns
-        self.spacing = spacing
-        self.content = content()
-    }
-    
-    public var body: some View {
-        LazyVGrid(
-            columns: Array(repeating: GridItem(.flexible(), spacing: spacing), count: columns),
-            spacing: spacing
-        ) {
-            content
-        }
-        .padding(.horizontal, MosaicLayout.margin)
-    }
-}
-
-// MARK: - SwiftUI Preview
-#Preview {
-    ScrollView {
-        VStack(spacing: MosaicLayout.sectionSpacing) {
-            Text("Layout System")
-                .font(MosaicTypography.display)
-                .foregroundColor(MosaicColors.textPrimary)
-                .generousMargins()
-            
-            // Generous margins demo
-            VStack(alignment: .leading, spacing: MosaicLayout.itemSpacing) {
-                Text("Generous Margins")
-                    .font(MosaicTypography.headline)
-                    .foregroundColor(MosaicColors.textPrimary)
-                
-                RoundedRectangle(cornerRadius: MosaicLayout.cornerRadius)
-                    .fill(MosaicColors.terracotta.opacity(0.2))
-                    .frame(height: 80)
-                    .overlay(
-                        Text("15%+ margins create breathing room")
-                            .mosaicBody()
-                    )
-            }
-            .generousMargins()
-            
-            // Card style demo
-            VStack(alignment: .leading, spacing: MosaicLayout.itemSpacing) {
-                Text("Card Style")
-                    .font(MosaicTypography.headline)
-                    .foregroundColor(MosaicColors.textPrimary)
-                
-                Text("Subtle shadows, flat colors, warm cream background")
-                    .mosaicBody()
-            }
-            .cardStyle()
-            .generousMargins()
-            
-            // Asymmetric layout demo
-            AsymmetricContainer(favorLeading: true) {
-                VStack(alignment: .leading, spacing: MosaicLayout.itemSpacing) {
-                    Text("Asymmetric Layout")
-                        .font(MosaicTypography.headline)
-                        .foregroundColor(MosaicColors.textPrimary)
-                    
-                    Text("Content shifted off-center for editorial artfulness")
-                        .mosaicBody()
-                    
-                    RoundedRectangle(cornerRadius: MosaicLayout.cornerRadius)
-                        .fill(MosaicColors.deepOlive.opacity(0.3))
-                        .frame(height: 120)
-                }
-            }
-            
-            // Mosaic grid demo
-            VStack(alignment: .leading, spacing: MosaicLayout.itemSpacing) {
-                Text("Mosaic Grid")
-                    .font(MosaicTypography.headline)
-                    .foregroundColor(MosaicColors.textPrimary)
-                    .generousMargins()
-                
-                MosaicGrid {
-                    ForEach(0..<4) { index in
-                        RoundedRectangle(cornerRadius: MosaicLayout.cornerRadius)
-                            .fill(MosaicColors.terracotta.opacity(0.2 + Double(index) * 0.1))
-                            .frame(height: 100 + (index % 2 == 0 ? 0 : 40))
-                            .offset(y: MosaicMotif.staggeredOffset(for: index))
-                    }
-                }
-            }
-        }
-        .padding(.vertical, MosaicLayout.sectionSpacing)
-    }
-    .background(MosaicColors.backgroundPrimary)
+    /// Bouncy spring animation
+    static let modaicsBouncy = Animation.spring(response: 0.5, dampingFraction: 0.6)
 }

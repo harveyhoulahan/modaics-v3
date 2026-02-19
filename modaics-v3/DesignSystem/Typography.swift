@@ -1,244 +1,128 @@
 import SwiftUI
 
-// MARK: - Modaics v3.0 Typography System
-// Editorial feel: Aesop + Kinfolk magazine + Le Labo
-// System fonts styled for warmth, generous line height, no bold weights
-
-public struct MosaicTypography {
+// MARK: - Modaics Typography
+/// Editorial typography system
+/// Playfair Display for headings (elegant, editorial)
+/// Inter for body text (clean, readable)
+public extension Font {
     
-    // MARK: - Font Definitions
+    // MARK: - Display Fonts (Playfair Display)
     
-    /// Large display headlines - Hero moments, splash screens
-    public static let display = Font.system(.largeTitle, design: .serif)
+    /// Splash/hero title - 42pt bold
+    static let modaicsSplashTitle = Font.custom("PlayfairDisplay-Bold", size: 42)
     
-    /// Primary headlines - Section headers, story titles
-    public static let headline = Font.system(.title, design: .serif)
+    /// Large display - 36pt bold
+    static let modaicsDisplayLarge = Font.custom("PlayfairDisplay-Bold", size: 36)
     
-    /// Secondary headlines - Card titles, feature names
-    public static let headline2 = Font.system(.title2, design: .serif)
+    /// Medium display - 32pt bold
+    static let modaicsDisplayMedium = Font.custom("PlayfairDisplay-Bold", size: 32)
     
-    /// Tertiary headlines - Subsection headers
-    public static let headline3 = Font.system(.title3, design: .serif)
+    /// Small display - 28pt bold
+    static let modaicsDisplaySmall = Font.custom("PlayfairDisplay-Bold", size: 28)
     
-    /// Body text - Primary reading content
-    public static let body = Font.system(.body, design: .serif)
+    // MARK: - Heading Fonts (Playfair Display)
     
-    /// Body text with medium weight for emphasis (no bold)
-    public static let bodyEmphasis = Font.system(.body, design: .serif).weight(.medium)
+    /// Large heading - 24pt semi-bold
+    static let modaicsHeadingLarge = Font.custom("PlayfairDisplay-SemiBold", size: 24)
     
-    /// Large body for featured paragraphs
-    public static let bodyLarge = Font.system(.title3, design: .serif)
+    /// Medium heading - 20pt semi-bold
+    static let modaicsHeadingSemiBold = Font.custom("PlayfairDisplay-SemiBold", size: 20)
     
-    /// Small body for captions and metadata
-    public static let caption = Font.system(.callout, design: .serif)
+    /// Heading 1 - 22pt medium
+    static let modaicsHeadline1 = Font.custom("PlayfairDisplay-Medium", size: 22)
     
-    /// Fine print - Dates, tags, subtle details
-    public static let finePrint = Font.system(.footnote, design: .serif)
+    /// Heading 2 - 20pt medium
+    static let modaicsHeadline2 = Font.custom("PlayfairDisplay-Medium", size: 20)
     
-    /// Labels - Buttons, navigation
-    public static let label = Font.system(.subheadline, design: .serif).weight(.medium)
+    /// Heading 3 - 18pt medium
+    static let modaicsHeadline3 = Font.custom("PlayfairDisplay-Medium", size: 18)
     
-    /// Story text - Multi-line garment narratives, generous spacing
-    public static let story = Font.system(.body, design: .serif)
+    /// Card title - 18pt medium
+    static let modaicsCardTitle = Font.custom("PlayfairDisplay-Medium", size: 18)
     
-    // MARK: - Line Heights (Multipliers)
+    // MARK: - Body Fonts (Inter)
     
-    /// Generous line height for editorial feel (1.6-1.8)
-    public static let lineHeightRelaxed: CGFloat = 1.7
+    /// Large body - 17pt regular
+    static let modaicsBodyLarge = Font.custom("Inter-Regular", size: 17)
     
-    /// Standard line height for UI elements
-    public static let lineHeightStandard: CGFloat = 1.4
+    /// Body - 15pt regular
+    static let modaicsBodyRegular = Font.custom("Inter-Regular", size: 15)
     
-    /// Tight line height for compact UI
-    public static let lineHeightTight: CGFloat = 1.2
+    /// Body emphasis - 15pt medium
+    static let modaicsBodyEmphasis = Font.custom("Inter-Medium", size: 15)
     
-    /// Story/reading line height - maximum comfort
-    public static let lineHeightStory: CGFloat = 1.8
+    /// Body semi-bold - 15pt semi-bold
+    static let modaicsBodySemiBold = Font.custom("Inter-SemiBold", size: 15)
+    
+    /// Label - 14pt medium
+    static let modaicsLabel = Font.custom("Inter-Medium", size: 14)
+    
+    // MARK: - Supporting Fonts (Inter)
+    
+    /// Button text - 16pt semi-bold
+    static let modaicsButton = Font.custom("Inter-SemiBold", size: 16)
+    
+    /// Caption - 13pt medium
+    static let modaicsCaption = Font.custom("Inter-Medium", size: 13)
+    
+    /// Caption regular - 13pt regular
+    static let modaicsCaptionRegular = Font.custom("Inter-Regular", size: 13)
+    
+    /// Fine print - 12pt medium (for tags, labels)
+    static let modaicsFinePrint = Font.custom("Inter-Medium", size: 12)
+    
+    /// Small - 12pt regular
+    static let modaicsSmall = Font.custom("Inter-Regular", size: 12)
+    
+    /// Micro - 11pt regular
+    static let modaicsMicro = Font.custom("Inter-Regular", size: 11)
 }
 
-// MARK: - View Modifiers
+// MARK: - Font Modifiers
 
-public struct HeadlineStyle: ViewModifier {
-    public func body(content: Content) -> some View {
-        content
-            .font(MosaicTypography.headline)
-            .foregroundColor(MosaicColors.textPrimary)
-            .lineSpacing(4)
+public extension View {
+    
+    /// Applies splash title style
+    func modaicsSplashTitleStyle() -> some View {
+        self.font(.modaicsSplashTitle)
+            .foregroundColor(.modaicsTextPrimary)
     }
-}
-
-public struct BodyStyle: ViewModifier {
-    public func body(content: Content) -> some View {
-        content
-            .font(MosaicTypography.body)
-            .foregroundColor(MosaicColors.textPrimary)
-            .lineSpacing(6)
+    
+    /// Applies heading style
+    func modaicsHeadingStyle(size: ModaicsHeadingSize = .medium) -> some View {
+        self.font(size.font)
+            .foregroundColor(.modaicsTextPrimary)
     }
-}
-
-public struct StoryStyle: ViewModifier {
-    public func body(content: Content) -> some View {
-        content
-            .font(MosaicTypography.story)
-            .foregroundColor(MosaicColors.textPrimary)
-            .lineSpacing(10)
-            .lineLimit(nil)
-    }
-}
-
-public struct CaptionStyle: ViewModifier {
-    public func body(content: Content) -> some View {
-        content
-            .font(MosaicTypography.caption)
-            .foregroundColor(MosaicColors.textSecondary)
-            .lineSpacing(2)
-    }
-}
-
-public struct LabelStyle: ViewModifier {
-    public func body(content: Content) -> some View {
-        content
-            .font(MosaicTypography.label)
-            .foregroundColor(MosaicColors.textPrimary)
-            .tracking(0.5)
+    
+    /// Applies body style
+    func modaicsBodyStyle(emphasis: ModaicsBodyEmphasis = .regular) -> some View {
+        self.font(emphasis.font)
+            .foregroundColor(.modaicsTextPrimary)
     }
 }
 
-// MARK: - SwiftUI Extensions
+// MARK: - Typography Enums
 
-extension View {
-    /// Apply headline typography style
-    public func mosaicHeadline() -> some View {
-        modifier(HeadlineStyle())
-    }
+public enum ModaicsHeadingSize {
+    case large, medium, small
     
-    /// Apply body typography style
-    public func mosaicBody() -> some View {
-        modifier(BodyStyle())
-    }
-    
-    /// Apply story/reading typography style with generous spacing
-    public func mosaicStory() -> some View {
-        modifier(StoryStyle())
-    }
-    
-    /// Apply caption typography style
-    public func mosaicCaption() -> some View {
-        modifier(CaptionStyle())
-    }
-    
-    /// Apply label typography style
-    public func mosaicLabel() -> some View {
-        modifier(LabelStyle())
-    }
-    
-    /// Set custom line height multiplier
-    public func lineHeight(_ multiplier: CGFloat) -> some View {
-        self.lineSpacing(self.font?.pointSize ?? 16 * (multiplier - 1) ?? 0)
-    }
-}
-
-// MARK: - Text Helpers
-
-public struct MosaicText {
-    
-    /// Create a headline text view
-    public static func headline(_ text: String) -> some View {
-        Text(text)
-            .mosaicHeadline()
-    }
-    
-    /// Create a body text view
-    public static func body(_ text: String) -> some View {
-        Text(text)
-            .mosaicBody()
-    }
-    
-    /// Create a story text view for garment narratives
-    public static func story(_ text: String) -> some View {
-        Text(text)
-            .mosaicStory()
-    }
-    
-    /// Create a caption text view
-    public static func caption(_ text: String) -> some View {
-        Text(text)
-            .mosaicCaption()
-    }
-    
-    /// Create a label text view
-    public static func label(_ text: String) -> some View {
-        Text(text)
-            .mosaicLabel()
-    }
-}
-
-// MARK: - SwiftUI Preview
-#Preview {
-    ScrollView {
-        VStack(alignment: .leading, spacing: 32) {
-            Text("Typography")
-                .font(MosaicTypography.display)
-                .foregroundColor(MosaicColors.textPrimary)
-            
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Display LargeTitle")
-                    .font(MosaicTypography.display)
-                    .foregroundColor(MosaicColors.textPrimary)
-                
-                Text("Headline Title")
-                    .font(MosaicTypography.headline)
-                    .foregroundColor(MosaicColors.textPrimary)
-                
-                Text("Headline 2")
-                    .font(MosaicTypography.headline2)
-                    .foregroundColor(MosaicColors.textPrimary)
-                
-                Text("Headline 3")
-                    .font(MosaicTypography.headline3)
-                    .foregroundColor(MosaicColors.textPrimary)
-            }
-            
-            Divider()
-                .background(MosaicColors.divider)
-            
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Body text with generous line spacing for that editorial magazine feel. Notice how the serif font creates warmth and sophistication.")
-                    .mosaicBody()
-                
-                Text("Body Emphasis (Medium)")
-                    .font(MosaicTypography.bodyEmphasis)
-                    .foregroundColor(MosaicColors.textPrimary)
-                
-                Text("Body Large")
-                    .font(MosaicTypography.bodyLarge)
-                    .foregroundColor(MosaicColors.textPrimary)
-            }
-            
-            Divider()
-                .background(MosaicColors.divider)
-            
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Story Style - For garment narratives and longer content blocks. The line height is generous at 1.8 for comfortable reading. This is how you tell the story behind each piece, where it came from, who made it, and why it matters.")
-                    .mosaicStory()
-            }
-            
-            Divider()
-                .background(MosaicColors.divider)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Caption Style")
-                    .mosaicCaption()
-                
-                Text("Label Style")
-                    .mosaicLabel()
-                
-                Text("Fine Print")
-                    .font(MosaicTypography.finePrint)
-                    .foregroundColor(MosaicColors.textTertiary)
-            }
+    var font: Font {
+        switch self {
+        case .large: return .modaicsHeadingLarge
+        case .medium: return .modaicsHeadingSemiBold
+        case .small: return .modaicsHeadline3
         }
-        .padding()
     }
-    .background(MosaicColors.backgroundPrimary)
+}
+
+public enum ModaicsBodyEmphasis {
+    case regular, medium, semibold
+    
+    var font: Font {
+        switch self {
+        case .regular: return .modaicsBodyRegular
+        case .medium: return .modaicsBodyEmphasis
+        case .semibold: return .modaicsBodySemiBold
+        }
+    }
 }
