@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - GarmentCard
+// MARK: - GarmentCard (Dark Green Porsche)
 /// Card component for displaying a garment in the discovery feed
 public struct GarmentCard: View {
     
@@ -29,7 +29,7 @@ public struct GarmentCard: View {
     
     public var body: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: ModaicsLayout.small) {
+            VStack(alignment: .leading, spacing: 12) {
                 // Image Container
                 imageContainer
                 
@@ -49,12 +49,16 @@ public struct GarmentCard: View {
             
             // Favorite Button
             favoriteButton
-                .padding(ModaicsLayout.small)
+                .padding(12)
         }
         .frame(height: 200)
-        .background(Color.modaicsOatmeal)
-        .cornerRadius(ModaicsLayout.cornerRadius)
+        .background(Color.modaicsSurface)
+        .cornerRadius(12)
         .clipped()
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
+        )
     }
     
     private var garmentImage: some View {
@@ -82,16 +86,17 @@ public struct GarmentCard: View {
     
     private var placeholderView: some View {
         ZStack {
-            Color.modaicsOatmeal
+            Color.modaicsSurface
             
-            VStack(spacing: ModaicsLayout.small) {
+            VStack(spacing: 8) {
                 Image(systemName: "hanger")
                     .font(.system(size: 40))
-                    .foregroundColor(.modaicsStone)
+                    .foregroundColor(.sageSubtle)
                 
-                Text(garment.category.rawValue.capitalized)
-                    .font(.modaicsCaption)
-                    .foregroundColor(.modaicsTextSecondary)
+                Text(garment.category.rawValue.uppercased())
+                    .font(.forestCaptionSmall)
+                    .foregroundColor(.sageMuted)
+                    .tracking(1)
             }
         }
     }
@@ -102,12 +107,16 @@ public struct GarmentCard: View {
         Button(action: onFavoriteToggle) {
             ZStack {
                 Circle()
-                    .fill(Color.modaicsPaper.opacity(0.9))
+                    .fill(Color.modaicsSurface.opacity(0.9))
                     .frame(width: 36, height: 36)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
+                    )
                 
                 Image(systemName: isFavorite ? "heart.fill" : "heart")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(isFavorite ? .modaicsTerracotta : .modaicsCharcoal)
+                    .foregroundColor(isFavorite ? .luxeGold : .sageWhite)
             }
         }
         .buttonStyle(PlainButtonStyle())
@@ -116,61 +125,64 @@ public struct GarmentCard: View {
     // MARK: - Info Container
     
     private var infoContainer: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
+        VStack(alignment: .leading, spacing: 4) {
             // Title
-            Text(garment.title)
-                .font(.modaicsCardTitle)
-                .foregroundColor(.modaicsTextPrimary)
+            Text(garment.title.uppercased())
+                .font(.forestBodyMedium)
+                .foregroundColor(.sageWhite)
                 .lineLimit(1)
             
             // Brand (if available)
             if let brand = garment.brand {
-                Text(brand.name)
-                    .font(.modaicsCaption)
-                    .foregroundColor(.modaicsTextSecondary)
+                Text(brand.name.uppercased())
+                    .font(.forestCaptionSmall)
+                    .foregroundColor(.sageMuted)
                     .lineLimit(1)
+                    .tracking(1)
             }
             
             // Condition & Price Row
-            HStack(spacing: ModaicsLayout.xsmall) {
+            HStack(spacing: 8) {
                 conditionBadge
                 Spacer()
                 priceView
             }
         }
-        .padding(.horizontal, ModaicsLayout.xsmall)
-        .padding(.bottom, ModaicsLayout.xsmall)
+        .padding(.horizontal, 4)
+        .padding(.bottom, 4)
     }
     
     private var conditionBadge: some View {
-        Text(garment.condition.displayName)
-            .font(.modaicsFinePrint)
-            .foregroundColor(.modaicsDeepOlive)
-            .padding(.horizontal, ModaicsLayout.tightSpacing)
+        Text(garment.condition.displayName.uppercased())
+            .font(.forestCaptionSmall)
+            .foregroundColor(.modaicsFern)
+            .tracking(1)
+            .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(
                 Capsule()
-                    .fill(Color.modaicsDeepOlive.opacity(0.12))
+                    .fill(Color.modaicsFern.opacity(0.15))
             )
     }
     
     private var priceView: some View {
-        HStack(alignment: .firstTextBaseline, spacing: ModaicsLayout.xxsmall) {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
             if let listingPrice = garment.listingPrice {
                 Text("\(listingPrice, format: .currency(code: "USD"))")
-                    .font(.modaicsBodySemiBold)
-                    .foregroundColor(.modaicsCharcoal)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.luxeGold)
                 
                 if let originalPrice = garment.originalPrice, originalPrice > listingPrice {
                     Text("\(originalPrice, format: .currency(code: "USD"))")
-                        .font(.modaicsCaptionRegular)
-                        .foregroundColor(.modaicsTextSecondary)
+                        .font(.forestCaptionSmall)
+                        .foregroundColor(.sageMuted)
                         .strikethrough()
                 }
             } else {
-                Text("Trade Only")
-                    .font(.modaicsCaption)
-                    .foregroundColor(.modaicsSage)
+                Text("TRADE ONLY")
+                    .font(.forestCaptionSmall)
+                    .foregroundColor(.emerald)
+                    .tracking(1)
             }
         }
     }
@@ -181,7 +193,7 @@ public struct GarmentCard: View {
 #if DEBUG
 struct GarmentCard_Previews: PreviewProvider {
     static var previews: some View {
-        HStack(spacing: ModaicsLayout.medium) {
+        HStack(spacing: 16) {
             GarmentCard(
                 garment: ModaicsGarment(
                     id: UUID(),
@@ -219,7 +231,7 @@ struct GarmentCard_Previews: PreviewProvider {
             )
         }
         .padding()
-        .background(Color.modaicsWarmSand)
+        .background(Color.modaicsBackground)
         .previewLayout(.sizeThatFits)
     }
 }

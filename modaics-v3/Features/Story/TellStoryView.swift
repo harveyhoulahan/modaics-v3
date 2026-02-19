@@ -11,10 +11,10 @@ public enum TellStoryStep: Int, CaseIterable {
     
     public var title: String {
         switch self {
-        case .photos: return "Photos"
-        case .basics: return "Details"
-        case .story: return "Story"
-        case .exchange: return "Exchange"
+        case .photos: return "PHOTOS"
+        case .basics: return "DETAILS"
+        case .story: return "STORY"
+        case .exchange: return "EXCHANGE"
         }
     }
     
@@ -28,9 +28,9 @@ public enum TellStoryStep: Int, CaseIterable {
     }
 }
 
-// MARK: - Tell Story View
+// MARK: - Tell Story View (Dark Green Porsche)
 /// Multi-step form for creating a new garment listing
-/// Warm, editorial aesthetic inspired by Mediterranean craft
+/// Dark green Porsche aesthetic with gold accents
 public struct TellStoryView: View {
     @StateObject private var viewModel: TellStoryViewModel
     @Environment(\.dismiss) private var dismiss
@@ -42,8 +42,8 @@ public struct TellStoryView: View {
     public var body: some View {
         NavigationStack {
             ZStack {
-                // Warm sand background
-                Color.modaicsWarmSand
+                // Dark green background
+                Color.modaicsBackground
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -53,22 +53,23 @@ public struct TellStoryView: View {
                     // Step content
                     ScrollView {
                         stepContent
-                            .padding(.horizontal, ModaicsLayout.large)
-                            .padding(.vertical, ModaicsLayout.medium)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 16)
                     }
                     
                     // Navigation footer
                     navigationFooter
                 }
             }
-            .navigationTitle("Tell Your Story")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button("CANCEL") {
                         dismiss()
                     }
-                    .foregroundColor(Color.modaicsStone)
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.sageMuted)
                 }
             }
             .alert("Error", isPresented: $viewModel.showError) {
@@ -93,9 +94,9 @@ public struct TellStoryView: View {
     // MARK: - Progress Header
     
     private var progressHeader: some View {
-        VStack(spacing: ModaicsLayout.small) {
+        VStack(spacing: 12) {
             // Step indicators
-            HStack(spacing: ModaicsLayout.small) {
+            HStack(spacing: 8) {
                 ForEach(TellStoryStep.allCases, id: \.self) { step in
                     StepIndicator(
                         step: step,
@@ -104,17 +105,17 @@ public struct TellStoryView: View {
                     )
                 }
             }
-            .padding(.horizontal, ModaicsLayout.large)
+            .padding(.horizontal, 24)
             
             // Progress bar
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(Color.modaicsOatmeal)
+                        .fill(Color.modaicsSurface)
                         .frame(height: 2)
                     
                     Rectangle()
-                        .fill(Color.modaicsTerracotta)
+                        .fill(Color.luxeGold)
                         .frame(
                             width: geo.size.width * viewModel.progressPercentage,
                             height: 2
@@ -124,19 +125,20 @@ public struct TellStoryView: View {
             .frame(height: 2)
             
             // Step title
-            VStack(spacing: ModaicsLayout.tightSpacing) {
+            VStack(spacing: 4) {
                 Text(viewModel.currentStep.title)
-                    .font(.modaicsHeadline3)
-                    .foregroundColor(Color.modaicsTextPrimary)
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.sageWhite)
+                    .tracking(2)
                 
                 Text(viewModel.currentStep.subtitle)
-                    .font(.modaicsCaptionRegular)
-                    .foregroundColor(Color.modaicsTextSecondary)
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.sageMuted)
             }
-            .padding(.top, ModaicsLayout.small)
+            .padding(.top, 8)
         }
-        .padding(.vertical, ModaicsLayout.small)
-        .background(Color.modaicsPaper)
+        .padding(.vertical, 12)
+        .background(Color.modaicsSurface)
     }
     
     // MARK: - Step Content
@@ -158,63 +160,95 @@ public struct TellStoryView: View {
     // MARK: - Navigation Footer
     
     private var navigationFooter: some View {
-        HStack(spacing: ModaicsLayout.small) {
+        HStack(spacing: 12) {
             // Back button
             if viewModel.currentStep != .photos {
-                Button("Back") {
+                Button("BACK") {
                     viewModel.previousStep()
                 }
-                .buttonStyle(ModaicsGhostButtonStyle())
+                .font(.forestBodyMedium)
+                .foregroundColor(.sageWhite)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(Color.modaicsSurface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+                )
+                .cornerRadius(8)
             }
             
             Spacer()
             
             // Next/Submit button
             if viewModel.currentStep != .exchange {
-                Button("Continue") {
+                Button("CONTINUE") {
                     viewModel.nextStep()
                 }
-                .buttonStyle(ModaicsPrimaryButtonStyle())
+                .font(.forestBodyMedium)
+                .foregroundColor(.modaicsBackground)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(Color.luxeGold)
+                .cornerRadius(8)
                 .disabled(!viewModel.canProceed)
+                .opacity(viewModel.canProceed ? 1 : 0.5)
             } else {
-                Button("Publish") {
+                Button("PUBLISH") {
                     Task {
                         await viewModel.submit()
                     }
                 }
-                .buttonStyle(ModaicsPrimaryButtonStyle())
+                .font(.forestBodyMedium)
+                .foregroundColor(.modaicsBackground)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(Color.luxeGold)
+                .cornerRadius(8)
                 .disabled(!viewModel.canSubmit)
+                .opacity(viewModel.canSubmit ? 1 : 0.5)
             }
         }
-        .padding(.horizontal, ModaicsLayout.large)
-        .padding(.vertical, ModaicsLayout.medium)
-        .background(Color.modaicsPaper)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
+        .background(Color.modaicsSurface)
+        .overlay(
+            Rectangle()
+                .fill(Color.modaicsSurfaceHighlight)
+                .frame(height: 0.5)
+                , alignment: .top
+        )
     }
     
     // MARK: - Loading Overlay
     
     private var loadingOverlay: some View {
         ZStack {
-            Color.modaicsCharcoal.opacity(0.4)
+            Color.modaicsBackground.opacity(0.8)
                 .ignoresSafeArea()
             
-            VStack(spacing: ModaicsLayout.large) {
+            VStack(spacing: 24) {
                 ProgressView()
                     .scaleEffect(1.5)
-                    .tint(Color.modaicsTerracotta)
+                    .tint(Color.luxeGold)
                 
-                Text("Publishing your story...")
-                    .font(.modaicsBodyRegular)
-                    .foregroundColor(Color.modaicsTextPrimary)
+                Text("PUBLISHING YOUR STORY...")
+                    .font(.forestCaptionLarge)
+                    .foregroundColor(.sageWhite)
+                    .tracking(2)
             }
-            .padding(ModaicsLayout.xlarge)
-            .background(Color.modaicsPaper)
-            .cornerRadius(ModaicsLayout.cornerRadius)
+            .padding(32)
+            .background(Color.modaicsSurface)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
+            )
         }
     }
 }
 
-// MARK: - Step Indicator
+// MARK: - Step Indicator (Dark Green Porsche)
 
 struct StepIndicator: View {
     let step: TellStoryStep
@@ -222,7 +256,7 @@ struct StepIndicator: View {
     let isCompleted: Bool
     
     var body: some View {
-        VStack(spacing: ModaicsLayout.tightSpacing) {
+        VStack(spacing: 6) {
             ZStack {
                 Circle()
                     .fill(backgroundColor)
@@ -231,41 +265,42 @@ struct StepIndicator: View {
                 if isCompleted {
                     Image(systemName: "checkmark")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color.modaicsCream)
+                        .foregroundColor(.modaicsBackground)
                 } else {
                     Text("\(step.rawValue)")
-                        .font(.modaicsCaption)
+                        .font(.forestCaptionSmall)
                         .foregroundColor(foregroundColor)
                 }
             }
             
             Text(step.title)
-                .font(.modaicsFinePrint)
+                .font(.forestCaptionSmall)
                 .foregroundColor(textColor)
+                .tracking(1)
         }
     }
     
     private var backgroundColor: Color {
         if isCompleted {
-            return Color.modaicsSage
+            return Color.emerald
         } else if isActive {
-            return Color.modaicsTerracotta
+            return Color.luxeGold
         } else {
-            return Color.modaicsOatmeal
+            return Color.modaicsSurfaceHighlight
         }
     }
     
     private var foregroundColor: Color {
-        isActive ? Color.modaicsCream : Color.modaicsTextSecondary
+        isActive ? Color.modaicsBackground : Color.sageMuted
     }
     
     private var textColor: Color {
         if isActive {
-            return Color.modaicsTextPrimary
+            return Color.sageWhite
         } else if isCompleted {
-            return Color.modaicsTextPrimary
+            return Color.sageWhite
         } else {
-            return Color.modaicsTextSecondary.opacity(0.6)
+            return Color.sageSubtle
         }
     }
 }
@@ -277,20 +312,21 @@ struct PhotosStepView: View {
     @State private var selectedImageIndex: Int?
     
     var body: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.large) {
+        VStack(alignment: .leading, spacing: 24) {
             // Header
-            VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
-                Text("Add Photos")
-                    .font(.modaicsHeadingSemiBold)
-                    .foregroundColor(Color.modaicsTextPrimary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("ADD PHOTOS")
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.sageWhite)
+                    .tracking(1)
                 
                 Text("Upload clear photos of your garment. Include front, back, and any details.")
-                    .font(.modaicsBodyRegular)
-                    .foregroundColor(Color.modaicsTextSecondary)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageMuted)
             }
             
             // Photo grid
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 120), spacing: ModaicsLayout.small)], spacing: ModaicsLayout.small) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 120), spacing: 12)], spacing: 12) {
                 // Add photo button
                 addPhotoButton
                 
@@ -301,24 +337,25 @@ struct PhotosStepView: View {
             }
             
             // Tips
-            VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
-                Text("Tips for great photos:")
-                    .font(.modaicsLabel)
-                    .foregroundColor(Color.modaicsTextPrimary)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("TIPS FOR GREAT PHOTOS:")
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.sageWhite)
+                    .tracking(1)
                 
                 ForEach(["Use natural lighting", "Show the garment flat or on a hanger", "Include close-ups of fabric and details"], id: \.self) { tip in
-                    HStack(spacing: ModaicsLayout.tightSpacing) {
+                    HStack(spacing: 8) {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 12))
-                            .foregroundColor(Color.modaicsSage)
+                            .foregroundColor(.emerald)
                         
                         Text(tip)
-                            .font(.modaicsCaptionRegular)
-                            .foregroundColor(Color.modaicsTextSecondary)
+                            .font(.forestCaptionRegular)
+                            .foregroundColor(.sageMuted)
                     }
                 }
             }
-            .padding(.top, ModaicsLayout.small)
+            .padding(.top, 8)
         }
     }
     
@@ -326,21 +363,22 @@ struct PhotosStepView: View {
         Button {
             viewModel.showPhotoPicker = true
         } label: {
-            RoundedRectangle(cornerRadius: ModaicsLayout.cornerRadiusSmall)
-                .fill(Color.modaicsCream)
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.modaicsSurface)
                 .overlay(
-                    RoundedRectangle(cornerRadius: ModaicsLayout.cornerRadiusSmall)
-                        .stroke(Color.modaicsTerracotta.opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [5]))
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.luxeGold.opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [5]))
                 )
                 .overlay(
-                    VStack(spacing: ModaicsLayout.small) {
+                    VStack(spacing: 8) {
                         Image(systemName: "plus")
                             .font(.system(size: 24, weight: .medium))
-                            .foregroundColor(Color.modaicsTerracotta)
+                            .foregroundColor(.luxeGold)
                         
-                        Text("Add")
-                            .font(.modaicsCaption)
-                            .foregroundColor(Color.modaicsTerracotta)
+                        Text("ADD")
+                            .font(.forestCaptionSmall)
+                            .foregroundColor(.luxeGold)
+                            .tracking(1)
                     }
                 )
                 .aspectRatio(1, contentMode: .fill)
@@ -353,7 +391,7 @@ struct PhotosStepView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(minWidth: 100, minHeight: 100)
-                .clipShape(RoundedRectangle(cornerRadius: ModaicsLayout.cornerRadiusSmall))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
             
             // Remove button
             Button {
@@ -361,8 +399,8 @@ struct PhotosStepView: View {
             } label: {
                 Image(systemName: "xmark.circle.fill")
                     .font(.system(size: 20))
-                    .foregroundColor(Color.modaicsRust)
-                    .background(Color.modaicsCream.clipShape(Circle()))
+                    .foregroundColor(.modaicsError)
+                    .background(Color.modaicsBackground.clipShape(Circle()))
             }
             .offset(x: 6, y: -6)
         }
@@ -375,28 +413,29 @@ struct BasicsStepView: View {
     @ObservedObject var viewModel: TellStoryViewModel
     
     var body: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.large) {
+        VStack(alignment: .leading, spacing: 24) {
             // Header
-            VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
-                Text("Garment Details")
-                    .font(.modaicsHeadingSemiBold)
-                    .foregroundColor(Color.modaicsTextPrimary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("GARMENT DETAILS")
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.sageWhite)
+                    .tracking(1)
                 
                 Text("Tell us about the piece you're sharing.")
-                    .font(.modaicsBodyRegular)
-                    .foregroundColor(Color.modaicsTextSecondary)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageMuted)
             }
             
             // Form fields
-            VStack(alignment: .leading, spacing: ModaicsLayout.medium) {
+            VStack(alignment: .leading, spacing: 16) {
                 // Title
-                formField(title: "Title") {
+                formField(title: "TITLE") {
                     TextField("e.g., Vintage Leather Jacket", text: $viewModel.garmentTitle)
-                        .textFieldStyle(ModaicsTextFieldStyle())
+                        .textFieldStyle(DarkGreenTextFieldStyle())
                 }
                 
                 // Category
-                formField(title: "Category") {
+                formField(title: "CATEGORY") {
                     Menu {
                         ForEach(ModaicsCategory.allCases, id: \.self) { category in
                             Button(category.displayName) {
@@ -406,24 +445,28 @@ struct BasicsStepView: View {
                     } label: {
                         HStack {
                             Text(viewModel.selectedCategory?.displayName ?? "Select category")
-                                .foregroundColor(viewModel.selectedCategory == nil ? Color.modaicsTextTertiary : Color.modaicsTextPrimary)
+                                .foregroundColor(viewModel.selectedCategory == nil ? Color.sageSubtle : Color.sageWhite)
                             
                             Spacer()
                             
                             Image(systemName: "chevron.down")
                                 .font(.system(size: 12))
-                                .foregroundColor(Color.modaicsTextSecondary)
+                                .foregroundColor(.sageMuted)
                         }
                         .padding()
-                        .background(Color.modaicsPaper)
-                        .cornerRadius(ModaicsLayout.cornerRadiusMedium)
+                        .background(Color.modaicsSurface)
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
+                        )
                     }
                 }
                 
                 // Condition
-                formField(title: "Condition") {
+                formField(title: "CONDITION") {
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: ModaicsLayout.small) {
+                        HStack(spacing: 8) {
                             ForEach(ModaicsCondition.allCases, id: \.self) { condition in
                                 ConditionButton(
                                     condition: condition,
@@ -437,8 +480,8 @@ struct BasicsStepView: View {
                 }
                 
                 // Size
-                formField(title: "Size") {
-                    HStack(spacing: ModaicsLayout.small) {
+                formField(title: "SIZE") {
+                    HStack(spacing: 8) {
                         // Size system picker
                         Menu {
                             ForEach(ModaicsSizeSystem.allCases, id: \.self) { system in
@@ -449,20 +492,20 @@ struct BasicsStepView: View {
                         } label: {
                             HStack {
                                 Text(viewModel.selectedSizeSystem.rawValue.uppercased())
-                                    .font(.modaicsCaption)
+                                    .font(.forestCaptionSmall)
                                 Image(systemName: "chevron.down")
                                     .font(.system(size: 10))
                             }
-                            .foregroundColor(Color.modaicsTextPrimary)
-                            .padding(.horizontal, ModaicsLayout.small)
-                            .padding(.vertical, ModaicsLayout.tightSpacing)
-                            .background(Color.modaicsOatmeal)
-                            .cornerRadius(ModaicsLayout.cornerRadiusSmall)
+                            .foregroundColor(.sageWhite)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.modaicsSurface)
+                            .cornerRadius(6)
                         }
                         
                         // Size input
                         TextField("e.g., M or 8", text: $viewModel.sizeLabel)
-                            .textFieldStyle(ModaicsTextFieldStyle())
+                            .textFieldStyle(DarkGreenTextFieldStyle())
                     }
                 }
             }
@@ -470,10 +513,11 @@ struct BasicsStepView: View {
     }
     
     private func formField<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(.modaicsLabel)
-                .foregroundColor(Color.modaicsTextPrimary)
+                .font(.forestCaptionMedium)
+                .foregroundColor(.sageMuted)
+                .tracking(1)
             
             content()
         }
@@ -489,13 +533,14 @@ struct ConditionButton: View {
     
     var body: some View {
         Button(action: action) {
-            Text(condition.displayName)
-                .font(.modaicsCaption)
-                .foregroundColor(isSelected ? Color.modaicsCream : Color.modaicsTextPrimary)
-                .padding(.horizontal, ModaicsLayout.small)
-                .padding(.vertical, ModaicsLayout.tightSpacing)
-                .background(isSelected ? Color.modaicsTerracotta : Color.modaicsOatmeal)
-                .cornerRadius(ModaicsLayout.cornerRadiusSmall)
+            Text(condition.displayName.uppercased())
+                .font(.forestCaptionSmall)
+                .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
+                .tracking(1)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
+                .cornerRadius(6)
         }
     }
 }
@@ -506,20 +551,21 @@ struct StoryStepView: View {
     @ObservedObject var viewModel: TellStoryViewModel
     
     var body: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.large) {
+        VStack(alignment: .leading, spacing: 24) {
             // Header
-            VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
-                Text("The Story")
-                    .font(.modaicsHeadingSemiBold)
-                    .foregroundColor(Color.modaicsTextPrimary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("THE STORY")
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.sageWhite)
+                    .tracking(1)
                 
                 Text("This is what makes your garment special. Share its journey.")
-                    .font(.modaicsBodyRegular)
-                    .foregroundColor(Color.modaicsTextSecondary)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageMuted)
             }
             
             // Form fields
-            VStack(alignment: .leading, spacing: ModaicsLayout.medium) {
+            VStack(alignment: .leading, spacing: 16) {
                 // Provenance
                 StoryInput(
                     "Where did this garment come from? A specific shop, city, or person?",
@@ -554,25 +600,27 @@ struct ExchangeStepView: View {
     @ObservedObject var viewModel: TellStoryViewModel
     
     var body: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.large) {
+        VStack(alignment: .leading, spacing: 24) {
             // Header
-            VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
-                Text("How to Exchange")
-                    .font(.modaicsHeadingSemiBold)
-                    .foregroundColor(Color.modaicsTextPrimary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("HOW TO EXCHANGE")
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.sageWhite)
+                    .tracking(1)
                 
                 Text("Choose how you'd like to find your garment a new home.")
-                    .font(.modaicsBodyRegular)
-                    .foregroundColor(Color.modaicsTextSecondary)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageMuted)
             }
             
             // Exchange type selection
-            VStack(alignment: .leading, spacing: ModaicsLayout.small) {
-                Text("Exchange Type")
-                    .font(.modaicsLabel)
-                    .foregroundColor(Color.modaicsTextPrimary)
+            VStack(alignment: .leading, spacing: 12) {
+                Text("EXCHANGE TYPE")
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(.sageMuted)
+                    .tracking(1)
                 
-                VStack(spacing: ModaicsLayout.small) {
+                VStack(spacing: 12) {
                     ExchangeTypeButton(
                         type: .sell,
                         isSelected: viewModel.exchangeType == .sell,
@@ -595,28 +643,35 @@ struct ExchangeStepView: View {
             
             // Price input (if selling)
             if viewModel.exchangeType == .sell || viewModel.exchangeType == .sellOrTrade {
-                VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
-                    Text("Price")
-                        .font(.modaicsLabel)
-                        .foregroundColor(Color.modaicsTextPrimary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("PRICE")
+                        .font(.forestCaptionMedium)
+                        .foregroundColor(.sageMuted)
+                        .tracking(1)
                     
                     HStack {
                         Text("$")
-                            .font(.modaicsBodyLarge)
-                            .foregroundColor(Color.modaicsTextPrimary)
+                            .font(.forestBodyLarge)
+                            .foregroundColor(.sageWhite)
                         
                         TextField("0.00", text: $viewModel.price)
                             .keyboardType(.decimalPad)
-                            .font(.modaicsBodyLarge)
+                            .font(.forestBodyLarge)
+                            .foregroundColor(.sageWhite)
                     }
                     .padding()
-                    .background(Color.modaicsPaper)
-                    .cornerRadius(ModaicsLayout.cornerRadiusMedium)
+                    .background(Color.modaicsSurface)
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
+                    )
                     
                     if let suggestedPrice = viewModel.suggestedPrice {
-                        Text("Suggested: \(suggestedPrice) based on condition")
-                            .font(.modaicsFinePrint)
-                            .foregroundColor(Color.modaicsSage)
+                        Text("SUGGESTED: \(suggestedPrice) BASED ON CONDITION")
+                            .font(.forestCaptionSmall)
+                            .foregroundColor(.emerald)
+                            .tracking(1)
                     }
                 }
             }
@@ -633,44 +688,45 @@ struct ExchangeTypeButton: View {
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: ModaicsLayout.small) {
+            HStack(spacing: 12) {
                 // Icon
                 Image(systemName: iconName)
                     .font(.system(size: 20))
-                    .foregroundColor(isSelected ? Color.modaicsTerracotta : Color.modaicsTextSecondary)
+                    .foregroundColor(isSelected ? Color.luxeGold : Color.sageMuted)
                     .frame(width: 40)
                 
                 // Text
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(type.displayName)
-                        .font(.modaicsBodyEmphasis)
-                        .foregroundColor(Color.modaicsTextPrimary)
+                    Text(type.displayName.uppercased())
+                        .font(.forestBodyMedium)
+                        .foregroundColor(.sageWhite)
+                        .tracking(1)
                     
                     Text(description)
-                        .font(.modaicsCaptionRegular)
-                        .foregroundColor(Color.modaicsTextSecondary)
+                        .font(.forestCaptionSmall)
+                        .foregroundColor(.sageMuted)
                 }
                 
                 Spacer()
                 
                 // Selection indicator
                 Circle()
-                    .stroke(isSelected ? Color.modaicsTerracotta : Color.modaicsOatmeal, lineWidth: 2)
+                    .stroke(isSelected ? Color.luxeGold : Color.modaicsSurfaceHighlight, lineWidth: 2)
                     .frame(width: 22, height: 22)
                     .overlay(
                         Circle()
-                            .fill(Color.modaicsTerracotta)
+                            .fill(Color.luxeGold)
                             .frame(width: 12, height: 12)
                             .opacity(isSelected ? 1 : 0)
                     )
             }
             .padding()
-            .background(isSelected ? Color.modaicsTerracotta.opacity(0.05) : Color.modaicsPaper)
+            .background(isSelected ? Color.luxeGold.opacity(0.05) : Color.modaicsSurface)
             .overlay(
-                RoundedRectangle(cornerRadius: ModaicsLayout.cornerRadius)
-                    .stroke(isSelected ? Color.modaicsTerracotta : Color.clear, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.luxeGold : Color.clear, lineWidth: 1)
             )
-            .cornerRadius(ModaicsLayout.cornerRadius)
+            .cornerRadius(12)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -694,13 +750,18 @@ struct ExchangeTypeButton: View {
 
 // MARK: - Text Field Style
 
-struct ModaicsTextFieldStyle: TextFieldStyle {
+struct DarkGreenTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
-            .font(.modaicsBodyRegular)
+            .font(.forestBodyMedium)
+            .foregroundColor(.sageWhite)
             .padding()
-            .background(Color.modaicsPaper)
-            .cornerRadius(ModaicsLayout.cornerRadiusMedium)
+            .background(Color.modaicsSurface)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
+            )
     }
 }
 

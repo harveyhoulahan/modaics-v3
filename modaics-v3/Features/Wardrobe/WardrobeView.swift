@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-// MARK: - WardrobeView
+// MARK: - WardrobeView (Dark Green Porsche)
 /// "My Wardrobe" — the user's personal collection view
 /// Displays their garments in a grid with stats and actions
 public struct WardrobeView: View {
@@ -13,28 +13,28 @@ public struct WardrobeView: View {
     
     public var body: some View {
         ZStack {
-            // Warm sand background
-            Color.modaicsWarmSand
+            // Dark green background
+            Color.modaicsBackground
                 .ignoresSafeArea()
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     // Header with title and stats
                     headerSection
-                        .padding(.horizontal, ModaicsLayout.large)
-                        .padding(.top, ModaicsLayout.medium)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 16)
                     
                     // Stats row
                     statsSection
-                        .padding(.horizontal, ModaicsLayout.large)
-                        .padding(.top, ModaicsLayout.large)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 24)
                     
                     // Garments grid
                     garmentsSection
-                        .padding(.horizontal, ModaicsLayout.large)
-                        .padding(.top, ModaicsLayout.xlarge)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 32)
                     
-                    Spacer(minLength: ModaicsLayout.xxlarge)
+                    Spacer(minLength: 48)
                 }
             }
         }
@@ -44,80 +44,90 @@ public struct WardrobeView: View {
         .onAppear {
             viewModel.loadWardrobe()
         }
+        .toolbar(.hidden, for: .navigationBar)
     }
     
     // MARK: - Header Section
     private var headerSection: some View {
         HStack {
-            VStack(alignment: .leading, spacing: ModaicsLayout.tightSpacing) {
-                Text("My Wardrobe")
-                    .font(.modaicsDisplaySmall)
-                    .foregroundColor(.modaicsTextPrimary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("MY WARDROBE")
+                    .font(.forestDisplaySmall)
+                    .foregroundColor(.sageWhite)
+                    .tracking(2)
                 
-                Text("\(viewModel.garmentCount) pieces curated with intention")
-                    .font(.modaicsBodyRegular)
-                    .foregroundColor(.modaicsTextSecondary)
+                Text("\(viewModel.garmentCount) PIECES CURATED")
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageMuted)
             }
             
             Spacer()
             
             // Add Garment Button
             Button(action: { showingAddGarment = true }) {
-                HStack(spacing: ModaicsLayout.xsmall) {
+                HStack(spacing: 8) {
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .semibold))
-                    Text("Add")
-                        .font(.modaicsButton)
+                    Text("ADD")
+                        .font(.forestCaptionLarge)
                 }
-                .foregroundColor(.white)
-                .padding(.horizontal, ModaicsLayout.medium)
-                .padding(.vertical, ModaicsLayout.small)
-                .background(Color.modaicsTerracotta)
-                .cornerRadius(ModaicsLayout.cornerRadius)
+                .foregroundColor(.modaicsBackground)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color.luxeGold)
+                .cornerRadius(8)
             }
         }
     }
     
     // MARK: - Stats Section
     private var statsSection: some View {
-        HStack(spacing: ModaicsLayout.large) {
+        HStack(spacing: 16) {
             StatItem(
                 value: "\(viewModel.garmentCount)",
-                label: "Garments",
-                icon: "hanger"
+                label: "GARMENTS",
+                icon: "hanger",
+                color: .luxeGold
             )
             
             StatItem(
                 value: viewModel.estimatedValue,
-                label: "Est. Value",
-                icon: "dollarsign.circle"
+                label: "EST. VALUE",
+                icon: "dollarsign.circle",
+                color: .emerald
             )
             
             StatItem(
                 value: "\(viewModel.sustainabilityScore)",
-                label: "Eco Score",
-                icon: "leaf"
+                label: "ECO SCORE",
+                icon: "leaf",
+                color: .modaicsFern
             )
             
             StatItem(
                 value: String(format: "%.1f", viewModel.carbonSavedKg),
-                label: "kg CO₂ Saved",
-                icon: "arrow.down.circle"
+                label: "KG CO₂ SAVED",
+                icon: "arrow.down.circle",
+                color: .modaicsMoss
             )
         }
-        .padding(ModaicsLayout.medium)
-        .background(Color.modaicsPaper)
-        .cornerRadius(ModaicsLayout.cornerRadius)
-        .modaicsShadowSmall()
+        .padding(16)
+        .background(Color.modaicsSurface)
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
+        )
     }
     
     // MARK: - Garments Section
     private var garmentsSection: some View {
-        VStack(alignment: .leading, spacing: ModaicsLayout.large) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Your Collection")
-                    .font(.modaicsHeadingSemiBold)
-                    .foregroundColor(.modaicsTextPrimary)
+                Text("YOUR COLLECTION")
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.sageWhite)
+                    .tracking(1)
                 
                 Spacer()
                 
@@ -131,10 +141,10 @@ public struct WardrobeView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "arrow.up.arrow.down")
                             .font(.system(size: 14, weight: .medium))
-                        Text("Sort")
-                            .font(.modaicsCaption)
+                        Text("SORT")
+                            .font(.forestCaptionSmall)
                     }
-                    .foregroundColor(.modaicsTerracotta)
+                    .foregroundColor(.luxeGold)
                 }
             }
             
@@ -146,7 +156,7 @@ public struct WardrobeView: View {
                 // Empty state
                 EmptyStateView(
                     icon: "hanger",
-                    title: "Your wardrobe is waiting",
+                    title: "YOUR WARDROBE IS WAITING",
                     message: "Start building your collection by adding pieces with stories to tell."
                 )
                 .frame(maxWidth: .infinity, minHeight: 300)
@@ -154,9 +164,9 @@ public struct WardrobeView: View {
                 // Garments grid
                 LazyVGrid(
                     columns: [
-                        GridItem(.adaptive(minimum: 100, maximum: 120), spacing: ModaicsLayout.small)
+                        GridItem(.adaptive(minimum: 100, maximum: 120), spacing: 12)
                     ],
-                    spacing: ModaicsLayout.small
+                    spacing: 12
                 ) {
                     ForEach(viewModel.garments) { garment in
                         GarmentTile(
@@ -175,31 +185,33 @@ public struct WardrobeView: View {
     }
 }
 
-// MARK: - Stat Item
+// MARK: - Stat Item (Dark Green Porsche)
 struct StatItem: View {
     let value: String
     let label: String
     let icon: String
+    let color: Color
     
     var body: some View {
-        VStack(spacing: ModaicsLayout.xsmall) {
+        VStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.system(size: 20))
-                .foregroundColor(.modaicsTerracotta)
+                .foregroundColor(color)
             
             Text(value)
-                .font(.modaicsBodySemiBold)
-                .foregroundColor(.modaicsTextPrimary)
+                .font(.forestBodyMedium)
+                .foregroundColor(.sageWhite)
             
             Text(label)
-                .font(.modaicsFinePrint)
-                .foregroundColor(.modaicsTextSecondary)
+                .font(.forestCaptionSmall)
+                .foregroundColor(.sageMuted)
+                .tracking(1)
         }
         .frame(maxWidth: .infinity)
     }
 }
 
-// MARK: - Garment Tile
+// MARK: - Garment Tile (Dark Green Porsche)
 struct GarmentTile: View {
     let garment: ModaicsGarment
     let onTap: () -> Void
@@ -210,19 +222,23 @@ struct GarmentTile: View {
         Button(action: onTap) {
             ZStack {
                 // Background
-                RoundedRectangle(cornerRadius: ModaicsLayout.cornerRadius)
-                    .fill(Color.modaicsCream)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.modaicsSurface)
                     .aspectRatio(3/4, contentMode: .fit)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
+                    )
                 
                 // Placeholder image or icon
-                VStack(spacing: ModaicsLayout.small) {
+                VStack(spacing: 8) {
                     Image(systemName: categoryIcon)
                         .font(.system(size: 32))
-                        .foregroundColor(.modaicsStone)
+                        .foregroundColor(.sageSubtle)
                     
-                    Text(garment.title)
-                        .font(.modaicsCaption)
-                        .foregroundColor(.modaicsTextPrimary)
+                    Text(garment.title.uppercased())
+                        .font(.forestCaptionSmall)
+                        .foregroundColor(.sageWhite)
                         .lineLimit(1)
                         .padding(.horizontal, 4)
                 }
@@ -232,14 +248,14 @@ struct GarmentTile: View {
                     HStack {
                         Spacer()
                         Text(conditionAbbreviation)
-                            .font(.modaicsMicro)
-                            .foregroundColor(.white)
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundColor(.modaicsBackground)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(conditionColor)
                             .cornerRadius(4)
                     }
-                    .padding(ModaicsLayout.xsmall)
+                    .padding(6)
                     
                     Spacer()
                 }
@@ -252,17 +268,13 @@ struct GarmentTile: View {
                             Spacer()
                             Image(systemName: "tag.fill")
                                 .font(.system(size: 10))
-                                .foregroundColor(.modaicsTerracotta)
-                                .padding(ModaicsLayout.xsmall)
+                                .foregroundColor(.luxeGold)
+                                .padding(6)
                         }
                     }
                 }
             }
-            .overlay(
-                RoundedRectangle(cornerRadius: ModaicsLayout.cornerRadius)
-                    .stroke(Color.white, lineWidth: 2)
-            )
-            .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 3)
+            .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 3)
         }
         .buttonStyle(PlainButtonStyle())
         .contextMenu {
@@ -316,13 +328,13 @@ struct GarmentTile: View {
         case .newWithTags, .newWithoutTags:
             return .modaicsSage
         case .excellent, .veryGood:
-            return .modaicsDeepOlive
+            return .modaicsEmerald
         case .good, .fair:
-            return .modaicsOchre
+            return .modaicsOlive
         case .vintage:
-            return .modaicsTerracotta
+            return .luxeGold
         case .needsRepair:
-            return .modaicsRust
+            return .modaicsWarning
         }
     }
 }
@@ -334,14 +346,15 @@ struct LoadingGridView: View {
             Spacer()
             HStack {
                 Spacer()
-                ModaicsLoadingIndicator()
+                ProgressView()
                     .scaleEffect(1.5)
+                    .tint(.luxeGold)
                 Spacer()
             }
             Spacer()
         }
-        .background(Color.modaicsPaper.opacity(0.5))
-        .cornerRadius(ModaicsLayout.cornerRadius)
+        .background(Color.modaicsSurface.opacity(0.5))
+        .cornerRadius(12)
     }
 }
 
@@ -352,19 +365,20 @@ struct EmptyStateView: View {
     let message: String
     
     var body: some View {
-        VStack(spacing: ModaicsLayout.large) {
+        VStack(spacing: 24) {
             Image(systemName: icon)
                 .font(.system(size: 48))
-                .foregroundColor(.modaicsStone)
+                .foregroundColor(.sageSubtle)
             
-            VStack(spacing: ModaicsLayout.small) {
+            VStack(spacing: 8) {
                 Text(title)
-                    .font(.modaicsHeadingSemiBold)
-                    .foregroundColor(.modaicsTextPrimary)
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(.sageWhite)
+                    .tracking(1)
                 
                 Text(message)
-                    .font(.modaicsBodyRegular)
-                    .foregroundColor(.modaicsTextSecondary)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(.sageMuted)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
@@ -379,31 +393,38 @@ struct AddGarmentPlaceholderView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: ModaicsLayout.large) {
-                Image(systemName: "camera.fill")
-                    .font(.system(size: 64))
-                    .foregroundColor(.modaicsTerracotta)
+            ZStack {
+                Color.modaicsBackground.ignoresSafeArea()
                 
-                Text("Add a New Garment")
-                    .font(.modaicsHeadingSemiBold)
-                    .foregroundColor(.modaicsTextPrimary)
-                
-                Text("Take photos, tell its story, and add it to your wardrobe.")
-                    .font(.modaicsBodyRegular)
-                    .foregroundColor(.modaicsTextSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                
-                Spacer()
+                VStack(spacing: 32) {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 64))
+                        .foregroundColor(.luxeGold)
+                    
+                    Text("ADD A NEW GARMENT")
+                        .font(.forestHeadlineMedium)
+                        .foregroundColor(.sageWhite)
+                        .tracking(2)
+                    
+                    Text("Take photos, tell its story, and add it to your wardrobe.")
+                        .font(.forestBodyMedium)
+                        .foregroundColor(.sageMuted)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    
+                    Spacer()
+                }
+                .padding(.top, 64)
             }
-            .padding(.top, ModaicsLayout.xxlarge)
-            .navigationTitle("Add Garment")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button("DONE") {
                         dismiss()
                     }
+                    .font(.forestCaptionLarge)
+                    .foregroundColor(.luxeGold)
                 }
             }
         }
@@ -414,5 +435,6 @@ struct AddGarmentPlaceholderView: View {
 struct WardrobeView_Previews: PreviewProvider {
     static var previews: some View {
         WardrobeView()
+            .preferredColorScheme(.dark)
     }
 }
