@@ -169,8 +169,7 @@ public struct ComposePostSheet: View {
                             }
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
-                                    .stroke(style: StrokeStyle(lineWidth: 1, dash: [6]))
+                                    .stroke(Color.modaicsSurfaceHighlight, style: StrokeStyle(lineWidth: 1, dash: [6]))
                             )
                         }
                     }
