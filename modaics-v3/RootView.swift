@@ -77,7 +77,7 @@ struct MainTabView: View {
                 }
                 .tag(Tab.discovery)
             
-            Text("Tell Story")
+            TellStoryView()
                 .tabItem {
                     Label("Tell Story", systemImage: "plus.circle.fill")
                 }
