@@ -113,16 +113,6 @@ public enum Size: String, CaseIterable, Codable, Identifiable {
     public var displayName: String { rawValue }
 }
 
-// MARK: - SortOption Enum
-public enum SortOption: String, CaseIterable, Identifiable {
-    case newest = "NEWEST"
-    case priceLowToHigh = "PRICE: LOW TO HIGH"
-    case priceHighToLow = "PRICE: HIGH TO LOW"
-    case sustainability = "SUSTAINABILITY SCORE"
-    
-    public var id: String { rawValue }
-}
-
 // MARK: - FashionItem Model
 // Shared with Create page
 public struct FashionItem: Identifiable, Codable, Hashable {
