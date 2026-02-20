@@ -36,7 +36,7 @@ enum Tab: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     
     var label: String {
-        return rawValue.uppercased()
+        return rawValue  // Sentence case, not ALL CAPS
     }
     
     var icon: String {

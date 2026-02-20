@@ -6,7 +6,7 @@ struct RootView: View {
     
     var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
+            Color.warmOffWhite.ignoresSafeArea()
             
             Group {
                 if appState.isLoading {
@@ -30,19 +30,18 @@ struct LoadingView: View {
             Spacer()
             
             // Logo
-            Text("MODAICS")
-                .font(.forestDisplayMedium)
-                .foregroundColor(.luxeGold)
-                .tracking(4)
+            Text("modaics")
+                .font(.editorialDisplayMedium(28))
+                .foregroundColor(.nearBlack)
             
             ProgressView()
                 .scaleEffect(1.2)
-                .tint(.luxeGold)
+                .tint(.agedBrass)
             
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.modaicsBackground)
+        .background(Color.warmOffWhite)
     }
 }
 
@@ -52,21 +51,19 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
+            Color.warmOffWhite.ignoresSafeArea()
             
             VStack(spacing: 48) {
                 Spacer()
                 
                 VStack(spacing: 16) {
-                    Text("MODAICS")
-                        .font(.forestDisplayLarge)
-                        .foregroundColor(.luxeGold)
-                        .tracking(6)
+                    Text("modaics")
+                        .font(.editorialDisplayMedium(36))
+                        .foregroundColor(.nearBlack)
                     
-                    Text("EVERY PIECE, A STORY")
-                        .font(.forestCaptionLarge)
-                        .foregroundColor(.sageMuted)
-                        .tracking(3)
+                    Text("Every piece, a story")
+                        .font(.bodyMedium)
+                        .foregroundColor(.warmCharcoal)
                 }
                 
                 Spacer()
@@ -75,27 +72,26 @@ struct OnboardingView: View {
                     Button(action: {
                         appState.completeOnboarding()
                     }) {
-                        Text("ENTER")
-                            .font(.forestBodyLarge)
-                            .foregroundColor(.modaicsBackground)
+                        Text("Enter")
+                            .font(.bodyText(15, weight: .medium))
+                            .foregroundColor(.warmOffWhite)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color.luxeGold)
-                            .cornerRadius(8)
+                            .background(Color.nearBlack)
+                            .clipShape(RoundedRectangle(cornerRadius: 2))
                     }
                     
                     Button(action: {}) {
-                        Text("SIGN IN")
-                            .font(.forestBodyMedium)
-                            .foregroundColor(.sageWhite)
+                        Text("Sign in")
+                            .font(.bodyText(15, weight: .medium))
+                            .foregroundColor(.nearBlack)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color.modaicsSurface)
+                            .background(Color.clear)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.luxeGold.opacity(0.5), lineWidth: 1)
+                                RoundedRectangle(cornerRadius: 2)
+                                    .stroke(Color.nearBlack.opacity(0.3), lineWidth: 1)
                             )
-                            .cornerRadius(8)
                     }
                 }
                 .padding(.horizontal, 40)
@@ -115,19 +111,17 @@ struct AuthView: View {
     
     var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
+            Color.warmOffWhite.ignoresSafeArea()
             
             VStack(spacing: 32) {
                 VStack(spacing: 8) {
-                    Text("MODAICS")
-                        .font(.forestDisplaySmall)
-                        .foregroundColor(.luxeGold)
-                        .tracking(4)
+                    Text("modaics")
+                        .font(.editorialDisplayMedium(24))
+                        .foregroundColor(.nearBlack)
                     
-                    Text("SIGN IN")
-                        .font(.forestCaptionLarge)
-                        .foregroundColor(.sageMuted)
-                        .tracking(2)
+                    Text("Sign in")
+                        .font(.bodyMedium)
+                        .foregroundColor(.warmCharcoal)
                 }
                 .padding(.top, 60)
                 
@@ -135,39 +129,37 @@ struct AuthView: View {
                 
                 VStack(spacing: 20) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("EMAIL")
-                            .font(.forestCaptionMedium)
-                            .foregroundColor(.sageMuted)
-                            .tracking(1)
+                        Text("Email")
+                            .font(.uiLabelSmall)
+                            .foregroundColor(.warmCharcoal)
                         
                         TextField("", text: $email)
-                            .font(.forestBodyMedium)
-                            .foregroundColor(.sageWhite)
+                            .font(.bodyMedium)
+                            .foregroundColor(.nearBlack)
                             .padding(14)
-                            .background(Color.modaicsSurface)
+                            .background(Color.ivory)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+                                RoundedRectangle(cornerRadius: 2)
+                                    .stroke(Color.warmDivider, lineWidth: 1)
                             )
-                            .cornerRadius(8)
+                            .clipShape(RoundedRectangle(cornerRadius: 2))
                     }
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("PASSWORD")
-                            .font(.forestCaptionMedium)
-                            .foregroundColor(.sageMuted)
-                            .tracking(1)
+                        Text("Password")
+                            .font(.uiLabelSmall)
+                            .foregroundColor(.warmCharcoal)
                         
                         SecureField("", text: $password)
-                            .font(.forestBodyMedium)
-                            .foregroundColor(.sageWhite)
+                            .font(.bodyMedium)
+                            .foregroundColor(.nearBlack)
                             .padding(14)
-                            .background(Color.modaicsSurface)
+                            .background(Color.ivory)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+                                RoundedRectangle(cornerRadius: 2)
+                                    .stroke(Color.warmDivider, lineWidth: 1)
                             )
-                            .cornerRadius(8)
+                            .clipShape(RoundedRectangle(cornerRadius: 2))
                     }
                 }
                 .padding(.horizontal, 24)
@@ -177,13 +169,13 @@ struct AuthView: View {
                 Button(action: {
                     appState.isAuthenticated = true
                 }) {
-                    Text("SIGN IN")
-                        .font(.forestBodyLarge)
-                        .foregroundColor(.modaicsBackground)
+                    Text("Sign in")
+                        .font(.bodyText(15, weight: .medium))
+                        .foregroundColor(.warmOffWhite)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.luxeGold)
-                        .cornerRadius(8)
+                        .background(Color.nearBlack)
+                        .clipShape(RoundedRectangle(cornerRadius: 2))
                 }
                 .padding(.horizontal, 24)
                 
@@ -224,19 +216,16 @@ struct MainAppView: View {
     }
 }
 
-// MARK: - Custom Tab Bar
+// MARK: - Custom Tab Bar (Editorial Style)
 struct CustomTabBar: View {
     @Binding var selectedTab: Tab
     
     var body: some View {
         VStack(spacing: 0) {
-            // Chrome gradient line at top
-            LinearGradient(
-                colors: [Color.modaicsChrome.opacity(0.3), Color.clear],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 1)
+            // Thin top border
+            Rectangle()
+                .fill(Color.warmDivider)
+                .frame(height: 0.5)
             
             HStack(spacing: 0) {
                 ForEach(Tab.allCases) { tab in
@@ -248,15 +237,12 @@ struct CustomTabBar: View {
                 }
             }
             .frame(height: 55)
-            .background(
-                Color.modaicsBackground.opacity(0.95)
-                    .overlay(.ultraThinMaterial)
-            )
+            .background(Color.warmOffWhite)
         }
     }
 }
 
-// MARK: - Tab Button
+// MARK: - Tab Button (Editorial Style)
 struct TabButton: View {
     let tab: Tab
     let isSelected: Bool
@@ -265,11 +251,11 @@ struct TabButton: View {
     
     var body: some View {
         Button(action: {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            withAnimation(.editorialSpring) {
                 scale = 0.9
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                withAnimation(.editorialSpring) {
                     scale = 1.0
                 }
             }
@@ -277,15 +263,14 @@ struct TabButton: View {
         }) {
             VStack(spacing: 4) {
                 Image(systemName: isSelected ? tab.icon : tab.inactiveIcon)
-                    .font(.system(size: tab == .create ? 28 : 22, weight: .medium))
-                    .foregroundColor(isSelected ? .luxeGold : .modaicsGunmetal)
+                    .font(.system(size: tab == .create ? 24 : 20, weight: .regular))
+                    .foregroundColor(isSelected ? .nearBlack : .mutedGray)
                     .scaleEffect(scale)
                 
                 if tab != .create {
                     Text(tab.label)
-                        .font(.forestTabLabel)
-                        .foregroundColor(isSelected ? .luxeGold : .modaicsGunmetal)
-                        .tracking(1)
+                        .font(.tabLabel)
+                        .foregroundColor(isSelected ? .nearBlack : .mutedGray)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -293,14 +278,14 @@ struct TabButton: View {
     }
 }
 
-// MARK: - Placeholder Views
+// MARK: - Placeholder Views (Editorial Style)
 struct DiscoveryPlaceholderView: View {
     var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
-            Text("DISCOVER")
-                .font(.forestDisplaySmall)
-                .foregroundColor(.sageWhite)
+            Color.warmOffWhite.ignoresSafeArea()
+            Text("Discover")
+                .font(.editorialMedium)
+                .foregroundColor(.nearBlack)
         }
     }
 }
@@ -308,10 +293,10 @@ struct DiscoveryPlaceholderView: View {
 struct CreatePlaceholderView: View {
     var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
-            Text("LIST A PIECE")
-                .font(.forestDisplaySmall)
-                .foregroundColor(.sageWhite)
+            Color.warmOffWhite.ignoresSafeArea()
+            Text("List a piece")
+                .font(.editorialMedium)
+                .foregroundColor(.nearBlack)
         }
     }
 }
@@ -319,10 +304,10 @@ struct CreatePlaceholderView: View {
 struct CommunityPlaceholderView: View {
     var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
-            Text("COMMUNITY")
-                .font(.forestDisplaySmall)
-                .foregroundColor(.sageWhite)
+            Color.warmOffWhite.ignoresSafeArea()
+            Text("Community")
+                .font(.editorialMedium)
+                .foregroundColor(.nearBlack)
         }
     }
 }
@@ -330,10 +315,10 @@ struct CommunityPlaceholderView: View {
 struct WardrobePlaceholderView: View {
     var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
-            Text("WARDROBE")
-                .font(.forestDisplaySmall)
-                .foregroundColor(.sageWhite)
+            Color.warmOffWhite.ignoresSafeArea()
+            Text("Wardrobe")
+                .font(.editorialMedium)
+                .foregroundColor(.nearBlack)
         }
     }
 }
