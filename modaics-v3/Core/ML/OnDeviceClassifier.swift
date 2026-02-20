@@ -75,7 +75,7 @@ struct EstimatedPrice {
 class OnDeviceClassifier: ObservableObject {
     
     // MARK: - Services
-    private let clipService: MobileCLIPService
+    private let clipService: MobileCLIPService?
     private let detector: ClothingDetector
     private let ocr: LabelOCR
     
@@ -91,7 +91,7 @@ class OnDeviceClassifier: ObservableObject {
     
     /// Initialize all models
     func initialize() async throws {
-        try await clipService.initialize()
+        try await clipService?.initialize()
         try detector.initialize()
         // OCR uses Vision framework, no explicit init needed
     }
@@ -106,9 +106,10 @@ class OnDeviceClassifier: ObservableObject {
         
         // Run detection and embedding in parallel
         async let detectionTask = detector.detect(in: image)
-        async let embeddingTask = clipService.encodeImage(image)
+        async let embeddingTask = clipService?.encodeImage(image)
         
         let (detections, embedding) = try await (detectionTask, embeddingTask)
+        let validEmbedding = embedding ?? []
         
         // Get dominant detected item
         let dominantItem = detector.getDominantItem(from: detections)
@@ -125,7 +126,7 @@ class OnDeviceClassifier: ObservableObject {
             category: dominantItem?.category.displayName,
             categoryConfidence: dominantItem?.confidence ?? 0,
             boundingBox: dominantItem?.boundingBox,
-            embedding: embedding,
+            embedding: validEmbedding,
             labelInfo: labelInfo,
             processingTimeMs: processingTime
         )

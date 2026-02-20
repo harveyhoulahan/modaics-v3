@@ -8,10 +8,13 @@ class MobileCLIPService {
     private var imageEncoder: VNCoreMLModel?
     private let modelURL: URL
     
-    init() {
+    init?() {
         // Model path - would be bundled in app
-        self.modelURL = Bundle.main.url(forResource: "MobileCLIP_S2_ImageEncoder", withExtension: "mlmodelc")
-            ?? Bundle.main.url(forResource: "MobileCLIP_S2_ImageEncoder", withExtension: "mlpackage")!
+        guard let url = Bundle.main.url(forResource: "MobileCLIP_S2_ImageEncoder", withExtension: "mlmodelc")
+            ?? Bundle.main.url(forResource: "MobileCLIP_S2_ImageEncoder", withExtension: "mlpackage") else {
+            return nil
+        }
+        self.modelURL = url
     }
     
     /// Initialize the CoreML model
