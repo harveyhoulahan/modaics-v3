@@ -19,7 +19,7 @@ from anthropic import AsyncAnthropic
 import openai
 
 from app.config import get_settings
-from app.database import get_db_pool
+from app.database import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -82,93 +82,100 @@ class ModaContext:
         
     async def load(self):
         """Load user context from database."""
-        pool = await get_db_pool()
-        async with pool.acquire() as conn:
+        from sqlalchemy import text
+        
+        async with AsyncSessionLocal() as session:
             # Wardrobe stats
-            row = await conn.fetchrow(
-                """
-                SELECT 
-                    COUNT(*) as wardrobe_count,
-                    COALESCE(SUM(carbon_savings_kg), 0) as total_carbon
-                FROM wardrobe_items 
-                WHERE user_id = $1
-                """,
-                self.user_id
+            result = await session.execute(
+                text("""
+                    SELECT 
+                        COUNT(*) as wardrobe_count,
+                        COALESCE(SUM(carbon_savings_kg), 0) as total_carbon
+                    FROM wardrobe_items 
+                    WHERE user_id = :user_id
+                """),
+                {"user_id": self.user_id}
             )
+            row = result.fetchone()
             if row:
-                self.wardrobe_count = row["wardrobe_count"]
-                self.total_carbon_saved = float(row["total_carbon"])
+                self.wardrobe_count = row.wardrobe_count
+                self.total_carbon_saved = float(row.total_carbon)
             
             # Recent searches (last 30 days)
-            searches = await conn.fetch(
-                """
-                SELECT search_query, created_at
-                FROM search_history
-                WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'
-                ORDER BY created_at DESC
-                LIMIT 20
-                """,
-                self.user_id
+            result = await session.execute(
+                text("""
+                    SELECT search_query, created_at
+                    FROM search_history
+                    WHERE user_id = :user_id AND created_at > NOW() - INTERVAL '30 days'
+                    ORDER BY created_at DESC
+                    LIMIT 20
+                """),
+                {"user_id": self.user_id}
             )
-            self.recent_searches = [s["search_query"] for s in searches]
+            searches = result.fetchall()
+            self.recent_searches = [s.search_query for s in searches]
             
             # Recent purchases
-            purchases = await conn.fetch(
-                """
-                SELECT i.title, i.category, i.brand, t.created_at
-                FROM transactions t
-                JOIN items i ON t.item_id = i.id
-                WHERE t.buyer_id = $1
-                ORDER BY t.created_at DESC
-                LIMIT 10
-                """,
-                self.user_id
+            result = await session.execute(
+                text("""
+                    SELECT i.title, i.category, i.brand, t.created_at
+                    FROM transactions t
+                    JOIN items i ON t.item_id = i.id
+                    WHERE t.buyer_id = :user_id
+                    ORDER BY t.created_at DESC
+                    LIMIT 10
+                """),
+                {"user_id": self.user_id}
             )
+            purchases = result.fetchall()
             self.recent_purchases = [
-                {"title": p["title"], "category": p["category"], "brand": p["brand"]}
+                {"title": p.title, "category": p.category, "brand": p.brand}
                 for p in purchases
             ]
             
             # Saved items (wishlist)
-            saved = await conn.fetch(
-                """
-                SELECT i.title, i.category, i.brand
-                FROM wishlist w
-                JOIN items i ON w.item_id = i.id
-                WHERE w.user_id = $1
-                ORDER BY w.created_at DESC
-                LIMIT 10
-                """,
-                self.user_id
+            result = await session.execute(
+                text("""
+                    SELECT i.title, i.category, i.brand
+                    FROM wishlist w
+                    JOIN items i ON w.item_id = i.id
+                    WHERE w.user_id = :user_id
+                    ORDER BY w.created_at DESC
+                    LIMIT 10
+                """),
+                {"user_id": self.user_id}
             )
+            saved = result.fetchall()
             self.saved_items = [
-                {"title": s["title"], "category": s["category"], "brand": s["brand"]}
+                {"title": s.title, "category": s.category, "brand": s.brand}
                 for s in saved
             ]
             
             # Style preferences from profile
-            profile = await conn.fetchrow(
-                "SELECT style_preferences, favorite_colors, location FROM users WHERE id = $1",
-                self.user_id
+            result = await session.execute(
+                text("SELECT style_preferences, favorite_colors, location FROM users WHERE id = :user_id"),
+                {"user_id": self.user_id}
             )
+            profile = result.fetchone()
             if profile:
-                self.style_preferences = profile.get("style_preferences", []) or []
-                self.favorite_colors = profile.get("favorite_colors", []) or []
-                self.location = profile.get("location", "")
+                self.style_preferences = profile.style_preferences or []
+                self.favorite_colors = profile.favorite_colors or []
+                self.location = profile.location or ""
             
             # Extract favorite categories from wardrobe
-            categories = await conn.fetch(
-                """
-                SELECT category, COUNT(*) as count
-                FROM wardrobe_items
-                WHERE user_id = $1
-                GROUP BY category
-                ORDER BY count DESC
-                LIMIT 5
-                """,
-                self.user_id
+            result = await session.execute(
+                text("""
+                    SELECT category, COUNT(*) as count
+                    FROM wardrobe_items
+                    WHERE user_id = :user_id
+                    GROUP BY category
+                    ORDER BY count DESC
+                    LIMIT 5
+                """),
+                {"user_id": self.user_id}
             )
-            self.favorite_categories = [c["category"] for c in categories]
+            categories = result.fetchall()
+            self.favorite_categories = [c.category for c in categories]
 
 
 class ModaAssistant:

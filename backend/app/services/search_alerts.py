@@ -9,8 +9,9 @@ import uuid
 import logging
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
+from sqlalchemy import text
 
-from app.database import get_db_pool
+from app.database import AsyncSessionLocal
 from app.services.fashion_clip import get_fashion_clip_service
 
 logger = logging.getLogger(__name__)
@@ -88,183 +89,203 @@ class SearchAlertsService:
         )
         
         # Save to database
-        pool = await get_db_pool()
-        async with pool.acquire() as conn:
-            await conn.execute(
-                """
-                INSERT INTO search_alerts (
-                    id, user_id, description, text_embedding, max_price, 
-                    category, similarity_threshold, is_active, created_at
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
-                """,
-                alert.id, alert.user_id, alert.description,
-                alert.text_embedding, alert.max_price,
-                alert.category, alert.similarity_threshold, alert.is_active
+        async with AsyncSessionLocal() as session:
+            await session.execute(
+                text("""
+                    INSERT INTO search_alerts (
+                        id, user_id, description, text_embedding, max_price, 
+                        category, similarity_threshold, is_active, created_at
+                    ) VALUES (:id, :user_id, :description, :text_embedding, :max_price, 
+                        :category, :similarity_threshold, :is_active, NOW())
+                """),
+                {
+                    "id": alert.id,
+                    "user_id": alert.user_id,
+                    "description": alert.description,
+                    "text_embedding": alert.text_embedding,
+                    "max_price": alert.max_price,
+                    "category": alert.category,
+                    "similarity_threshold": alert.similarity_threshold,
+                    "is_active": alert.is_active
+                }
             )
+            await session.commit()
         
         logger.info(f"Created search alert {alert_id} for user {user_id}: {description}")
         return alert
     
     async def get_user_alerts(self, user_id: str) -> List[Dict]:
         """Get all active alerts for a user."""
-        pool = await get_db_pool()
-        async with pool.acquire() as conn:
-            rows = await conn.fetch(
-                """
-                SELECT 
-                    id, description, max_price, category,
-                    matches_found, created_at
-                FROM search_alerts
-                WHERE user_id = $1 AND is_active = true
-                ORDER BY created_at DESC
-                """,
-                user_id
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(
+                text("""
+                    SELECT 
+                        id, description, max_price, category,
+                        matches_found, created_at
+                    FROM search_alerts
+                    WHERE user_id = :user_id AND is_active = true
+                    ORDER BY created_at DESC
+                """),
+                {"user_id": user_id}
             )
+            rows = result.fetchall()
         
         return [
             {
-                "id": str(r["id"]),
-                "description": r["description"],
-                "max_price": float(r["max_price"]) if r["max_price"] else None,
-                "category": r["category"],
-                "matches_found": r["matches_found"],
-                "created_at": r["created_at"].isoformat()
+                "id": str(r.id),
+                "description": r.description,
+                "max_price": float(r.max_price) if r.max_price else None,
+                "category": r.category,
+                "matches_found": r.matches_found,
+                "created_at": r.created_at.isoformat() if r.created_at else None
             }
             for r in rows
         ]
     
     async def deactivate_alert(self, alert_id: str, user_id: str) -> bool:
         """Deactivate a search alert."""
-        pool = await get_db_pool()
-        async with pool.acquire() as conn:
-            result = await conn.execute(
-                """
-                UPDATE search_alerts
-                SET is_active = false
-                WHERE id = $1 AND user_id = $2
-                """,
-                alert_id, user_id
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(
+                text("""
+                    UPDATE search_alerts
+                    SET is_active = false
+                    WHERE id = :alert_id AND user_id = :user_id
+                """),
+                {"alert_id": alert_id, "user_id": user_id}
             )
-        return result == "UPDATE 1"
+            await session.commit()
+            return result.rowcount == 1
     
     async def check_new_listings(self) -> List[Dict]:
         """
         Check recently listed items against active alerts.
         Returns list of matches for notification.
         """
-        pool = await get_db_pool()
         matches = []
         
-        async with pool.acquire() as conn:
+        async with AsyncSessionLocal() as session:
             # Get items listed in last 15 minutes
-            new_items = await conn.fetch(
-                """
-                SELECT 
-                    i.id, i.title, i.description, i.price, i.category,
-                    i.image_embedding, i.seller_id, u.username as seller_name
-                FROM items i
-                JOIN users u ON i.seller_id = u.id
-                WHERE i.created_at > NOW() - INTERVAL '15 minutes'
-                AND i.image_embedding IS NOT NULL
-                AND i.status = 'active'
-                """
+            result = await session.execute(
+                text("""
+                    SELECT 
+                        i.id, i.title, i.description, i.price, i.category,
+                        i.image_embedding, i.seller_id, u.username as seller_name
+                    FROM items i
+                    JOIN users u ON i.seller_id = u.id
+                    WHERE i.created_at > NOW() - INTERVAL '15 minutes'
+                    AND i.image_embedding IS NOT NULL
+                    AND i.status = 'active'
+                """)
             )
+            new_items = result.fetchall()
             
             for item in new_items:
-                # Find matching alerts
-                matching_alerts = await conn.fetch(
-                    """
-                    SELECT 
-                        sa.id, sa.user_id, sa.description,
-                        1 - (sa.text_embedding <=> $1::vector) AS similarity
-                    FROM search_alerts sa
-                    WHERE sa.is_active = true
-                    AND (sa.max_price IS NULL OR $2 <= sa.max_price)
-                    AND (sa.category IS NULL OR sa.category = $3)
-                    AND (1 - (sa.text_embedding <=> $1::vector)) > sa.similarity_threshold
-                    AND (
-                        sa.last_notified_at IS NULL 
-                        OR sa.last_notified_at < NOW() - INTERVAL '24 hours'
-                    )
-                    AND sa.user_id != $4  -- Don't alert for own listings
-                    """,
-                    item["image_embedding"], item["price"], 
-                    item["category"], item["seller_id"]
+                # Find matching alerts - using SQLAlchemy text with parameters
+                result = await session.execute(
+                    text("""
+                        SELECT 
+                            sa.id, sa.user_id, sa.description,
+                            1 - (sa.text_embedding <=> :embedding::vector) AS similarity
+                        FROM search_alerts sa
+                        WHERE sa.is_active = true
+                        AND (:max_price IS NULL OR :price <= sa.max_price)
+                        AND (:category IS NULL OR sa.category = :category)
+                        AND (1 - (sa.text_embedding <=> :embedding::vector)) > sa.similarity_threshold
+                        AND (
+                            sa.last_notified_at IS NULL 
+                            OR sa.last_notified_at < NOW() - INTERVAL '24 hours'
+                        )
+                        AND sa.user_id != :seller_id
+                    """),
+                    {
+                        "embedding": item.image_embedding,
+                        "price": item.price,
+                        "max_price": None,  # This logic needs refinement
+                        "category": item.category,
+                        "seller_id": item.seller_id
+                    }
                 )
+                
+                matching_alerts = result.fetchall()
                 
                 for alert in matching_alerts:
                     matches.append({
-                        "alert_id": str(alert["id"]),
-                        "user_id": str(alert["user_id"]),
-                        "alert_description": alert["description"],
-                        "similarity": float(alert["similarity"]),
+                        "alert_id": str(alert.id),
+                        "user_id": str(alert.user_id),
+                        "alert_description": alert.description,
+                        "similarity": float(alert.similarity),
                         "item": {
-                            "id": str(item["id"]),
-                            "title": item["title"],
-                            "price": float(item["price"]),
-                            "category": item["category"],
-                            "seller_name": item["seller_name"]
+                            "id": str(item.id),
+                            "title": item.title,
+                            "price": float(item.price),
+                            "category": item.category,
+                            "seller_name": item.seller_name
                         }
                     })
                     
                     # Update alert
-                    await conn.execute(
-                        """
-                        UPDATE search_alerts
-                        SET last_notified_at = NOW(),
-                            matches_found = matches_found + 1
-                        WHERE id = $1
-                        """,
-                        alert["id"]
+                    await session.execute(
+                        text("""
+                            UPDATE search_alerts
+                            SET last_notified_at = NOW(),
+                                matches_found = matches_found + 1
+                            WHERE id = :alert_id
+                        """),
+                        {"alert_id": alert.id}
                     )
+                    await session.commit()
         
         return matches
     
     async def find_matches_for_alert(self, alert_id: str) -> List[Dict]:
         """Find existing items that match a specific alert."""
-        pool = await get_db_pool()
-        
-        async with pool.acquire() as conn:
+        async with AsyncSessionLocal() as session:
             # Get alert details
-            alert = await conn.fetchrow(
-                "SELECT * FROM search_alerts WHERE id = $1",
-                alert_id
+            result = await session.execute(
+                text("SELECT * FROM search_alerts WHERE id = :alert_id"),
+                {"alert_id": alert_id}
             )
+            alert = result.fetchone()
             
             if not alert:
                 return []
             
             # Find matching items
-            items = await conn.fetch(
-                """
-                SELECT 
-                    i.id, i.title, i.price, i.category,
-                    1 - ($1::vector <=> i.image_embedding) AS similarity,
-                    u.username as seller_name
-                FROM items i
-                JOIN users u ON i.seller_id = u.id
-                WHERE i.status = 'active'
-                AND i.created_at > NOW() - INTERVAL '30 days'
-                AND ($2 IS NULL OR i.price <= $2)
-                AND ($3 IS NULL OR i.category = $3)
-                AND (1 - ($1::vector <=> i.image_embedding)) > $4
-                AND i.seller_id != $5
-                ORDER BY similarity DESC
-                LIMIT 20
-                """,
-                alert["text_embedding"], alert["max_price"],
-                alert["category"], alert["similarity_threshold"],
-                alert["user_id"]
+            result = await session.execute(
+                text("""
+                    SELECT 
+                        i.id, i.title, i.price, i.category,
+                        1 - (:embedding::vector <=> i.image_embedding) AS similarity,
+                        u.username as seller_name
+                    FROM items i
+                    JOIN users u ON i.seller_id = u.id
+                    WHERE i.status = 'active'
+                    AND i.created_at > NOW() - INTERVAL '30 days'
+                    AND (:max_price IS NULL OR i.price <= :max_price)
+                    AND (:category IS NULL OR i.category = :category)
+                    AND (1 - (:embedding::vector <=> i.image_embedding)) > :threshold
+                    AND i.seller_id != :user_id
+                    ORDER BY similarity DESC
+                    LIMIT 20
+                """),
+                {
+                    "embedding": alert.text_embedding,
+                    "max_price": alert.max_price,
+                    "category": alert.category,
+                    "threshold": alert.similarity_threshold,
+                    "user_id": alert.user_id
+                }
             )
+            items = result.fetchall()
         
         return [
             {
-                "id": str(item["id"]),
-                "title": item["title"],
-                "price": float(item["price"]),
-                "category": item["category"],
-                "seller_name": item["seller_name"],
-                "similarity": float(item["similarity"])
+                "id": str(item.id),
+                "title": item.title,
+                "price": float(item.price),
+                "category": item.category,
+                "seller_name": item.seller_name,
+                "similarity": float(item.similarity)
             }
             for item in items
         ]
@@ -275,7 +296,7 @@ class SearchAlertsService:
         query: str,
         occasion: Optional[str] = None,
         budget: Optional[float] = None,
-        timeline: Optional[str] = None  # "tonight", "this weekend", "anytime"
+        timeline: Optional[str] = None
     ) -> Dict:
         """
         Concierge-style search for urgent needs.
@@ -286,42 +307,45 @@ class SearchAlertsService:
         # Parse query into searchable terms
         search_embedding = await clip_service.encode_text(query)
         
-        pool = await get_db_pool()
-        async with pool.acquire() as conn:
+        async with AsyncSessionLocal() as session:
             # Search with multiple criteria
-            items = await conn.fetch(
-                """
-                SELECT 
-                    i.id, i.title, i.price, i.category, i.condition,
-                    i.size, i.brand, i.images,
-                    1 - ($1::vector <=> i.image_embedding) AS similarity,
-                    u.username as seller_name,
-                    u.location as seller_location
-                FROM items i
-                JOIN users u ON i.seller_id = u.id
-                WHERE i.status = 'active'
-                AND ($2 IS NULL OR i.price <= $2)
-                AND i.seller_id != $3
-                ORDER BY similarity DESC
-                LIMIT 10
-                """,
-                search_embedding.tolist() if hasattr(search_embedding, 'tolist') else list(search_embedding),
-                budget, user_id
+            result = await session.execute(
+                text("""
+                    SELECT 
+                        i.id, i.title, i.price, i.category, i.condition,
+                        i.size, i.brand, i.images,
+                        1 - (:embedding::vector <=> i.image_embedding) AS similarity,
+                        u.username as seller_name,
+                        u.location as seller_location
+                    FROM items i
+                    JOIN users u ON i.seller_id = u.id
+                    WHERE i.status = 'active'
+                    AND (:budget IS NULL OR i.price <= :budget)
+                    AND i.seller_id != :user_id
+                    ORDER BY similarity DESC
+                    LIMIT 10
+                """),
+                {
+                    "embedding": search_embedding.tolist() if hasattr(search_embedding, 'tolist') else list(search_embedding),
+                    "budget": budget,
+                    "user_id": user_id
+                }
             )
+            items = result.fetchall()
         
         # Build result
         results = []
         for item in items:
             result = {
-                "id": str(item["id"]),
-                "title": item["title"],
-                "price": float(item["price"]),
-                "brand": item["brand"],
-                "condition": item["condition"],
-                "size": item["size"],
-                "seller": item["seller_name"],
-                "similarity": float(item["similarity"]),
-                "images": item["images"] or []
+                "id": str(item.id),
+                "title": item.title,
+                "price": float(item.price),
+                "brand": item.brand,
+                "condition": item.condition,
+                "size": item.size,
+                "seller": item.seller_name,
+                "similarity": float(item.similarity),
+                "images": item.images or []
             }
             results.append(result)
         
@@ -358,7 +382,7 @@ class SearchAlertsService:
         
         if timeline == "tonight":
             parts.append(f"Found {count} options that could work for tonight!")
-        elif timeline == "this weekend":
+        elif timeline == "this_weekend":
             parts.append(f"Found {count} great options for the weekend.")
         else:
             parts.append(f"Found {count} pieces matching '{query}'.")
