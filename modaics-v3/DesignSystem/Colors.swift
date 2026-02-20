@@ -33,6 +33,12 @@ public extension Color {
     static let modaicsSage = Color(hex: "7A9A5A")                // more vibrant sage
     static let modaicsFern = Color(hex: "4A9A5A")                // brighter fern
     
+    // MARK: - Legacy Green Aliases (for backward compatibility)
+    static var forestDeep: Color { .modaicsPrimary }
+    static var forestRich: Color { .modaicsForest }
+    static var forestMid: Color { .modaicsRacingGreen }
+    static var forestSoft: Color { .modaicsEmerald }
+    
     // MARK: - Editorial Palette (NEW - replaces gold family)
     /// Primary accent — replaces luxeGold. Warm aged brass, like a vintage belt buckle.
     static let agedBrass = Color(red: 0.784, green: 0.541, blue: 0.396)       // #C88A65
