@@ -15,9 +15,12 @@ from app.config import get_settings
 from app.database import check_db_connection, close_db_connections, init_extensions
 from app.routers import garments, discovery, exchange, wardrobes
 from app.routers.analysis import router as analysis_router
+from app.routers.chat import router as chat_router
+from app.routers.greeting import router as greeting_router
 from app.schemas import HealthCheck
 from app.services.style_matching import style_matching_service
 from app.services.fashion_clip import get_fashion_clip_service
+from app.services.moda_assistant import get_moda_assistant
 
 # Configure logging
 logging.basicConfig(
@@ -60,6 +63,13 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning("Could not initialize FashionCLIP service: %s", e)
     
+    # Initialize Moda AI Assistant
+    try:
+        moda = await get_moda_assistant()
+        logger.info("Moda AI Assistant initialized")
+    except Exception as e:
+        logger.warning("Could not initialize Moda assistant: %s", e)
+    
     # Health check
     db_healthy = await check_db_connection()
     logger.info("Database connection: %s", "healthy" if db_healthy else "unhealthy")
@@ -84,6 +94,7 @@ app = FastAPI(
     - **Discovery** - AI-powered style matching using CLIP embeddings
     - **Exchange** - Buy, sell, and trade garments
     - **Wardrobes** - Curated collections ("The Mosaic")
+    - **Moda AI Assistant** - Your personal style companion
     
     ## AI Features
     
@@ -94,6 +105,10 @@ app = FastAPI(
     - CLIP-based visual and semantic similarity
     - Vector search for style matching
     - Smart recommendations
+    - Moda AI Assistant with streaming chat
+    - "Keep an eye out" alerts for wanted items
+    - Concierge search for urgent needs
+    - Dynamic personalized greetings
     """,
     docs_url="/docs" if not settings.is_production else None,
     redoc_url="/redoc" if not settings.is_production else None,
@@ -130,6 +145,8 @@ app.include_router(discovery.router)
 app.include_router(exchange.router)
 app.include_router(wardrobes.router)
 app.include_router(analysis_router)  # AI-powered /api/analyze endpoint
+app.include_router(chat_router)  # Moda AI Assistant chat
+app.include_router(greeting_router)  # Dynamic greetings and search hints
 
 
 @app.get("/", response_model=HealthCheck)
