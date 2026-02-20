@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with pgvector extension
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: modaics-postgres
+    environment:
+      POSTGRES_USER: modaics
+      POSTGRES_PASSWORD: modaics
+      POSTGRES_DB: modaics
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U modaics -d modaics"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - modaics-network
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: modaics-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - modaics-network
+
+  # FastAPI Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: modaics-api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://modaics:modaics@postgres:5432/modaics
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-super-secret-dev-key-change-in-production}
+      CLIP_MODEL_NAME: ${CLIP_MODEL_NAME:-openai/clip-vit-base-patch32}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app:ro
+      - ./alembic:/app/alembic:ro
+      - model_cache:/app/model_cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    networks:
+      - modaics-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  model_cache:
+
+networks:
+  modaics-network:
+    driver: bridge
