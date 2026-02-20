@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var selectedEvent: ModaicsEvent?
     @State private var showItemDetail = false
     @State private var showEventDetail = false
+    @State private var showModaAssistant = false
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -76,6 +77,9 @@ struct HomeView: View {
                 LegacyEventDetailSheet(event: event)
             }
         }
+        .sheet(isPresented: $showModaAssistant) {
+            ModaAssistantView()
+        }
         .onAppear {
             viewModel.loadHomeData()
         }
@@ -93,8 +97,22 @@ struct HomeView: View {
                 
                 Spacer()
                 
-                // Notification & Settings buttons
+                // Moda AI, Notification & Settings buttons
                 HStack(spacing: 16) {
+                    Button(action: { showModaAssistant = true }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 16, weight: .medium))
+                            Text("Moda")
+                                .font(.forestCaptionMedium)
+                        }
+                        .foregroundColor(.luxeGold)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.luxeGold.opacity(0.15))
+                        .cornerRadius(16)
+                    }
+                    
                     Button(action: {}) {
                         Image(systemName: "bell")
                             .font(.system(size: 20, weight: .medium))
