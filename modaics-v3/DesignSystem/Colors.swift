@@ -1,14 +1,21 @@
 import SwiftUI
 
-// MARK: - Modaics Dark Green Porsche Design System
-/// Deep forest greens, gold accents, near-black backgrounds with MORE green
+// MARK: - Modaics Editorial Design System
+/// Fashion editorial aesthetic: serif headlines, aged brass accents, brutalist minimalism
+/// Deep forest greens kept as brand identity, gold → aged brass
+
 public extension Color {
     
-    // MARK: - Backgrounds (near-black with STRONG green undertones)
+    // MARK: - Backgrounds (Dark Mode - keep existing)
     static let modaicsBackground = Color(hex: "0A140F")          // deeper green-black
     static let modaicsBackgroundSecondary = Color(hex: "0F1F17") // stronger green
     static let modaicsBackgroundTertiary = Color(hex: "152920")  // even greener
     static let modaicsElevated = Color(hex: "1C3328")            // elevated surfaces
+    
+    // MARK: - Light Mode Backgrounds (NEW)
+    static let warmOffWhite = Color(red: 0.980, green: 0.976, blue: 0.965)    // #FAF9F6
+    static let ivory = Color(red: 0.941, green: 0.929, blue: 0.898)           // #F0EDE5
+    static let cream = Color(red: 0.961, green: 0.953, blue: 0.929)           // #F5F3ED
     
     // MARK: - Surfaces (charcoal with STRONG green tint)
     static let modaicsSurface = Color(hex: "162B21")             // greener surface
@@ -26,10 +33,34 @@ public extension Color {
     static let modaicsSage = Color(hex: "7A9A5A")                // more vibrant sage
     static let modaicsFern = Color(hex: "4A9A5A")                // brighter fern
     
-    // MARK: - Gold Accents (luxury — same)
-    static let luxeGold = Color(hex: "D9BD6B")                   // primary accent
-    static let luxeGoldBright = Color(hex: "EBD185")             // highlights
-    static let luxeGoldDeep = Color(hex: "B89E4A")               // pressed
+    // MARK: - Editorial Palette (NEW - replaces gold family)
+    /// Primary accent — replaces luxeGold. Warm aged brass, like a vintage belt buckle.
+    static let agedBrass = Color(red: 0.784, green: 0.541, blue: 0.396)       // #C88A65
+    
+    /// Lighter brass for subtle highlights
+    static let agedBrassLight = Color(red: 0.831, green: 0.647, blue: 0.455)  // #D4A574
+    
+    /// Darker bronze for small icon accents
+    static let burnishedBronze = Color(red: 0.604, green: 0.482, blue: 0.216) // #9A7B37
+    
+    /// Warm divider line colour — replaces gold borders
+    static let warmDivider = Color(red: 0.831, green: 0.812, blue: 0.780)     // #D4CFC7
+    
+    /// Near-black for CTAs and primary text — never pure #000000
+    static let nearBlack = Color(red: 0.102, green: 0.102, blue: 0.102)       // #1A1A1A
+    
+    /// Warm charcoal for secondary text
+    static let warmCharcoal = Color(red: 0.290, green: 0.290, blue: 0.271)    // #4A4A45
+    
+    /// Inactive tab / muted UI elements
+    static let mutedGray = Color(red: 0.604, green: 0.604, blue: 0.604)       // #9A9A9A
+    
+    // MARK: - Legacy Gold → Brass Bridge
+    static var luxeGold: Color { .agedBrass }
+    static var luxeGoldBright: Color { .agedBrassLight }
+    static var luxeGoldDeep: Color { .burnishedBronze }
+    static var goldText: Color { .agedBrass }
+    static var brassText: Color { .agedBrass }
     
     // MARK: - Chrome / Metallic
     static let modaicsChrome = Color(hex: "C4C4C4")
@@ -41,6 +72,11 @@ public extension Color {
     static let sageWhite = Color(hex: "F5F7F3")                  // slightly green-tinted white
     static let sageMuted = Color(hex: "B8C9B0")                  // green-tinted muted
     static let sageSubtle = Color(hex: "7A8B72")                 // green-tinted subtle
+    
+    // Text colors for light backgrounds
+    static var modaicsTextPrimary: Color { .nearBlack }
+    static var modaicsTextSecondary: Color { .warmCharcoal }
+    static var modaicsTextTertiary: Color { .mutedGray }
     
     // MARK: - Semantic (ENHANCED greens)
     static let modaicsEco = Color(hex: "3DDC84")                 // brighter eco green
@@ -57,6 +93,13 @@ public extension Color {
             endPoint: .bottom
         )
     }
+    
+    // MARK: - Editorial Shimmer (neutral warm, no gold tint)
+    static let editorialShimmer = LinearGradient(
+        colors: [.clear, .warmDivider.opacity(0.4), .warmDivider.opacity(0.6), .warmDivider.opacity(0.4), .clear],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
 }
 
 // MARK: - Hex Initializer
