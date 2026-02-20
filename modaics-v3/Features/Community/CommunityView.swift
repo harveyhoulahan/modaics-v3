@@ -52,10 +52,10 @@ public struct CommunityView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text("COMMUNITY")
-                        .font(.forestDisplaySmall)
+                    // Sentence case serif title - NOT ALL CAPS
+                    Text("Community")
+                        .font(.editorialSmall)
                         .foregroundColor(.sageWhite)
-                        .tracking(2)
                     
                     Spacer()
                     
@@ -68,7 +68,7 @@ public struct CommunityView: View {
                 }
                 
                 Text("Connect with the Modaics community")
-                    .font(.forestCaptionMedium)
+                    .font(.bodyText(13))
                     .foregroundColor(.sageMuted)
             }
             .padding(.horizontal, 20)
@@ -94,13 +94,14 @@ public struct CommunityView: View {
                     HStack(spacing: 6) {
                         Image(systemName: segment.icon)
                             .font(.system(size: 14))
-                        Text(segment.rawValue.uppercased())
-                            .font(.forestCaptionSmall)
+                        // Sentence case - NOT ALL CAPS
+                        Text(segment.rawValue)
+                            .font(.bodyText(12, weight: .medium))
                     }
                     .foregroundColor(selectedSegment == segment ? .modaicsBackground : .sageWhite)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(selectedSegment == segment ? Color.luxeGold : Color.modaicsSurface)
+                    .background(selectedSegment == segment ? Color.agedBrass : Color.modaicsSurface)
                 }
             }
         }
@@ -108,7 +109,7 @@ public struct CommunityView: View {
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+                .stroke(Color.warmDivider, lineWidth: 0.5)
         )
         .padding(.horizontal, 20)
         .padding(.vertical, 8)

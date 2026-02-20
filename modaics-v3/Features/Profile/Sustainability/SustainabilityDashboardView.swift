@@ -12,10 +12,10 @@ public struct SustainabilityDashboardView: View {
     
     public var body: some View {
         VStack(spacing: 20) {
-            // Impact Dashboard
+            // Impact Dashboard - simplified
             impactDashboard
             
-            // Eco Points Section
+            // Eco Points Section - simplified
             ecoPointsSection
             
             // Badges Section
@@ -26,7 +26,7 @@ public struct SustainabilityDashboardView: View {
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+                .stroke(Color.warmDivider, lineWidth: 0.5)
         )
         .padding(.horizontal, 20)
         .sheet(isPresented: $showFullReport) {
@@ -37,42 +37,16 @@ public struct SustainabilityDashboardView: View {
     // MARK: - Impact Dashboard
     private var impactDashboard: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Header
-            HStack(spacing: 8) {
-                Image(systemName: "leaf.fill")
-                    .font(.system(size: 16))
-                    .foregroundColor(.modaicsEco)
-                
-                Text("YOUR IMPACT")
-                    .font(.forestHeadlineSmall)
-                    .foregroundColor(.sageWhite)
-            }
+            // Header - serif title
+            Text("Your impact")
+                .font(.editorialSmall)
+                .foregroundColor(.sageWhite)
             
-            // Metric Cards
-            HStack(spacing: 12) {
-                ImpactCard(
-                    icon: "drop.fill",
-                    value: formatWater(viewModel.waterSavedLiters),
-                    label: "Water",
-                    change: "+\(Int(viewModel.monthlyChange.water))%",
-                    color: .natureTeal
-                )
-                
-                ImpactCard(
-                    icon: "cloud.fill",
-                    value: "\(Int(viewModel.carbonSavedKg)) kg",
-                    label: "CO₂",
-                    change: "+\(Int(viewModel.monthlyChange.carbon))%",
-                    color: .modaicsEco
-                )
-                
-                ImpactCard(
-                    icon: "arrow.3.trianglepath",
-                    value: "\(viewModel.itemsCirculated)",
-                    label: "Circulated",
-                    change: "+\(viewModel.monthlyChange.items) new",
-                    color: .luxeGold
-                )
+            // Simple text metrics - NO emerald gradient icons
+            HStack(spacing: 24) {
+                ImpactMetric(value: "\(viewModel.ecoPoints)", label: "Eco points")
+                ImpactMetric(value: "\(Int(viewModel.carbonSavedKg))kg", label: "CO₂ saved")
+                ImpactMetric(value: "\(viewModel.itemsCirculated)", label: "Circulated")
             }
             
             // View Full Report Button
@@ -80,11 +54,12 @@ public struct SustainabilityDashboardView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "chart.bar")
                         .font(.system(size: 14))
-                    Text("View Full Report")
-                        .font(.forestCaptionMedium)
+                    Text("View full report")
+                        .font(.bodyText(12, weight: .medium))
                 }
-                .foregroundColor(.luxeGold)
+                .foregroundColor(.agedBrass)
             }
+            .padding(.top, 4)
         }
     }
     
@@ -93,90 +68,34 @@ public struct SustainabilityDashboardView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Header
             HStack {
-                HStack(spacing: 8) {
-                    Image(systemName: "leaf.circle.fill")
-                        .font(.system(size: 16))
-                        .foregroundColor(.modaicsEco)
-                    
-                    Text("ECO POINTS")
-                        .font(.forestHeadlineSmall)
-                        .foregroundColor(.sageWhite)
-                }
+                Text("\(viewModel.ecoPoints)")
+                    .font(.bodyText(24, weight: .medium))
+                    .foregroundColor(.sageWhite)
+                
+                Text("points earned")
+                    .font(.bodyText(14))
+                    .foregroundColor(.warmCharcoal)
                 
                 Spacer()
-                
-                HStack(spacing: 4) {
-                    Image(systemName: "leaf.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(.modaicsEco)
-                    Text("\(viewModel.ecoPoints)")
-                        .font(.forestHeadlineMedium)
-                        .foregroundColor(.modaicsEco)
-                }
-            }
-            
-            Text("Earned from sustainable actions")
-                .font(.forestCaptionMedium)
-                .foregroundColor(.sageMuted)
-            
-            // Progress Bar
-            VStack(alignment: .leading, spacing: 8) {
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Track
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.modaicsSurfaceHighlight)
-                            .frame(height: 8)
-                        
-                        // Fill
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.modaicsEco)
-                            .frame(width: geometry.size.width * viewModel.progressPercentage, height: 8)
-                    }
-                }
-                .frame(height: 8)
-                
-                Text("\(viewModel.pointsToNext) points to next reward")
-                    .font(.forestCaptionSmall)
-                    .foregroundColor(.sageMuted)
             }
             
             Divider()
-                .background(Color.modaicsSurfaceHighlight)
+                .background(Color.warmDivider)
             
             // How to Earn
             VStack(alignment: .leading, spacing: 12) {
-                Text("HOW TO EARN")
-                    .font(.forestCaptionSmall)
-                    .foregroundColor(.luxeGold)
+                Text("How to earn")
+                    .font(.bodyText(12, weight: .medium))
+                    .foregroundColor(.agedBrass)
                 
                 VStack(spacing: 10) {
-                    EcoPointRow(icon: "arrow.left.arrow.right", text: "Items Swapped", points: "+50 pts each", color: .modaicsEco)
-                    EcoPointRow(icon: "dollarsign.circle", text: "Second-hand Buy", points: "+25 pts each", color: .modaicsEco)
-                    EcoPointRow(icon: "calendar", text: "Event Attendance", points: "+75 pts each", color: .modaicsEco)
-                    EcoPointRow(icon: "star.fill", text: "Sustainability Badge", points: "+100 pts", color: .modaicsEco)
-                    EcoPointRow(icon: "camera.fill", text: "Garment Story", points: "+30 pts", color: .modaicsEco)
-                    EcoPointRow(icon: "gift.fill", text: "Donation", points: "+40 pts", color: .modaicsEco)
+                    EcoPointRow(icon: "arrow.left.arrow.right", text: "Items swapped", points: "+50 pts")
+                    EcoPointRow(icon: "dollarsign.circle", text: "Second-hand buy", points: "+25 pts")
+                    EcoPointRow(icon: "calendar", text: "Event attendance", points: "+75 pts")
+                    EcoPointRow(icon: "star.fill", text: "Sustainability badge", points: "+100 pts")
+                    EcoPointRow(icon: "camera.fill", text: "Garment story", points: "+30 pts")
+                    EcoPointRow(icon: "gift.fill", text: "Donation", points: "+40 pts")
                 }
-            }
-            
-            // Premium CTA
-            Button(action: {}) {
-                HStack(spacing: 8) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 14))
-                    Text("Upgrade to Premium for 2x pts")
-                        .font(.forestCaptionMedium)
-                }
-                .foregroundColor(.luxeGold)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.luxeGold.opacity(0.1))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1)
-                )
-                .cornerRadius(8)
             }
         }
     }
@@ -186,21 +105,15 @@ public struct SustainabilityDashboardView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Header
             HStack {
-                HStack(spacing: 8) {
-                    Image(systemName: "medal.fill")
-                        .font(.system(size: 16))
-                        .foregroundColor(.luxeGold)
-                    
-                    Text("BADGES")
-                        .font(.forestHeadlineSmall)
-                        .foregroundColor(.sageWhite)
-                }
+                Text("Badges")
+                    .font(.bodyText(14, weight: .medium))
+                    .foregroundColor(.sageWhite)
                 
                 Spacer()
                 
                 Text("\(viewModel.earnedBadges.count)/\(ModaicsSustainabilityBadge.allCases.count)")
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(.sageMuted)
+                    .font(.bodyText(12))
+                    .foregroundColor(.warmCharcoal)
             }
             
             // Badges Grid
@@ -218,50 +131,23 @@ public struct SustainabilityDashboardView: View {
             }
         }
     }
-    
-    // MARK: - Helpers
-    private func formatWater(_ liters: Double) -> String {
-        if liters >= 1000 {
-            return "\(Int(liters / 1000))kL"
-        }
-        return "\(Int(liters))L"
-    }
 }
 
-// MARK: - Impact Card
-private struct ImpactCard: View {
-    let icon: String
+// MARK: - Impact Metric
+private struct ImpactMetric: View {
     let value: String
     let label: String
-    let change: String
-    let color: Color
     
     var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundColor(color)
-            
+        VStack(alignment: .leading, spacing: 2) {
             Text(value)
-                .font(.forestHeadlineMedium)
+                .font(.bodyText(18, weight: .medium))
                 .foregroundColor(.sageWhite)
             
             Text(label)
-                .font(.forestCaptionSmall)
-                .foregroundColor(.sageMuted)
-            
-            Text(change)
-                .font(.system(size: 10, design: .monospaced))
-                .foregroundColor(.modaicsEco)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Color.modaicsEco.opacity(0.15))
-                .clipShape(Capsule())
+                .font(.bodyText(12))
+                .foregroundColor(.warmCharcoal)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.modaicsSurfaceHighlight.opacity(0.5))
-        .cornerRadius(12)
     }
 }
 
@@ -270,26 +156,25 @@ private struct EcoPointRow: View {
     let icon: String
     let text: String
     let points: String
-    let color: Color
     
     var body: some View {
         HStack {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.system(size: 14))
-                    .foregroundColor(color)
+                    .foregroundColor(.agedBrass)
                     .frame(width: 20)
                 
                 Text(text)
-                    .font(.forestBodySmall)
+                    .font(.bodyText(13))
                     .foregroundColor(.sageWhite)
             }
             
             Spacer()
             
             Text(points)
-                .font(.forestCaptionMedium)
-                .foregroundColor(.modaicsEco)
+                .font(.bodyText(12, weight: .medium))
+                .foregroundColor(.agedBrass)
         }
     }
 }
@@ -304,12 +189,12 @@ private struct BadgeView: View {
         VStack(spacing: 8) {
             ZStack {
                 Circle()
-                    .fill(isEarned ? badge.color.opacity(0.2) : Color.modaicsSurfaceHighlight)
+                    .fill(isEarned ? Color.agedBrass.opacity(0.2) : Color.modaicsSurfaceHighlight)
                     .frame(width: 56, height: 56)
                 
                 Image(systemName: isEarned ? badge.icon : "lock.fill")
                     .font(.system(size: 24))
-                    .foregroundColor(isEarned ? badge.color : .sageMuted.opacity(0.5))
+                    .foregroundColor(isEarned ? Color.agedBrass : .sageMuted.opacity(0.5))
                 
                 if isEarned {
                     VStack {
@@ -327,7 +212,7 @@ private struct BadgeView: View {
             }
             
             Text(isEarned ? badge.rawValue : "????")
-                .font(.forestCaptionSmall)
+                .font(.bodyText(11))
                 .foregroundColor(isEarned ? .sageWhite : .sageMuted.opacity(0.5))
                 .lineLimit(1)
                 .frame(width: 70)
@@ -349,9 +234,9 @@ private struct FullReportSheet: View {
                     VStack(spacing: 24) {
                         // Circularity Score
                         VStack(spacing: 16) {
-                            Text("CIRCULARITY SCORE")
-                                .font(.forestCaptionMedium)
-                                .foregroundColor(.luxeGold)
+                            Text("Circularity score")
+                                .font(.editorialSmall)
+                                .foregroundColor(.sageWhite)
                             
                             ZStack {
                                 Circle()
@@ -361,12 +246,7 @@ private struct FullReportSheet: View {
                                 Circle()
                                     .trim(from: 0, to: Double(viewModel.calculateCircularityScore()) / 100)
                                     .stroke(
-                                        AngularGradient(
-                                            colors: [.modaicsEco, .luxeGold],
-                                            center: .center,
-                                            startAngle: .degrees(-90),
-                                            endAngle: .degrees(270)
-                                        ),
+                                        Color.agedBrass,
                                         style: StrokeStyle(lineWidth: 12, lineCap: .round)
                                     )
                                     .frame(width: 150, height: 150)
@@ -374,17 +254,17 @@ private struct FullReportSheet: View {
                                 
                                 VStack(spacing: 4) {
                                     Text("\(viewModel.calculateCircularityScore())")
-                                        .font(.system(size: 48, weight: .bold, design: .monospaced))
+                                        .font(.bodyText(48, weight: .medium))
                                         .foregroundColor(.sageWhite)
                                     Text("/100")
-                                        .font(.forestCaptionMedium)
+                                        .font(.bodyText(14))
                                         .foregroundColor(.sageMuted)
                                 }
                             }
                             
                             Text(viewModel.calculateCircularityScore() >= 70 ? "Excellent" : viewModel.calculateCircularityScore() >= 40 ? "Good" : "Getting Started")
-                                .font(.forestHeadlineSmall)
-                                .foregroundColor(.modaicsEco)
+                                .font(.bodyText(16, weight: .medium))
+                                .foregroundColor(.agedBrass)
                         }
                         .padding(24)
                         .background(Color.modaicsSurface)
@@ -392,28 +272,28 @@ private struct FullReportSheet: View {
                         
                         // Monthly Breakdown
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("MONTHLY IMPACT")
-                                .font(.forestCaptionMedium)
-                                .foregroundColor(.luxeGold)
+                            Text("Monthly impact")
+                                .font(.editorialSmall)
+                                .foregroundColor(.sageWhite)
                             
                             VStack(spacing: 12) {
                                 ImpactBreakdownRow(
                                     icon: "drop.fill",
-                                    label: "Water Saved",
+                                    label: "Water saved",
                                     value: "\(Int(viewModel.waterSavedLiters))L",
                                     equivalent: "≈ \(Int(viewModel.waterSavedLiters / 150)) showers"
                                 )
                                 
                                 ImpactBreakdownRow(
                                     icon: "cloud.fill",
-                                    label: "CO₂ Prevented",
+                                    label: "CO₂ prevented",
                                     value: "\(String(format: "%.1f", viewModel.carbonSavedKg))kg",
                                     equivalent: "≈ \(Int(viewModel.carbonSavedKg / 4.6)) car miles"
                                 )
                                 
                                 ImpactBreakdownRow(
                                     icon: "arrow.3.trianglepath",
-                                    label: "Items Circulated",
+                                    label: "Items circulated",
                                     value: "\(viewModel.itemsCirculated)",
                                     equivalent: "Kept in use, not landfills"
                                 )
@@ -428,13 +308,13 @@ private struct FullReportSheet: View {
                     .padding(20)
                 }
             }
-            .navigationTitle("Impact Report")
+            .navigationTitle("Impact report")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.luxeGold)
+                        .font(.bodyText(12, weight: .medium))
+                        .foregroundColor(.agedBrass)
                 }
             }
         }
@@ -452,20 +332,20 @@ private struct ImpactBreakdownRow: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 24))
-                .foregroundColor(.modaicsEco)
+                .foregroundColor(.agedBrass)
                 .frame(width: 40)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(label)
-                    .font(.forestCaptionSmall)
+                    .font(.bodyText(12))
                     .foregroundColor(.sageMuted)
                 
                 Text(value)
-                    .font(.forestHeadlineMedium)
+                    .font(.bodyText(16, weight: .medium))
                     .foregroundColor(.sageWhite)
                 
                 Text(equivalent)
-                    .font(.forestCaptionSmall)
+                    .font(.bodyText(11))
                     .foregroundColor(.sageMuted)
             }
             

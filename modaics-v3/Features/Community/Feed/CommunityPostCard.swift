@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - CommunityPostCard
-/// Modaics-unique post card with industrial/editorial aesthetic
+/// Simplified community post card with editorial aesthetic
 public struct CommunityPostCard: View {
     let post: CommunityPost
     let onLikeTapped: () -> Void
@@ -40,82 +40,69 @@ public struct CommunityPostCard: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            // Industrial-style header with type badge
+            // Simplified header
             headerBar
             
-            // Editorial image grid (not carousel) - constrained height
+            // Image grid
             if !post.imageURLs.isEmpty {
                 editorialImageGrid
                     .frame(maxHeight: 320)
                     .clipped()
             }
             
-            // Story/Caption section - with max height constraint
+            // Story/Caption section
             storySection
                 .frame(maxHeight: 200, alignment: .top)
             
-            // Sustainability metrics (Modaics unique)
+            // Simplified sustainability info
             if post.postType == .thriftFind || post.postType == .ecoTip {
-                sustainabilityBadge
+                sustainabilityInfo
             }
             
-            // Actions with industrial styling
-            industrialActionBar
+            // Simplified action bar
+            actionBar
         }
-        .background(
-            LinearGradient(
-                colors: [Color.modaicsSurface, Color.modaicsSurface.opacity(0.8)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
+        .background(Color.modaicsSurface)
         .overlay(
-            Rectangle()
-                .stroke(Color.luxeGold.opacity(0.3), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.warmDivider, lineWidth: 0.5)
         )
         .cornerRadius(12)
     }
     
-    // MARK: - Industrial Header Bar
+    // MARK: - Header Bar
     private var headerBar: some View {
         HStack(spacing: 0) {
-            // Left: User with monospaced styling
+            // Left: User info - simplified
             HStack(spacing: 12) {
-                // Geometric avatar placeholder
+                // Avatar
                 ZStack {
-                    Rectangle()
+                    Circle()
                         .fill(Color.modaicsSurfaceHighlight)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 40, height: 40)
                     
                     Text(post.username.prefix(1).uppercased())
-                        .font(.system(size: 18, weight: .bold, design: .monospaced))
-                        .foregroundColor(.luxeGold)
+                        .font(.bodyText(16, weight: .medium))
+                        .foregroundColor(.sageWhite)
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(post.username.uppercased())
-                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                    Text(post.username)
+                        .font(.bodyText(14, weight: .medium))
                         .foregroundColor(.sageWhite)
                     
-                    Text(post.formattedTime.uppercased())
-                        .font(.system(size: 10, design: .monospaced))
+                    Text(post.formattedTime)
+                        .font(.bodyText(11))
                         .foregroundColor(.sageMuted)
                 }
             }
             
             Spacer()
             
-            // Right: Post type badge with industrial styling
-            HStack(spacing: 6) {
-                Image(systemName: post.postType.icon)
-                    .font(.system(size: 12))
-                Text(post.postType.rawValue.uppercased())
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-            }
-            .foregroundColor(.modaicsBackground)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color(hex: post.postType.color))
+            // Right: Post type as text label (NOT coloured pill)
+            Text(post.postType.rawValue)
+                .font(.bodyText(11, weight: .medium))
+                .foregroundColor(.agedBrass)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -126,12 +113,10 @@ public struct CommunityPostCard: View {
     private var editorialImageGrid: some View {
         Group {
             if post.imageURLs.count == 1 {
-                // Single image - full width, constrained height
                 singleImageView(url: post.imageURLs[0])
                     .frame(height: 280)
                     .clipped()
             } else if post.imageURLs.count == 2 {
-                // Two images - side by side
                 HStack(spacing: 2) {
                     ForEach(0..<2, id: \.self) { index in
                         singleImageView(url: post.imageURLs[index])
@@ -141,7 +126,6 @@ public struct CommunityPostCard: View {
                     }
                 }
             } else {
-                // 3+ images - 2x2 grid
                 VStack(spacing: 2) {
                     HStack(spacing: 2) {
                         ForEach(0..<min(2, post.imageURLs.count), id: \.self) { index in
@@ -163,7 +147,7 @@ public struct CommunityPostCard: View {
                                         ZStack {
                                             Color.black.opacity(0.5)
                                             Text("+\(post.imageURLs.count - 4)")
-                                                .font(.system(size: 20, weight: .bold, design: .monospaced))
+                                                .font(.bodyText(16, weight: .medium))
                                                 .foregroundColor(.white)
                                         }
                                         : nil
@@ -186,7 +170,7 @@ public struct CommunityPostCard: View {
                             .fill(Color.modaicsSurfaceHighlight)
                             .overlay(
                                 ProgressView()
-                                    .tint(Color.luxeGold)
+                                    .tint(Color.agedBrass)
                             )
                     case .success(let image):
                         image
@@ -211,46 +195,39 @@ public struct CommunityPostCard: View {
     // MARK: - Story Section
     private var storySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Caption with editorial styling - constrained
+            // Caption
             Text(post.caption)
-                .font(.system(size: 14, design: .monospaced))
+                .font(.bodyText(14))
                 .foregroundColor(.sageWhite)
                 .lineLimit(showFullCaption ? 8 : 3)
             
             if post.caption.count > 150 {
                 Button(action: { withAnimation { showFullCaption.toggle() } }) {
-                    Text(showFullCaption ? "LESS" : "READ MORE")
-                        .font(.system(size: 11, weight: .bold, design: .monospaced))
-                        .foregroundColor(.luxeGold)
+                    Text(showFullCaption ? "Less" : "Read more")
+                        .font(.bodyText(11, weight: .medium))
+                        .foregroundColor(.agedBrass)
                 }
             }
             
-            // Tags with industrial styling - max 2 rows
+            // Tags - simplified, no excessive styling
             if !post.tags.isEmpty {
                 FlowLayout(spacing: 8) {
                     ForEach(post.tags.prefix(6), id: \.self) { tag in
-                        Text("#\(tag.uppercased())")
-                            .font(.system(size: 10, design: .monospaced))
+                        Text("#\(tag)")
+                            .font(.bodyText(11))
                             .foregroundColor(.sageMuted)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.modaicsSurfaceHighlight)
-                            .overlay(
-                                Rectangle()
-                                    .stroke(Color.luxeGold.opacity(0.3), lineWidth: 0.5)
-                            )
                     }
                 }
             }
             
-            // Location with industrial icon
+            // Location
             if let location = post.location {
                 HStack(spacing: 6) {
                     Image(systemName: "mappin.and.ellipse")
                         .font(.system(size: 10))
-                        .foregroundColor(.luxeGold)
-                    Text(location.uppercased())
-                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(.agedBrass)
+                    Text(location)
+                        .font(.bodyText(11))
                         .foregroundColor(.sageMuted)
                 }
             }
@@ -258,43 +235,35 @@ public struct CommunityPostCard: View {
         .padding(16)
     }
     
-    // MARK: - Sustainability Badge (Modaics Unique)
-    private var sustainabilityBadge: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: 6) {
+    // MARK: - Sustainability Info (simplified)
+    private var sustainabilityInfo: some View {
+        HStack(spacing: 16) {
+            HStack(spacing: 4) {
                 Image(systemName: "leaf.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(.modaicsEco)
-                Text("CO₂ SAVED: 2.4KG")
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .foregroundColor(.modaicsEco)
+                    .foregroundColor(.agedBrass)
+                Text("CO₂ saved: 2.4kg")
+                    .font(.bodyText(11))
+                    .foregroundColor(.agedBrass)
             }
             
-            Divider()
-                .background(Color.modaicsSurfaceHighlight)
-            
-            HStack(spacing: 6) {
+            HStack(spacing: 4) {
                 Image(systemName: "drop.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(.modaicsEco)
-                Text("WATER: 1,800L")
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .foregroundColor(.modaicsEco)
+                    .foregroundColor(.agedBrass)
+                Text("Water: 1,800L")
+                    .font(.bodyText(11))
+                    .foregroundColor(.agedBrass)
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color.modaicsEco.opacity(0.1))
-        .overlay(
-            Rectangle()
-                .stroke(Color.modaicsEco.opacity(0.3), lineWidth: 1)
-        )
+        .padding(.vertical, 8)
     }
     
-    // MARK: - Industrial Action Bar
-    private var industrialActionBar: some View {
+    // MARK: - Action Bar (simplified)
+    private var actionBar: some View {
         HStack(spacing: 0) {
-            // Like button with scale animation
+            // Like button
             Button(action: {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                     isLiked.toggle()
@@ -307,12 +276,12 @@ public struct CommunityPostCard: View {
             }) {
                 HStack(spacing: 6) {
                     Image(systemName: isLiked ? "heart.fill" : "heart")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(isLiked ? .luxeGold : .sageMuted)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(isLiked ? .agedBrass : .sageMuted)
                         .scaleEffect(likeScale)
                     
                     Text("\(post.likes + (isLiked ? 1 : 0))")
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(.bodyText(12))
                         .foregroundColor(.sageMuted)
                 }
                 .frame(maxWidth: .infinity)
@@ -320,7 +289,7 @@ public struct CommunityPostCard: View {
             }
             
             Divider()
-                .background(Color.modaicsSurfaceHighlight)
+                .background(Color.warmDivider)
             
             // Comment button
             Button(action: onCommentTapped) {
@@ -330,7 +299,7 @@ public struct CommunityPostCard: View {
                         .foregroundColor(.sageMuted)
                     
                     Text("\(post.comments.count)")
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(.bodyText(12))
                         .foregroundColor(.sageMuted)
                 }
                 .frame(maxWidth: .infinity)
@@ -338,7 +307,7 @@ public struct CommunityPostCard: View {
             }
             
             Divider()
-                .background(Color.modaicsSurfaceHighlight)
+                .background(Color.warmDivider)
             
             // Share button
             Button(action: onShareTapped) {
@@ -350,21 +319,17 @@ public struct CommunityPostCard: View {
             }
             
             Divider()
-                .background(Color.modaicsSurfaceHighlight)
+                .background(Color.warmDivider)
             
             // Bookmark button
             Button(action: onBookmarkTapped) {
                 Image(systemName: post.isBookmarked ? "bookmark.fill" : "bookmark")
                     .font(.system(size: 16))
-                    .foregroundColor(post.isBookmarked ? .luxeGold : .sageMuted)
+                    .foregroundColor(post.isBookmarked ? .agedBrass : .sageMuted)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
             }
         }
         .background(Color.modaicsBackground)
-        .overlay(
-            Rectangle()
-                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
-        )
     }
 }

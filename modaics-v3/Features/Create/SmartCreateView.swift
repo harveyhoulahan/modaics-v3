@@ -245,136 +245,63 @@ struct PhotoPhaseView: View {
 struct AnalyzingPhaseView: View {
     @ObservedObject var viewModel: CreateViewModel
     @State private var rotation: Double = 0
-    @State private var pulse: Bool = false
     
     var body: some View {
         VStack(spacing: 40) {
             Spacer()
             
+            // Simple spinner
             ZStack {
-                // Outer glow rings
-                ForEach(0..<3) { i in
-                    Circle()
-                        .stroke(Color.luxeGold.opacity(0.1), lineWidth: 1)
-                        .frame(width: 120 + CGFloat(i * 40), height: 120 + CGFloat(i * 40))
-                        .scaleEffect(pulse ? 1.1 : 1.0)
-                        .opacity(pulse ? 0.3 : 0.6)
-                        .animation(
-                            .easeInOut(duration: 1.5)
-                            .repeatForever(autoreverses: true)
-                            .delay(Double(i) * 0.2),
-                            value: pulse
-                        )
-                }
+                Circle()
+                    .stroke(Color.warmDivider, lineWidth: 2)
+                    .frame(width: 60, height: 60)
                 
-                // Main spinner
-                ZStack {
-                    Circle()
-                        .stroke(Color.luxeGold.opacity(0.2), lineWidth: 4)
-                        .frame(width: 100, height: 100)
-                    
-                    Circle()
-                        .trim(from: 0, to: 0.3)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.luxeGold, .luxeGoldBright],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ),
-                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
-                        )
-                        .frame(width: 100, height: 100)
-                        .rotationEffect(.degrees(rotation))
-                    
-                    Image(systemName: analysisIcon)
-                        .font(.system(size: 32))
-                        .foregroundColor(.luxeGold)
-                }
+                Circle()
+                    .trim(from: 0, to: 0.3)
+                    .stroke(Color.nearBlack, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                    .frame(width: 60, height: 60)
+                    .rotationEffect(.degrees(rotation))
             }
             
             VStack(spacing: 12) {
                 Text(analysisTitle)
-                    .font(.forestDisplaySmall)
-                    .foregroundColor(.sageWhite)
-                    .tracking(2)
+                    .font(.editorialSmall)
+                    .foregroundColor(.nearBlack)
                 
                 Text(analysisDescription)
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(.sageMuted)
+                    .font(.bodySmall)
+                    .foregroundColor(.mutedGray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
-                
-                // Progress indicator
-                HStack(spacing: 8) {
-                    ForEach(0..<3) { i in
-                        Circle()
-                            .fill(analysisStep >= i ? Color.luxeGold : Color.modaicsSurface)
-                            .frame(width: 8, height: 8)
-                    }
-                }
-                .padding(.top, 16)
             }
             
             Spacer()
         }
         .padding(.horizontal, 20)
         .onAppear {
-            pulse = true
             withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
                 rotation = 360
             }
         }
     }
     
-    private var analysisStep: Int {
-        switch viewModel.aiAnalysisState {
-        case .analyzing(.onDevice):
-            return 0
-        case .analyzing(.server):
-            return 1
-        case .analyzing(.mergingResults):
-            return 2
-        default:
-            return 0
-        }
-    }
-    
-    private var analysisIcon: String {
-        switch viewModel.aiAnalysisState {
-        case .analyzing(.onDevice):
-            return "iphone"
-        case .analyzing(.server):
-            return "icloud.and.arrow.up"
-        case .analyzing(.mergingResults):
-            return "sparkles"
-        default:
-            return "sparkles"
-        }
-    }
-    
     private var analysisTitle: String {
         switch viewModel.aiAnalysisState {
-        case .analyzing(.onDevice):
-            return "ON-DEVICE ANALYSIS..."
-        case .analyzing(.server):
-            return "SERVER ANALYSIS..."
+        case .analyzing(.onDevice), .analyzing(.server):
+            return "Reading your piece..."
         case .analyzing(.mergingResults):
-            return "FINALIZING..."
+            return "Almost there..."
         default:
-            return "ANALYZING..."
+            return "Reading your piece..."
         }
     }
     
     private var analysisDescription: String {
         switch viewModel.aiAnalysisState {
-        case .analyzing(.onDevice):
-            return "Running AI on your device for instant results (< 150ms)"
-        case .analyzing(.server):
-            return "Sending to server for detailed fashion analysis"
-        case .analyzing(.mergingResults):
-            return "Combining on-device and server results"
+        case .analyzing(.onDevice), .analyzing(.server), .analyzing(.mergingResults):
+            return "We're identifying details from your photo"
         default:
-            return "Our AI is examining your photos"
+            return "We're identifying details from your photo"
         }
     }
 }
@@ -388,126 +315,90 @@ struct ReviewPhaseView: View {
     var body: some View {
         VStack(spacing: 24) {
             if case .completed(let analysis) = viewModel.aiAnalysisState {
-                // AI Results Header
+                // Results Header with pencil icon
                 HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundColor(.modaicsEco)
+                    Image(systemName: "pencil.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.nearBlack)
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("ANALYSIS COMPLETE")
-                            .font(.forestHeadlineSmall)
-                            .foregroundColor(.sageWhite)
+                        Text("Quick edits")
+                            .font(.bodyMedium)
+                            .foregroundColor(.nearBlack)
                         
-                        Text("\(Int(analysis.confidence * 100))% confidence")
-                            .font(.forestCaptionSmall)
-                            .foregroundColor(.sageMuted)
+                        Text("Tap any field to adjust")
+                            .font(.captionSmall)
+                            .foregroundColor(.mutedGray)
                     }
                     
                     Spacer()
                 }
                 .padding(16)
-                .background(Color.modaicsSurface)
-                .cornerRadius(12)
+                .background(Color.ivory)
+                .cornerRadius(2)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.modaicsEco.opacity(0.3), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 2)
+                        .stroke(Color.warmDivider, lineWidth: 0.5)
                 )
                 .padding(.horizontal, 20)
                 
                 // Detected Details
                 VStack(spacing: 12) {
-                    AIResultRow(icon: "tag.fill", label: "TITLE", value: analysis.title)
-                    AIResultRow(icon: "square.grid.2x2", label: "CATEGORY", value: analysis.category.displayName)
-                    AIResultRow(icon: "star.fill", label: "CONDITION", value: analysis.condition.displayName)
+                    StudioResultRow(label: "Title", value: analysis.title)
+                    StudioResultRow(label: "Category", value: analysis.category.displayName)
+                    StudioResultRow(label: "Condition", value: analysis.condition.displayName)
                     
                     // Materials
                     VStack(alignment: .leading, spacing: 12) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "leaf.fill")
-                                .foregroundColor(.modaicsEco)
-                            Text("MATERIALS")
-                                .font(.forestCaptionSmall)
-                                .foregroundColor(.sageMuted)
-                                .tracking(1)
-                        }
+                        Text("Materials")
+                            .font(.captionSmall)
+                            .foregroundColor(.mutedGray)
                         
                         ForEach(analysis.materials) { material in
                             HStack {
                                 Text(material.name)
-                                    .font(.forestBodySmall)
-                                    .foregroundColor(.sageWhite)
+                                    .font(.bodySmall)
+                                    .foregroundColor(.nearBlack)
                                 Spacer()
                                 Text("\(material.percentage)%")
-                                    .font(.forestCaptionSmall)
-                                    .foregroundColor(.sageMuted)
-                                if material.isSustainable {
-                                    Image(systemName: "checkmark.seal.fill")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.modaicsEco)
-                                }
+                                    .font(.captionSmall)
+                                    .foregroundColor(.mutedGray)
                             }
                         }
                     }
                     .padding(16)
-                    .background(Color.modaicsSurface)
-                    .cornerRadius(12)
+                    .background(Color.ivory)
+                    .cornerRadius(2)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 2)
+                            .stroke(Color.warmDivider, lineWidth: 0.5)
+                    )
                     
                     // Estimated price
-                    AIResultRow(
-                        icon: "dollarsign.circle.fill",
-                        label: "ESTIMATED PRICE",
-                        value: "\(analysis.estimatedPrice)",
-                        highlight: true
+                    StudioResultRow(
+                        label: "Estimated price",
+                        value: "\(analysis.estimatedPrice)"
                     )
                     
                     // Sustainability score
                     HStack {
-                        HStack(spacing: 8) {
-                            Image(systemName: "leaf.circle.fill")
-                                .foregroundColor(.modaicsEco)
-                            Text("SUSTAINABILITY")
-                                .font(.forestCaptionSmall)
-                                .foregroundColor(.sageMuted)
-                                .tracking(1)
-                        }
+                        Text("Sustainability")
+                            .font(.captionSmall)
+                            .foregroundColor(.mutedGray)
                         
                         Spacer()
                         
                         Text("\(analysis.sustainabilityScore)/100")
-                            .font(.forestHeadlineSmall)
-                            .foregroundColor(.modaicsEco)
+                            .font(.bodyMedium)
+                            .foregroundColor(.nearBlack)
                     }
                     .padding(16)
-                    .background(Color.modaicsSurface)
-                    .cornerRadius(12)
-                    
-                    // AI Suggestions
-                    if !analysis.suggestions.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "lightbulb.fill")
-                                    .foregroundColor(.luxeGold)
-                                Text("AI SUGGESTIONS")
-                                    .font(.forestCaptionSmall)
-                                    .foregroundColor(.sageMuted)
-                                    .tracking(1)
-                            }
-                            
-                            ForEach(analysis.suggestions, id: \.self) { suggestion in
-                                HStack(alignment: .top, spacing: 8) {
-                                    Text("•")
-                                        .foregroundColor(.luxeGold)
-                                    Text(suggestion)
-                                        .font(.forestBodySmall)
-                                        .foregroundColor(.sageWhite)
-                                }
-                            }
-                        }
-                        .padding(16)
-                        .background(Color.modaicsSurface)
-                        .cornerRadius(12)
-                    }
+                    .background(Color.ivory)
+                    .cornerRadius(2)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 2)
+                            .stroke(Color.warmDivider, lineWidth: 0.5)
+                    )
                 }
                 .padding(.horizontal, 20)
                 
@@ -517,31 +408,29 @@ struct ReviewPhaseView: View {
                 VStack(spacing: 12) {
                     Button(action: onNext) {
                         HStack(spacing: 8) {
-                            Text("REVIEW & SUBMIT")
-                            Image(systemName: "arrow.right")
+                            Text("Review and submit")
                         }
-                        .font(.forestBodyMedium)
-                        .foregroundColor(.modaicsBackground)
+                        .font(.bodyMedium)
+                        .foregroundColor(.nearBlack)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
-                        .background(Color.luxeGold)
-                        .cornerRadius(12)
+                        .background(Color.ivory)
+                        .cornerRadius(2)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 2)
+                                .stroke(Color.warmDivider, lineWidth: 0.5)
+                        )
                     }
                     
                     Button(action: onEditInFullForm) {
                         HStack(spacing: 8) {
                             Image(systemName: "pencil")
-                            Text("EDIT IN FULL FORM")
+                            Text("Edit details")
                         }
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.luxeGold)
+                        .font(.caption)
+                        .foregroundColor(.warmCharcoal)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color.clear)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.luxeGold.opacity(0.5), lineWidth: 1)
-                        )
                     }
                 }
                 .padding(.horizontal, 20)
@@ -551,33 +440,30 @@ struct ReviewPhaseView: View {
     }
 }
 
-// MARK: - AI Result Row
-struct AIResultRow: View {
-    let icon: String
+// MARK: - Studio Result Row
+struct StudioResultRow: View {
     let label: String
     let value: String
-    var highlight: Bool = false
     
     var body: some View {
         HStack {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .foregroundColor(highlight ? .luxeGold : .luxeGold.opacity(0.8))
-                Text(label)
-                    .font(.forestCaptionSmall)
-                    .foregroundColor(.sageMuted)
-                    .tracking(1)
-            }
+            Text(label)
+                .font(.captionSmall)
+                .foregroundColor(.mutedGray)
             
             Spacer()
             
             Text(value)
-                .font(.forestBodyMedium)
-                .foregroundColor(highlight ? .luxeGold : .sageWhite)
+                .font(.bodySmall)
+                .foregroundColor(.nearBlack)
         }
         .padding(16)
-        .background(Color.modaicsSurface)
-        .cornerRadius(12)
+        .background(Color.ivory)
+        .cornerRadius(2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 2)
+                .stroke(Color.warmDivider, lineWidth: 0.5)
+        )
     }
 }
 
