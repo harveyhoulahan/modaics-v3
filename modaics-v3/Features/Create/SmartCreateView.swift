@@ -32,7 +32,7 @@ public struct SmartCreateView: View {
                             })
                             
                         case .analyzing:
-                            AnalyzingPhaseView()
+                            AnalyzingPhaseView(viewModel: viewModel)
                             
                         case .review:
                             ReviewPhaseView(viewModel: viewModel, onNext: {
@@ -253,6 +253,7 @@ struct PhotoPhaseView: View {
 
 // MARK: - Analyzing Phase View
 struct AnalyzingPhaseView: View {
+    @ObservedObject var viewModel: CreateViewModel
     @State private var rotation: Double = 0
     @State private var pulse: Bool = false
     
@@ -295,23 +296,33 @@ struct AnalyzingPhaseView: View {
                         .frame(width: 100, height: 100)
                         .rotationEffect(.degrees(rotation))
                     
-                    Image(systemName: "sparkles")
+                    Image(systemName: analysisIcon)
                         .font(.system(size: 32))
                         .foregroundColor(.luxeGold)
                 }
             }
             
             VStack(spacing: 12) {
-                Text("ANALYZING...")
+                Text(analysisTitle)
                     .font(.forestDisplaySmall)
                     .foregroundColor(.sageWhite)
                     .tracking(2)
                 
-                Text("Our AI is examining your photos\nand extracting garment details")
+                Text(analysisDescription)
                     .font(.forestCaptionMedium)
                     .foregroundColor(.sageMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
+                
+                // Progress indicator
+                HStack(spacing: 8) {
+                    ForEach(0..<3) { i in
+                        Circle()
+                            .fill(analysisStep >= i ? Color.luxeGold : Color.modaicsSurface)
+                            .frame(width: 8, height: 8)
+                    }
+                }
+                .padding(.top, 16)
             }
             
             Spacer()
@@ -322,6 +333,58 @@ struct AnalyzingPhaseView: View {
             withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
                 rotation = 360
             }
+        }
+    }
+    
+    private var analysisStep: Int {
+        switch viewModel.aiAnalysisState {
+        case .analyzing(.onDevice):
+            return 0
+        case .analyzing(.server):
+            return 1
+        case .analyzing(.mergingResults):
+            return 2
+        default:
+            return 0
+        }
+    }
+    
+    private var analysisIcon: String {
+        switch viewModel.aiAnalysisState {
+        case .analyzing(.onDevice):
+            return "iphone"
+        case .analyzing(.server):
+            return "icloud.and.arrow.up"
+        case .analyzing(.mergingResults):
+            return "sparkles"
+        default:
+            return "sparkles"
+        }
+    }
+    
+    private var analysisTitle: String {
+        switch viewModel.aiAnalysisState {
+        case .analyzing(.onDevice):
+            return "ON-DEVICE ANALYSIS..."
+        case .analyzing(.server):
+            return "SERVER ANALYSIS..."
+        case .analyzing(.mergingResults):
+            return "FINALIZING..."
+        default:
+            return "ANALYZING..."
+        }
+    }
+    
+    private var analysisDescription: String {
+        switch viewModel.aiAnalysisState {
+        case .analyzing(.onDevice):
+            return "Running AI on your device for instant results (< 150ms)"
+        case .analyzing(.server):
+            return "Sending to server for detailed fashion analysis"
+        case .analyzing(.mergingResults):
+            return "Combining on-device and server results"
+        default:
+            return "Our AI is examining your photos"
         }
     }
 }

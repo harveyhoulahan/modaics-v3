@@ -151,14 +151,22 @@ public enum ValidationError: Error, LocalizedError, Hashable {
 // MARK: - AI Analysis State
 public enum AIAnalysisState: Equatable {
     case idle
-    case analyzing
+    case analyzing(AnalysisPhase)
     case completed(AIGarmentAnalysis)
     case failed(String)
     
+    public enum AnalysisPhase {
+        case onDevice          // MobileCLIP + YOLO (< 150ms)
+        case server            // Full FashionCLIP analysis
+        case mergingResults    // Combining on-device + server
+    }
+    
     public static func == (lhs: AIAnalysisState, rhs: AIAnalysisState) -> Bool {
         switch (lhs, rhs) {
-        case (.idle, .idle), (.analyzing, .analyzing):
+        case (.idle, .idle):
             return true
+        case (.analyzing(let lhsPhase), .analyzing(let rhsPhase)):
+            return lhsPhase == rhsPhase
         case (.completed(let lhsAnalysis), .completed(let rhsAnalysis)):
             return lhsAnalysis.title == rhsAnalysis.title &&
                    lhsAnalysis.category == rhsAnalysis.category &&
@@ -206,13 +214,20 @@ public final class CreateViewModel: ObservableObject {
     // MARK: - Private Properties
     
     private let apiClient: SearchAPIClient
+    private let onDeviceClassifier: OnDeviceClassifier
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
     
     public init(apiClient: SearchAPIClient? = nil) {
         self.apiClient = apiClient ?? SearchAPIClient.shared
+        self.onDeviceClassifier = OnDeviceClassifier()
         setupValidation()
+        
+        // Initialize on-device ML models
+        Task {
+            try? await onDeviceClassifier.initialize()
+        }
     }
     
     // MARK: - Setup
@@ -332,23 +347,96 @@ public final class CreateViewModel: ObservableObject {
         sustainabilityScore = min(100, score)
     }
     
-    // MARK: - AI Analysis
+    // MARK: - AI Analysis (On-Device + Server)
     
     public func analyzeWithAI() async {
         guard !form.images.isEmpty else { return }
         
-        aiAnalysisState = .analyzing
+        let firstImage = form.images[0]
+        
+        // Phase 1: On-device instant analysis (< 150ms)
+        aiAnalysisState = .analyzing(.onDevice)
         
         do {
-            let analysis = try await apiClient.analyzeImages(form.images)
-            aiAnalysisState = .completed(analysis)
+            let onDeviceResult = try await onDeviceClassifier.classifyInstant(
+                image: firstImage,
+                includeOCR: true
+            )
             
-            // Auto-fill form with AI suggestions
-            await applyAIAnalysis(analysis)
+            // Immediately show preview while server processes
+            let previewAnalysis = createPreviewAnalysis(from: onDeviceResult)
+            aiAnalysisState = .completed(previewAnalysis)
+            await applyAIAnalysis(previewAnalysis)
+            
+            // Phase 2: Full server analysis in background
+            aiAnalysisState = .analyzing(.server)
+            
+            let fullResult = try await onDeviceClassifier.classifyFull(image: firstImage)
+            
+            // Phase 3: Merge and update with full results
+            aiAnalysisState = .analyzing(.mergingResults)
+            
+            if let serverResult = fullResult.serverResult {
+                let finalAnalysis = createFullAnalysis(from: serverResult, onDevice: onDeviceResult)
+                aiAnalysisState = .completed(finalAnalysis)
+                await applyAIAnalysis(finalAnalysis)
+            }
             
         } catch {
             aiAnalysisState = .failed(error.localizedDescription)
         }
+    }
+    
+    private func createPreviewAnalysis(from onDevice: OnDeviceClassificationResult) -> AIGarmentAnalysis {
+        AIGarmentAnalysis(
+            title: onDevice.labelInfo?.brand != nil ? "\(onDevice.labelInfo!.brand!) Item" : "New Listing",
+            category: Category(name: onDevice.category ?? "Clothing", icon: "tshirt"),
+            condition: .good,
+            materials: onDevice.labelInfo?.material.map { 
+                AIMaterial(name: $0, percentage: 100, isSustainable: false) 
+            } ?? [],
+            colors: [],
+            estimatedPrice: Decimal(50),
+            sustainabilityScore: 50,
+            suggestions: onDevice.category != nil ? ["Detected as \(onDevice.category!)"] : [],
+            confidence: onDevice.categoryConfidence
+        )
+    }
+    
+    private func createFullAnalysis(from server: ServerAnalysisResult, onDevice: OnDeviceClassificationResult) -> AIGarmentAnalysis {
+        AIGarmentAnalysis(
+            title: "\(server.category.first?.label.capitalized ?? "Item") for Sale",
+            category: Category(name: server.category.first?.label ?? "Clothing", icon: "tshirt"),
+            condition: mapCondition(server.conditionGrade.grade),
+            materials: server.material.map { 
+                AIMaterial(
+                    name: $0.label, 
+                    percentage: 100, 
+                    isSustainable: isSustainableMaterial($0.label)
+                ) 
+            },
+            colors: server.color.map { $0.label },
+            estimatedPrice: Decimal(server.estimatedPrice.max),
+            sustainabilityScore: server.sustainabilityScore,
+            suggestions: server.suggestions,
+            confidence: server.category.first?.confidence ?? 0.5
+        )
+    }
+    
+    private func mapCondition(_ grade: String) -> Condition {
+        switch grade {
+        case "A": return .new
+        case "B": return .likeNew
+        case "C": return .good
+        case "D": return .fair
+        case "F": return .vintage
+        default: return .good
+        }
+    }
+    
+    private func isSustainableMaterial(_ name: String) -> Bool {
+        let sustainable = ["organic", "recycled", "hemp", "linen", "tencel", "silk", "wool", "cashmere"]
+        return sustainable.contains { name.lowercased().contains($0) }
     }
     
     public func applyAIAnalysis(_ analysis: AIGarmentAnalysis) async {
