@@ -345,7 +345,7 @@ struct EditorialItemCard: View {
             
             // Price
             if let price = garment.listingPrice {
-                Text("$\(Int(price))")
+                Text("$\(NSDecimalNumber(decimal: price).intValue)")
                     .font(.price)
                     .foregroundColor(.nearBlack)
             }
