@@ -73,6 +73,10 @@ class Settings(BaseSettings):
         description="Allowed CORS origins"
     )
     
+    # AI Assistant (Moda)
+    ANTHROPIC_API_KEY: Optional[str] = Field(default=None, description="Anthropic API key for Moda AI")
+    OPENAI_API_KEY: Optional[str] = Field(default=None, description="OpenAI API key (alternative to Anthropic)")
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
