@@ -142,7 +142,7 @@ class GarmentCreate(GarmentBase):
     provenance: Optional[GarmentProvenance] = None
     style_attributes: Optional[GarmentStyleAttributes] = None
     exchange_type: ExchangeType
-    price: Optional[Decimal] = Field(None, ge=0, decimal_places=2)
+    price: Optional[Decimal] = Field(None, ge=0)
 
 
 class GarmentUpdate(BaseModel):
@@ -155,7 +155,7 @@ class GarmentUpdate(BaseModel):
     provenance: Optional[GarmentProvenance] = None
     style_attributes: Optional[GarmentStyleAttributes] = None
     exchange_type: Optional[ExchangeType] = None
-    price: Optional[Decimal] = Field(None, ge=0, decimal_places=2)
+    price: Optional[Decimal] = Field(None, ge=0)
     status: Optional[GarmentStatus] = None
 
 
@@ -191,7 +191,7 @@ class GarmentDetailResponse(GarmentResponse):
 class ExchangeBase(BaseModel):
     garment_id: uuid.UUID
     type: ExchangeType
-    amount: Optional[Decimal] = Field(None, ge=0, decimal_places=2)
+    amount: Optional[Decimal] = Field(None, ge=0)
     message: Optional[str] = None
 
 
