@@ -133,24 +133,6 @@ public struct SustainabilityDashboardView: View {
     }
 }
 
-// MARK: - Impact Metric
-private struct ImpactMetric: View {
-    let value: String
-    let label: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value)
-                .font(.bodyText(18, weight: .medium))
-                .foregroundColor(.sageWhite)
-            
-            Text(label)
-                .font(.bodyText(12))
-                .foregroundColor(.warmCharcoal)
-        }
-    }
-}
-
 // MARK: - Eco Point Row
 private struct EcoPointRow: View {
     let icon: String
