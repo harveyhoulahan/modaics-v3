@@ -1,3 +1,4 @@
+import Foundation
 import Vision
 import UIKit
 
@@ -64,9 +65,9 @@ class LabelOCR {
         ]
         
         for text in texts {
-            let upperText = text.upperCase
+            let upperText = text.uppercased()
             for brand in knownBrands {
-                if upperText.contains(brand.upperCase) {
+                if upperText.contains(brand.uppercased()) {
                     return brand
                 }
             }
@@ -86,13 +87,13 @@ class LabelOCR {
         // Size patterns
         let sizePatterns = [
             "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL",
-            "\d{1,2}",           // Numeric sizes (8, 10, 12, etc.)
-            "\d{2}/\d{2}",      // Split sizes (32/34)
-            "SIZE\s*[:\-]?\s*([A-Z0-9]+)",  // "Size: M" or "Size-10"
+            #"\d{1,2}"#,           // Numeric sizes (8, 10, 12, etc.)
+            #"\d{2}/\d{2}"#,      // Split sizes (32/34)
+            #"SIZE\s*[:\-]?\s*([A-Z0-9]+)"#,  // "Size: M" or "Size-10"
         ]
         
         for text in texts {
-            let upperText = text.upperCase
+            let upperText = text.uppercased()
             
             // Direct size mentions
             for pattern in sizePatterns {
@@ -131,7 +132,7 @@ class LabelOCR {
         
         // Look for percentage patterns (e.g., "100% Cotton")
         for text in texts {
-            let pattern = "\\d+%\\s*([A-Za-z]+)"
+            let pattern = #"\d+%\s*([A-Za-z]+)"#
             if let match = text.range(of: pattern, options: .regularExpression) {
                 return String(text[match])
             }
