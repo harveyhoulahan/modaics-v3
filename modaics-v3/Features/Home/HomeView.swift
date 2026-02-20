@@ -344,7 +344,7 @@ struct EditorialItemCard: View {
                 .lineLimit(1)
             
             // Price
-            if let price = garment.estimatedValue {
+            if let price = garment.listingPrice {
                 Text("$\(Int(price))")
                     .font(.price)
                     .foregroundColor(.nearBlack)
