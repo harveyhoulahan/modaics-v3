@@ -390,7 +390,7 @@ public final class CreateViewModel: ObservableObject {
     private func createPreviewAnalysis(from onDevice: OnDeviceClassificationResult) -> AIGarmentAnalysis {
         AIGarmentAnalysis(
             title: onDevice.labelInfo?.brand != nil ? "\(onDevice.labelInfo!.brand!) Item" : "New Listing",
-            category: Category(name: onDevice.category ?? "Clothing", icon: "tshirt"),
+            category: mapCategory(onDevice.category),
             condition: .good,
             materials: onDevice.labelInfo?.material.map { 
                 AIMaterial(name: $0, percentage: 100, isSustainable: false) 
@@ -406,7 +406,7 @@ public final class CreateViewModel: ObservableObject {
     private func createFullAnalysis(from server: ServerAnalysisResult, onDevice: OnDeviceClassificationResult) -> AIGarmentAnalysis {
         AIGarmentAnalysis(
             title: "\(server.category.first?.label.capitalized ?? "Item") for Sale",
-            category: Category(name: server.category.first?.label ?? "Clothing", icon: "tshirt"),
+            category: mapCategory(server.category.first?.label),
             condition: mapCondition(server.conditionGrade.grade),
             materials: server.material.map { 
                 AIMaterial(
@@ -421,6 +421,24 @@ public final class CreateViewModel: ObservableObject {
             confidence: Double(server.category.first?.confidence ?? 0.5),
             suggestions: server.suggestions
         )
+    }
+    
+    private func mapCategory(_ label: String?) -> Category {
+        let normalized = label?.lowercased() ?? ""
+        switch normalized {
+        case "tops", "shirt", "blouse", "t-shirt", "tshirt": return .tops
+        case "bottoms", "pants", "jeans", "trousers", "shorts": return .bottoms
+        case "dresses", "dress": return .dresses
+        case "outerwear", "jacket", "coat", "blazer": return .outerwear
+        case "shoes", "footwear", "boots", "sneakers": return .shoes
+        case "accessories", "accessory": return .accessories
+        case "bags", "bag", "handbag": return .bags
+        case "activewear", "sportswear": return .activewear
+        case "swimwear", "swimsuit", "bikini": return .swimwear
+        case "formal", "evening", "gown": return .formal
+        case "vintage": return .vintage
+        default: return .tops
+        }
     }
     
     private func mapCondition(_ grade: String) -> Condition {
