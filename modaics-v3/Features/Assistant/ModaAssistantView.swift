@@ -16,7 +16,6 @@ class ModaAssistantViewModel: ObservableObject {
     @Published var inputText = ""
     @Published var isStreaming = false
     
-    private var eventSource: EventSource?
     private var currentStreamingMessage = ""
     
     init() {
@@ -53,11 +52,6 @@ class ModaAssistantViewModel: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Add auth if available
-        if let token = AuthManager.shared.token {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
         
         // Build request body
         let body: [String: Any] = [
@@ -209,11 +203,11 @@ struct ModaAssistantView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("MODA")
                     .font(.forestHeadlineMedium)
-                    .foregroundColor(.luxeGold)
+                    .foregroundColor(Color.luxeGold)
                 
                 Text("Your style companion")
-                    .font(.forestCaption)
-                    .foregroundColor(.sageMuted)
+                    .font(.forestCaptionMedium)
+                    .foregroundColor(Color.sageMuted)
             }
             
             Spacer()
@@ -221,7 +215,7 @@ struct ModaAssistantView: View {
             Button(action: { /* dismiss */ }) {
                 Image(systemName: "xmark")
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.sageMuted)
+                    .foregroundColor(Color.sageMuted)
             }
         }
         .padding(.horizontal, 20)
@@ -259,8 +253,8 @@ struct ModaAssistantView: View {
     private var quickActions: some View {
         VStack(spacing: 8) {
             Text("Quick actions")
-                .font(.forestCaption)
-                .foregroundColor(.sageMuted)
+                .font(.forestCaptionMedium)
+                .foregroundColor(Color.sageMuted)
             
             HStack(spacing: 12) {
                 QuickActionButton(
@@ -295,11 +289,11 @@ struct ModaAssistantView: View {
     private var inputBar: some View {
         HStack(spacing: 12) {
             TextField("Ask Moda anything...", text: $viewModel.inputText, axis: .vertical)
-                .font(.forestBody)
-                .foregroundColor(.forestDark)
+                .font(.forestBodyMedium)
+                .foregroundColor(Color.sageWhite)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-                .background(Color.white)
+                .background(Color.modaicsSurface)
                 .cornerRadius(24)
                 .focused($isInputFocused)
                 .lineLimit(1...4)
@@ -307,7 +301,7 @@ struct ModaAssistantView: View {
             Button(action: viewModel.sendMessage) {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 32))
-                    .foregroundColor(viewModel.inputText.isEmpty ? .sageMuted : .luxeGold)
+                    .foregroundColor(viewModel.inputText.isEmpty ? Color.sageMuted : Color.luxeGold)
             }
             .disabled(viewModel.inputText.isEmpty || viewModel.isStreaming)
         }
@@ -332,12 +326,12 @@ struct ChatBubble: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(message.content)
-                    .font(.forestBody)
-                    .foregroundColor(message.isUser ? .white : .forestDark)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(message.isUser ? Color.modaicsBackground : Color.sageWhite)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
             }
-            .background(message.isUser ? Color.luxeGold : Color.white)
+            .background(message.isUser ? Color.luxeGold : Color.modaicsSurface)
             .cornerRadius(20, corners: message.isUser ? [.topLeft, .topRight, .bottomLeft] : [.topLeft, .topRight, .bottomRight])
             
             if !message.isUser {
@@ -364,7 +358,7 @@ struct TypingIndicator: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 16)
-            .background(Color.white)
+            .background(Color.modaicsSurface)
             .cornerRadius(20, corners: [.topLeft, .topRight, .bottomRight])
             
             Spacer(minLength: 60)
@@ -389,12 +383,12 @@ struct QuickActionButton: View {
                 Image(systemName: icon)
                     .font(.system(size: 20))
                 Text(label)
-                    .font(.forestSmall)
+                    .font(.forestCaptionMedium)
             }
-            .foregroundColor(.forestDark)
+            .foregroundColor(Color.sageWhite)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
-            .background(Color.white)
+            .background(Color.modaicsSurface)
             .cornerRadius(12)
         }
     }

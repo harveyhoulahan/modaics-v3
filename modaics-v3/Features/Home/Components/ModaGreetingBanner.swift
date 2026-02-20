@@ -10,7 +10,6 @@ class ModaGreetingViewModel: ObservableObject {
     @Published var funFact: String = ""
     @Published var showFunFact = false
     
-    private var cancellables = Set<AnyCancellable>()
     private var refreshTimer: Timer?
     
     init() {
@@ -39,9 +38,6 @@ class ModaGreetingViewModel: ObservableObject {
         guard let url = URL(string: "\(APIConfig.baseURL)/api/greeting") else { return }
         
         var request = URLRequest(url: url)
-        if let token = AuthManager.shared.token {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
         
         do {
             let (data, _) = try await URLSession.shared.data(for: request)
@@ -65,9 +61,6 @@ class ModaGreetingViewModel: ObservableObject {
             guard let url = URL(string: "\(APIConfig.baseURL)/api/greeting/search-hint") else { return }
             
             var request = URLRequest(url: url)
-            if let token = AuthManager.shared.token {
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            }
             
             do {
                 let (data, _) = try await URLSession.shared.data(for: request)
@@ -86,9 +79,6 @@ class ModaGreetingViewModel: ObservableObject {
             guard let url = URL(string: "\(APIConfig.baseURL)/api/greeting/daily-fact") else { return }
             
             var request = URLRequest(url: url)
-            if let token = AuthManager.shared.token {
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            }
             
             do {
                 let (data, _) = try await URLSession.shared.data(for: request)
@@ -124,19 +114,19 @@ struct ModaGreetingBanner: View {
             // Dynamic greeting
             VStack(alignment: .leading, spacing: 4) {
                 Text(viewModel.greeting)
-                    .font(.forestHeadlineLarge)
-                    .foregroundColor(.forestDark)
+                    .font(.forestHeadlineMedium)
+                    .foregroundColor(Color.sageWhite)
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                 
                 Text(viewModel.subtitle)
-                    .font(.forestBody)
-                    .foregroundColor(.sageMuted)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(Color.sageMuted)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
-            .background(Color.white)
+            .background(Color.modaicsBackground)
             .onTapGesture {
                 viewModel.loadFunFact()
             }
@@ -145,16 +135,16 @@ struct ModaGreetingBanner: View {
             HStack(spacing: 12) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 18))
-                    .foregroundColor(.sageMuted)
+                    .foregroundColor(Color.sageMuted)
                 
                 TextField(viewModel.searchHint, text: $searchText)
-                    .font(.forestBody)
-                    .foregroundColor(.forestDark)
+                    .font(.forestBodyMedium)
+                    .foregroundColor(Color.sageWhite)
                 
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.sageMuted)
+                            .foregroundColor(Color.sageMuted)
                     }
                 }
                 
@@ -164,9 +154,9 @@ struct ModaGreetingBanner: View {
                         Image(systemName: "sparkles")
                             .font(.system(size: 14))
                         Text("Ask Moda")
-                            .font(.forestSmall)
+                            .font(.forestCaptionMedium)
                     }
-                    .foregroundColor(.luxeGold)
+                    .foregroundColor(Color.luxeGold)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color.luxeGold.opacity(0.1))
@@ -180,7 +170,7 @@ struct ModaGreetingBanner: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
         }
-        .background(Color.white)
+        .background(Color.modaicsBackground)
         .overlay(
             // Fun fact tooltip
             Group {
@@ -190,10 +180,10 @@ struct ModaGreetingBanner: View {
                         
                         HStack(spacing: 8) {
                             Image(systemName: "lightbulb.fill")
-                                .foregroundColor(.luxeGold)
+                                .foregroundColor(Color.luxeGold)
                             Text(viewModel.funFact)
-                                .font(.forestSmall)
-                                .foregroundColor(.forestDark)
+                                .font(.forestCaptionMedium)
+                                .foregroundColor(Color.sageWhite)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
@@ -221,11 +211,11 @@ struct ModaSearchBar: View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 18))
-                .foregroundColor(.sageMuted)
+                .foregroundColor(Color.sageMuted)
             
             TextField(viewModel.searchHint, text: $text)
-                .font(.forestBody)
-                .foregroundColor(.forestDark)
+                .font(.forestBodyMedium)
+                .foregroundColor(Color.sageWhite)
                 .focused($isFocused)
                 .submitLabel(.search)
                 .onSubmit(onSubmit)
@@ -233,7 +223,7 @@ struct ModaSearchBar: View {
             if !text.isEmpty {
                 Button(action: { text = "" }) {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.sageMuted)
+                        .foregroundColor(Color.sageMuted)
                 }
             }
             
@@ -246,7 +236,7 @@ struct ModaSearchBar: View {
                         Text("Ask Moda")
                             .font(.system(size: 12, weight: .medium))
                     }
-                    .foregroundColor(.luxeGold)
+                    .foregroundColor(Color.luxeGold)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
                     .background(Color.luxeGold.opacity(0.12))
@@ -257,7 +247,7 @@ struct ModaSearchBar: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(Color.white)
+        .background(Color.modaicsSurface)
         .cornerRadius(24)
         .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
     }
