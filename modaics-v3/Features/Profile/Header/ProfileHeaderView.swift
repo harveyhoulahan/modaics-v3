@@ -24,7 +24,7 @@ public struct ProfileHeaderView: View {
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+                .stroke(Color.warmDivider, lineWidth: 0.5)
         )
         .padding(.horizontal, 20)
         .sheet(isPresented: $viewModel.isEditing) {
@@ -71,19 +71,19 @@ public struct ProfileHeaderView: View {
             HStack(spacing: 12) {
                 Button(action: { viewModel.showSettings = true }) {
                     Image(systemName: "gear")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.luxeGold)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.nearBlack)
                         .frame(width: 36, height: 36)
-                        .background(Color.modaicsBackground.opacity(0.8))
+                        .background(Color.ivory.opacity(0.9))
                         .clipShape(Circle())
                 }
                 
                 Button(action: { viewModel.isEditing = true }) {
                     Image(systemName: "pencil")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.sageWhite)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.nearBlack)
                         .frame(width: 36, height: 36)
-                        .background(Color.modaicsBackground.opacity(0.8))
+                        .background(Color.ivory.opacity(0.9))
                         .clipShape(Circle())
                 }
             }
@@ -135,23 +135,17 @@ public struct ProfileHeaderView: View {
         )
         .overlay(
             Circle()
-                .stroke(viewModel.isPremium ? Color.luxeGold : Color.clear, lineWidth: 2)
+                .stroke(Color.warmDivider, lineWidth: 1)
         )
     }
     
     private var avatarPlaceholder: some View {
         ZStack {
             Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [.modaicsPrimary, .luxeGold.opacity(0.3)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(Color.modaicsSurfaceHighlight)
             
             Text(String(viewModel.user.displayName.prefix(1).uppercased()))
-                .font(.system(size: 32, weight: .bold, design: .monospaced))
+                .font(.bodyText(32, weight: .medium))
                 .foregroundColor(.sageWhite)
         }
     }
@@ -163,25 +157,13 @@ public struct ProfileHeaderView: View {
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(viewModel.user.displayName)
-                        .font(.forestHeadlineMedium)
+                        .font(.bodyText(20, weight: .medium))
                         .foregroundColor(.sageWhite)
                     
-                    HStack(spacing: 8) {
-                        Text("@\(viewModel.user.username)")
-                            .font(.forestCaptionMedium)
-                            .foregroundColor(.sageMuted)
-                        
-                        if !viewModel.tierBadgeText.isEmpty {
-                            Text(viewModel.tierBadgeText)
-                                .font(.forestCaptionSmall)
-                                .fontWeight(.bold)
-                                .foregroundColor(.modaicsBackground)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 2)
-                                .background(Color.luxeGold)
-                                .clipShape(Capsule())
-                        }
-                    }
+                    // Membership text - simple, not gold, not ALL CAPS
+                    Text("Free member")
+                        .font(.bodyText(14))
+                        .foregroundColor(.warmCharcoal)
                 }
                 
                 Spacer()
@@ -190,27 +172,32 @@ public struct ProfileHeaderView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "star.fill")
                         .font(.system(size: 12))
-                        .foregroundColor(.luxeGold)
+                        .foregroundColor(.agedBrass)
                     
                     Text(String(format: "%.1f", viewModel.user.rating))
-                        .font(.forestCaptionMedium)
+                        .font(.bodyText(12, weight: .medium))
                         .foregroundColor(.sageWhite)
                     
                     Text("(\(viewModel.user.ratingCount))")
-                        .font(.forestCaptionSmall)
+                        .font(.bodyText(11))
                         .foregroundColor(.sageMuted)
                 }
             }
             
+            // Simple stats text - NO icon boxes
+            Text("\(viewModel.user.itemsCirculated) pieces · \(viewModel.user.followingCount) saved")
+                .font(.bodyText(13))
+                .foregroundColor(.sageMuted)
+            
             // Bio
             if !viewModel.user.bio.isEmpty {
                 Text(viewModel.user.bio)
-                    .font(.forestBodyMedium)
+                    .font(.bodyText(14))
                     .foregroundColor(.sageWhite)
                     .lineLimit(3)
             } else {
                 Text("Tap to add a bio")
-                    .font(.forestBodyMedium)
+                    .font(.bodyText(14))
                     .foregroundColor(.sageMuted)
                     .italic()
             }
@@ -221,9 +208,9 @@ public struct ProfileHeaderView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "mappin")
                             .font(.system(size: 12))
-                            .foregroundColor(.luxeGold)
+                            .foregroundColor(.agedBrass)
                         Text("\(location.city), \(location.country)")
-                            .font(.forestCaptionSmall)
+                            .font(.bodyText(11))
                             .foregroundColor(.sageMuted)
                     }
                 }
@@ -231,9 +218,9 @@ public struct ProfileHeaderView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "calendar")
                         .font(.system(size: 12))
-                        .foregroundColor(.luxeGold)
+                        .foregroundColor(.agedBrass)
                     Text(viewModel.joinedDateText)
-                        .font(.forestCaptionSmall)
+                        .font(.bodyText(11))
                         .foregroundColor(.sageMuted)
                 }
             }
@@ -243,11 +230,10 @@ public struct ProfileHeaderView: View {
                 Button(action: { showFollowingSheet = true }) {
                     HStack(spacing: 4) {
                         Text("\(viewModel.user.followingCount)")
-                            .font(.forestBodyMedium)
-                            .fontWeight(.bold)
+                            .font(.bodyText(14, weight: .medium))
                             .foregroundColor(.sageWhite)
                         Text("Following")
-                            .font(.forestCaptionSmall)
+                            .font(.bodyText(12))
                             .foregroundColor(.sageMuted)
                     }
                 }
@@ -255,23 +241,22 @@ public struct ProfileHeaderView: View {
                 Button(action: { showFollowersSheet = true }) {
                     HStack(spacing: 4) {
                         Text("\(viewModel.user.followerCount)")
-                            .font(.forestBodyMedium)
-                            .fontWeight(.bold)
+                            .font(.bodyText(14, weight: .medium))
                             .foregroundColor(.sageWhite)
                         Text("Followers")
-                            .font(.forestCaptionSmall)
+                            .font(.bodyText(12))
                             .foregroundColor(.sageMuted)
                     }
                 }
             }
             .padding(.top, 4)
             
-            // Style Descriptors
+            // Style Descriptors - simplified, no gold accents
             if !viewModel.user.styleDescriptors.isEmpty {
                 FlowLayout(spacing: 8) {
                     ForEach(viewModel.user.styleDescriptors, id: \.self) { descriptor in
-                        Text(descriptor.uppercased())
-                            .font(.forestCaptionSmall)
+                        Text(descriptor)
+                            .font(.bodyText(11))
                             .foregroundColor(.sageWhite)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
@@ -280,15 +265,15 @@ public struct ProfileHeaderView: View {
                     }
                     
                     if let aesthetic = viewModel.user.aesthetic {
-                        Text(aesthetic.rawValue.uppercased())
-                            .font(.forestCaptionSmall)
-                            .foregroundColor(.luxeGold)
+                        Text(aesthetic.rawValue)
+                            .font(.bodyText(11))
+                            .foregroundColor(.agedBrass)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
                             .background(Color.clear)
                             .overlay(
                                 Capsule()
-                                    .stroke(Color.luxeGold, lineWidth: 1)
+                                    .stroke(Color.agedBrass.opacity(0.5), lineWidth: 0.5)
                             )
                     }
                 }
@@ -328,23 +313,23 @@ private struct FollowersSheet: View {
                         .foregroundColor(.sageSubtle)
                     
                     Text("\(count) \(type.title)")
-                        .font(.forestHeadlineMedium)
+                        .font(.bodyText(18, weight: .medium))
                         .foregroundColor(.sageWhite)
                     
                     Text("Coming soon")
-                        .font(.forestBodyMedium)
+                        .font(.bodyText(14))
                         .foregroundColor(.sageMuted)
                     
                     Spacer()
                 }
             }
-            .navigationTitle(type.title.uppercased())
+            .navigationTitle(type.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.luxeGold)
+                        .font(.bodyText(12, weight: .medium))
+                        .foregroundColor(.agedBrass)
                 }
             }
         }

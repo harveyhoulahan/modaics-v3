@@ -48,6 +48,22 @@ public enum Category: String, CaseIterable, Codable, Identifiable {
         case .vintage: return "VINTAGE"
         }
     }
+    
+    public var sentenceCaseName: String {
+        switch self {
+        case .tops: return "Tops"
+        case .bottoms: return "Bottoms"
+        case .outerwear: return "Outerwear"
+        case .dresses: return "Dresses"
+        case .shoes: return "Shoes"
+        case .accessories: return "Accessories"
+        case .bags: return "Bags"
+        case .activewear: return "Activewear"
+        case .swimwear: return "Swimwear"
+        case .formal: return "Formal"
+        case .vintage: return "Vintage"
+        }
+    }
 }
 
 // MARK: - Condition Enum

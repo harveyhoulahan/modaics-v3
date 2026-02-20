@@ -315,11 +315,11 @@ public class DiscoverViewModel: ObservableObject {
     
     public var emptyStateTitle: String {
         if !searchQuery.isEmpty {
-            return "NO RESULTS FOUND"
+            return "No results found"
         } else if filterCriteria.activeFilterCount > 0 {
-            return "NO ITEMS MATCH"
+            return "No items match"
         } else {
-            return "NO ITEMS YET"
+            return "No items yet"
         }
     }
     

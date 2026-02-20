@@ -33,8 +33,8 @@ public struct UnifiedCreateView: View {
                     // Collapsable Header
                     createHeader
                     
-                    // HERO: Smart Create CTA (Gold gradient, biggest element)
-                    HeroSmartCreateCard {
+                    // HERO: The Studio card
+                    TheStudioCard {
                         viewModel.showSmartCreate = true
                     }
                     .padding(.horizontal, 20)
@@ -93,9 +93,9 @@ public struct UnifiedCreateView: View {
         .sheet(isPresented: $viewModel.showSmartCreate) {
             SmartCreateView(viewModel: viewModel)
         }
-        .alert("LISTING CREATED", isPresented: $showSuccessAlert) {
-            Button("CREATE ANOTHER", role: .none) { viewModel.resetForm() }
-            Button("DONE", role: .cancel) {}
+        .alert("Listed successfully", isPresented: $showSuccessAlert) {
+            Button("Create another", role: .none) { viewModel.resetForm() }
+            Button("Done", role: .cancel) {}
         } message: {
             Text("Your item has been successfully listed!")
         }
@@ -146,79 +146,32 @@ struct CreateScrollOffsetPreferenceKey: PreferenceKey {
     }
 }
 
-// MARK: - Hero Smart Create Card
-/// Big, prominent, gold gradient card - the HERO element
-struct HeroSmartCreateCard: View {
+// MARK: - The Studio Card
+/// Simple, elegant card - the HERO element
+struct TheStudioCard: View {
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 20) {
-                // Top row: Icon and arrow
-                HStack {
-                    // Sparkle icon with glow effect
-                    ZStack {
-                        Circle()
-                            .fill(Color.luxeGold.opacity(0.2))
-                            .frame(width: 56, height: 56)
-                        
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 28, weight: .semibold))
-                            .foregroundColor(.luxeGold)
-                    }
-                    
-                    Spacer()
-                    
-                    // Arrow indicator
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.luxeGold)
-                }
+            VStack(alignment: .leading, spacing: 12) {
+                // Title
+                Text("The Studio")
+                    .font(.editorialSmall)
+                    .foregroundColor(.nearBlack)
                 
-                // Content
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("SMART CREATE")
-                        .font(.forestDisplaySmall)
-                        .foregroundColor(.sageWhite)
-                        .tracking(2)
-                    
-                    Text("AI analyzes your photos and auto-fills details")
-                        .font(.forestBodyMedium)
-                        .foregroundColor(.sageMuted)
-                        .multilineTextAlignment(.leading)
-                }
-                
-                // Bottom badge row
-                HStack(spacing: 8) {
-                    SmartBadge(icon: "bolt.fill", text: "INSTANT")
-                    SmartBadge(icon: "wand.and.stars", text: "AI-POWERED")
-                    SmartBadge(icon: "checkmark.shield", text: "ACCURATE")
-                }
+                // Subtitle
+                Text("Snap a photo, we'll handle the details")
+                    .font(.bodyMedium)
+                    .foregroundColor(.warmCharcoal)
+                    .multilineTextAlignment(.leading)
             }
-            .padding(24)
+            .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color(hex: "2A2415"),  // Dark gold
-                        Color(hex: "1A1810"),  // Near black with gold undertone
-                        Color.modaicsSurface
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .cornerRadius(20)
+            .background(Color.ivory)
+            .cornerRadius(2)
             .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(
-                        LinearGradient(
-                            colors: [.luxeGold.opacity(0.6), .luxeGold.opacity(0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
+                RoundedRectangle(cornerRadius: 2)
+                    .stroke(Color.warmDivider, lineWidth: 0.5)
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -255,17 +208,16 @@ struct ManualDivider: View {
     var body: some View {
         HStack(spacing: 16) {
             Rectangle()
-                .fill(Color.modaicsSurfaceHighlight)
-                .frame(height: 1)
+                .fill(Color.warmDivider)
+                .frame(height: 0.5)
             
-            Text("OR MANUAL")
-                .font(.forestCaptionSmall)
-                .foregroundColor(.sageMuted)
-                .tracking(1)
+            Text("or list manually")
+                .font(.captionSmall)
+                .foregroundColor(.mutedGray)
             
             Rectangle()
-                .fill(Color.modaicsSurfaceHighlight)
-                .frame(height: 1)
+                .fill(Color.warmDivider)
+                .frame(height: 0.5)
         }
     }
 }
@@ -282,7 +234,7 @@ struct ListingModeSection: View {
                 subtitle: "Choose how you want to list this item"
             )
             
-            HStack(spacing: 12) {
+            VStack(spacing: 8) {
                 ForEach(ListingMode.allCases) { mode in
                     ListingModeButton(
                         mode: mode,
@@ -331,23 +283,36 @@ struct ListingModeButton: View {
     let isSelected: Bool
     let action: () -> Void
     
+    var displayText: String {
+        switch mode {
+        case .sell: return "Sell a piece"
+        case .rent: return "List for rent"
+        case .swap: return "Offer swap"
+        }
+    }
+    
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 8) {
-                Image(systemName: mode.icon)
-                    .font(.system(size: 24))
-                Text(mode.rawValue)
-                    .font(.forestCaptionMedium)
-                    .tracking(0.5)
+            HStack {
+                Text(displayText)
+                    .font(.bodyMedium)
+                    .foregroundColor(.nearBlack)
+                
+                Spacer()
+                
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.nearBlack)
+                }
             }
-            .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
-            .cornerRadius(12)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 16)
+            .background(Color.ivory)
+            .cornerRadius(2)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.clear : Color.modaicsSurfaceHighlight, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 2)
+                    .stroke(isSelected ? Color.warmDivider : Color.clear, lineWidth: 0.5)
             )
         }
         .buttonStyle(PlainButtonStyle())

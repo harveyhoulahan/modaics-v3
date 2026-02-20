@@ -86,20 +86,14 @@ public struct SmartCreateView: View {
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 20))
-                        .foregroundColor(.sageWhite)
+                        .foregroundColor(.nearBlack)
                 }
                 
                 Spacer()
                 
-                HStack(spacing: 8) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 16))
-                        .foregroundColor(.luxeGold)
-                    Text("SMART CREATE")
-                        .font(.forestHeadlineSmall)
-                        .foregroundColor(.sageWhite)
-                        .tracking(2)
-                }
+                Text("The Studio")
+                    .font(.editorialSmall)
+                    .foregroundColor(.nearBlack)
                 
                 Spacer()
                 
@@ -108,16 +102,16 @@ public struct SmartCreateView: View {
                     viewModel.resetForm()
                     currentPhase = .photo
                 }) {
-                    Text("RESET")
-                        .font(.forestCaptionSmall)
-                        .foregroundColor(.luxeGold)
+                    Text("Reset")
+                        .font(.captionSmall)
+                        .foregroundColor(.warmCharcoal)
                 }
             }
             .padding(.horizontal, 20)
             .padding(.top, 16)
             
             // Progress
-            SmartProgressBar(currentPhase: currentPhase)
+            StudioProgressBar(currentPhase: currentPhase)
                 .padding(.horizontal, 20)
         }
         .padding(.bottom, 20)
@@ -132,19 +126,16 @@ enum SmartCreatePhase: Int, CaseIterable {
     case finalReview = 3
 }
 
-// MARK: - Smart Progress Bar
-struct SmartProgressBar: View {
+// MARK: - Studio Progress Bar
+struct StudioProgressBar: View {
     let currentPhase: SmartCreatePhase
     
     var body: some View {
         HStack(spacing: 4) {
             ForEach(SmartCreatePhase.allCases, id: \.self) { phase in
-                HStack(spacing: 0) {
-                    // Segment
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(phase.rawValue <= currentPhase.rawValue ? Color.luxeGold : Color.modaicsSurface)
-                        .frame(height: 4)
-                }
+                Rectangle()
+                    .fill(phase.rawValue <= currentPhase.rawValue ? Color.nearBlack : Color.warmDivider)
+                    .frame(height: 2)
             }
         }
     }
@@ -159,30 +150,27 @@ struct PhotoPhaseView: View {
         VStack(spacing: 24) {
             // Hero image area
             ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.modaicsSurface)
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.ivory)
                     .aspectRatio(1, contentMode: .fit)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 2)
+                            .stroke(Color.warmDivider, lineWidth: 0.5)
+                    )
                 
                 if viewModel.form.images.isEmpty {
                     VStack(spacing: 16) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.luxeGold.opacity(0.2))
-                                .frame(width: 80, height: 80)
-                            
-                            Image(systemName: "camera.fill")
-                                .font(.system(size: 32))
-                                .foregroundColor(.luxeGold)
-                        }
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(.nearBlack)
                         
-                        Text("ADD PHOTOS")
-                            .font(.forestHeadlineSmall)
-                            .foregroundColor(.sageWhite)
-                            .tracking(1)
+                        Text("Add photos")
+                            .font(.bodyMedium)
+                            .foregroundColor(.nearBlack)
                         
-                        Text("Take or select photos of your item.\nAI will analyze them and auto-fill details.")
-                            .font(.forestCaptionMedium)
-                            .foregroundColor(.sageMuted)
+                        Text("Take or select photos of your item")
+                            .font(.captionSmall)
+                            .foregroundColor(.mutedGray)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                     }
@@ -191,15 +179,10 @@ struct PhotoPhaseView: View {
                         Image(uiImage: firstImage)
                             .resizable()
                             .scaledToFill()
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .clipShape(RoundedRectangle(cornerRadius: 2))
                     }
                 }
             }
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.luxeGold.opacity(viewModel.form.images.isEmpty ? 0.3 : 0), lineWidth: viewModel.form.images.isEmpty ? 2 : 0)
-                    .stroke(Color.modaicsSurfaceHighlight, lineWidth: viewModel.form.images.isEmpty ? 0 : 1)
-            )
             .padding(.horizontal, 20)
             
             // Image picker row
@@ -217,14 +200,18 @@ struct PhotoPhaseView: View {
                 }) {
                     HStack(spacing: 8) {
                         Image(systemName: "photo.stack")
-                        Text("SELECT FROM LIBRARY")
+                        Text("Select from library")
                     }
-                    .font(.forestBodyMedium)
-                    .foregroundColor(.modaicsBackground)
+                    .font(.bodyMedium)
+                    .foregroundColor(.nearBlack)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.luxeGold)
-                    .cornerRadius(12)
+                    .background(Color.ivory)
+                    .cornerRadius(2)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 2)
+                            .stroke(Color.warmDivider, lineWidth: 0.5)
+                    )
                 }
                 .padding(.horizontal, 20)
             }
@@ -234,15 +221,18 @@ struct PhotoPhaseView: View {
             // Continue button
             Button(action: onNext) {
                 HStack(spacing: 8) {
-                    Text("ANALYZE WITH AI")
-                    Image(systemName: "sparkles")
+                    Text("Continue")
                 }
-                .font(.forestBodyMedium)
-                .foregroundColor(.modaicsBackground)
+                .font(.bodyMedium)
+                .foregroundColor(viewModel.form.images.isEmpty ? .mutedGray : .nearBlack)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 18)
-                .background(viewModel.form.images.isEmpty ? Color.luxeGold.opacity(0.3) : Color.luxeGold)
-                .cornerRadius(12)
+                .background(viewModel.form.images.isEmpty ? Color.warmOffWhite : Color.ivory)
+                .cornerRadius(2)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 2)
+                        .stroke(viewModel.form.images.isEmpty ? Color.clear : Color.warmDivider, lineWidth: 0.5)
+                )
             }
             .disabled(viewModel.form.images.isEmpty)
             .padding(.horizontal, 20)

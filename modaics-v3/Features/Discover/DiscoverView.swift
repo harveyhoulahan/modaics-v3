@@ -18,7 +18,7 @@ public struct DiscoverView: View {
     
     public var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
+            Color.warmOffWhite.ignoresSafeArea()
             
             ScrollView(showsIndicators: false) {
                 GeometryReader { proxy in
@@ -36,6 +36,11 @@ public struct DiscoverView: View {
             .coordinateSpace(name: "scroll")
             .onPreferenceChange(DiscoverScrollOffsetPreferenceKey.self) { value in
                 scrollOffset = -value
+            }
+            
+            // Search suggestions overlay
+            if viewModel.showSearchSuggestions && !viewModel.searchSuggestions.isEmpty {
+                searchSuggestionsOverlay
             }
         }
         .sheet(isPresented: $viewModel.showFilterSheet) {
@@ -61,7 +66,7 @@ public struct DiscoverView: View {
         }
         .actionSheet(isPresented: $viewModel.showSortOptions) {
             ActionSheet(
-                title: Text("SORT BY"),
+                title: Text("Sort by"),
                 buttons: SortOption.allCases.map { option in
                     .default(Text(option.displayName)) { viewModel.setSortOption(option) }
                 } + [.cancel()]
@@ -76,25 +81,24 @@ public struct DiscoverView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text("DISCOVER")
-                        .font(.forestDisplaySmall)
-                        .foregroundColor(.sageWhite)
-                        .tracking(2)
+                    Text("Discover")
+                        .font(.editorialMedium)
+                        .foregroundColor(.nearBlack)
                     Spacer()
                     Button(action: {}) {
                         Image(systemName: "bell")
                             .font(.system(size: 20))
-                            .foregroundColor(.sageMuted)
+                            .foregroundColor(.warmCharcoal)
                     }
                 }
-                Text("Find pieces, events & more nearby")
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(.sageMuted)
+                Text("Pre-loved pieces with stories")
+                    .font(.bodyMedium)
+                    .foregroundColor(.warmCharcoal)
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
             .padding(.bottom, 12)
-            .background(Color.modaicsBackground)
+            .background(Color.warmOffWhite)
             .frame(height: headerHeight * (CGFloat(1) - headerCollapseProgress * CGFloat(0.5)))
             .opacity(CGFloat(1) - headerCollapseProgress)
             .clipped()
@@ -103,14 +107,14 @@ public struct DiscoverView: View {
                 .frame(height: categorySelectorHeight * (CGFloat(1) - headerCollapseProgress * CGFloat(0.3)))
                 .opacity(CGFloat(1) - headerCollapseProgress * CGFloat(0.5))
         }
-        .background(Color.modaicsBackground)
+        .background(Color.warmOffWhite)
     }
     
     private var categorySelector: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
+            HStack(spacing: 24) {
                 ForEach(DiscoverCategory.allCases) { category in
-                    CategoryTabPill(
+                    CategoryTab(
                         category: category,
                         isSelected: viewModel.selectedDiscoverCategory == category
                     ) { viewModel.selectDiscoverCategory(category) }
@@ -119,7 +123,7 @@ public struct DiscoverView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 8)
         }
-        .background(Color.modaicsBackground)
+        .background(Color.warmOffWhite)
     }
     
     private var contentArea: some View {
@@ -146,7 +150,7 @@ public struct DiscoverView: View {
             }
             
             if viewModel.isLoadingMore {
-                ProgressView().tint(Color.luxeGold).frame(height: 50)
+                ProgressView().tint(Color.agedBrass).frame(height: 50)
             }
         }
         .padding(.top, 8)
@@ -156,41 +160,118 @@ public struct DiscoverView: View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.sageMuted)
+                .foregroundColor(.warmCharcoal)
             
             TextField("", text: $viewModel.searchQuery)
-                .font(.forestBodyMedium)
-                .foregroundColor(.sageWhite)
+                .font(.bodyMedium)
+                .foregroundColor(.nearBlack)
                 .placeholder(when: viewModel.searchQuery.isEmpty) {
-                    Text("SEARCH GARMENTS...").font(.forestBodyMedium).foregroundColor(.sageMuted)
+                    Text("Search pieces, brands, styles...")
+                        .font(.bodyMedium)
+                        .foregroundColor(.mutedGray)
                 }
                 .submitLabel(.search)
                 .onSubmit { viewModel.performSearch() }
             
             if !viewModel.searchQuery.isEmpty {
                 Button(action: { viewModel.searchQuery = ""; viewModel.performSearch() }) {
-                    Image(systemName: "xmark.circle.fill").font(.system(size: 18)).foregroundColor(.sageMuted)
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(.warmCharcoal)
                 }
             }
             
             Button(action: { viewModel.showVisualSearch = true }) {
-                Image(systemName: "camera").font(.system(size: 18)).foregroundColor(.luxeGold)
+                Image(systemName: "camera")
+                    .font(.system(size: 18))
+                    .foregroundColor(.warmCharcoal)
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.modaicsSurface))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.luxeGold.opacity(0.2), lineWidth: 1))
+        .background(Color.ivory)
+        .clipShape(RoundedRectangle(cornerRadius: 2))
+    }
+    
+    private var searchSuggestionsOverlay: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.warmCharcoal)
+                
+                TextField("", text: $viewModel.searchQuery)
+                    .font(.bodyMedium)
+                    .foregroundColor(.nearBlack)
+                    .placeholder(when: viewModel.searchQuery.isEmpty) {
+                        Text("Search pieces, brands, styles...")
+                            .font(.bodyMedium)
+                            .foregroundColor(.mutedGray)
+                    }
+                    .submitLabel(.search)
+                    .onSubmit { viewModel.performSearch() }
+                
+                if !viewModel.searchQuery.isEmpty {
+                    Button(action: { viewModel.searchQuery = ""; viewModel.performSearch() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(.warmCharcoal)
+                    }
+                }
+                
+                Button(action: { viewModel.showVisualSearch = true }) {
+                    Image(systemName: "camera")
+                        .font(.system(size: 18))
+                        .foregroundColor(.warmCharcoal)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color.ivory)
+            
+            Divider().background(Color.warmDivider)
+            
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(viewModel.searchSuggestions) { suggestion in
+                    Button(action: { viewModel.selectSearchSuggestion(suggestion) }) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 14))
+                                .foregroundColor(.mutedGray)
+                            Text(suggestion.text)
+                                .font(.bodyMedium)
+                                .foregroundColor(.nearBlack)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    
+                    Divider()
+                        .background(Color.warmDivider)
+                        .padding(.leading, 44)
+                }
+            }
+            .background(Color.warmOffWhite)
+        }
+        .background(Color.warmOffWhite)
+        .padding(.horizontal, 20)
     }
     
     private var subcategoryStrip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                SubcategoryPill(title: "ALL", icon: "square.grid.2x2", isSelected: viewModel.selectedSubCategory == nil) {
+            HStack(spacing: 24) {
+                SubcategoryTab(
+                    title: "All",
+                    isSelected: viewModel.selectedSubCategory == nil
+                ) {
                     viewModel.selectSubCategory(nil)
                 }
                 ForEach(Category.allCases) { category in
-                    SubcategoryPill(title: category.rawValue, icon: category.icon, isSelected: viewModel.selectedSubCategory == category) {
+                    SubcategoryTab(
+                        title: category.sentenceCaseName,
+                        isSelected: viewModel.selectedSubCategory == category
+                    ) {
                         viewModel.selectSubCategory(category)
                     }
                 }
@@ -201,17 +282,16 @@ public struct DiscoverView: View {
     }
     
     private var sortFilterBar: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 20) {
             Button(action: { viewModel.showSortOptions = true }) {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.up.arrow.down").font(.system(size: 12))
-                    Text(viewModel.sortOption.displayName.uppercased()).font(.forestCaptionSmall)
+                HStack(spacing: 4) {
+                    Text("Sort")
+                        .font(.bodyMedium)
+                        .foregroundColor(.nearBlack)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 12))
+                        .foregroundColor(.warmCharcoal)
                 }
-                .foregroundColor(.sageWhite)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Capsule().fill(Color.modaicsSurface))
-                .overlay(Capsule().stroke(Color.modaicsSurfaceHighlight, lineWidth: 1))
             }
             
             Spacer()
@@ -243,17 +323,25 @@ public struct DiscoverView: View {
     private var emptyStateView: some View {
         VStack(spacing: 24) {
             Spacer()
-            Image(systemName: "magnifyingglass").font(.system(size: 60)).foregroundColor(.sageSubtle)
-            Text(viewModel.emptyStateTitle).font(.forestHeadlineMedium).foregroundColor(.sageWhite).multilineTextAlignment(.center)
-            Text("Try adjusting your search or filters").font(.forestCaptionMedium).foregroundColor(.sageMuted).multilineTextAlignment(.center)
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 60))
+                .foregroundColor(.mutedGray)
+            Text(viewModel.emptyStateTitle)
+                .font(.bodyText(18, weight: .semibold))
+                .foregroundColor(.nearBlack)
+                .multilineTextAlignment(.center)
+            Text("Try adjusting your search or filters")
+                .font(.bodyMedium)
+                .foregroundColor(.warmCharcoal)
+                .multilineTextAlignment(.center)
             Button(action: { viewModel.resetFilters() }) {
-                Text("CLEAR FILTERS")
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(.modaicsBackground)
+                Text("Clear filters")
+                    .font(.bodyMedium)
+                    .foregroundColor(.warmOffWhite)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
-                    .background(Color.luxeGold)
-                    .cornerRadius(8)
+                    .background(Color.nearBlack)
+                    .clipShape(RoundedRectangle(cornerRadius: 2))
             }
             .padding(.top, 8)
             Spacer()
@@ -288,47 +376,35 @@ public struct DiscoverView: View {
                     withAnimation(.easeInOut(duration: 0.2)) { viewModel.eventViewMode = mode }
                 }) {
                     HStack(spacing: 6) {
-                        Image(systemName: mode == .list ? "list.bullet" : "map").font(.system(size: 14))
-                        Text(mode == .list ? "LIST" : "MAP").font(.forestCaptionSmall)
+                        Image(systemName: mode == .list ? "list.bullet" : "map")
+                            .font(.system(size: 14))
+                        Text(mode == .list ? "List" : "Map")
+                            .font(.uiLabelSmall)
                     }
-                    .foregroundColor(viewModel.eventViewMode == mode ? .modaicsBackground : .sageWhite)
+                    .foregroundColor(viewModel.eventViewMode == mode ? .warmOffWhite : .nearBlack)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-                    .background(viewModel.eventViewMode == mode ? Color.luxeGold : Color.modaicsSurface)
+                    .background(viewModel.eventViewMode == mode ? Color.nearBlack : Color.ivory)
                 }
             }
         }
-        .background(Color.modaicsSurface)
-        .cornerRadius(8)
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.modaicsSurfaceHighlight, lineWidth: 1))
+        .background(Color.ivory)
+        .clipShape(RoundedRectangle(cornerRadius: 2))
+        .overlay(
+            RoundedRectangle(cornerRadius: 2)
+                .stroke(Color.warmDivider, lineWidth: 1)
+        )
     }
     
     private var filterButton: some View {
         Button {
             viewModel.showFilterSheet = true
         } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "line.3.horizontal.decrease")
-                    .font(.system(size: 12))
-                Text("FILTERS")
-                    .font(.forestCaptionSmall)
-                if viewModel.activeFilterCount > 0 {
-                    Text("(\(viewModel.activeFilterCount))")
-                        .font(.forestCaptionSmall)
-                        .foregroundColor(.luxeGold)
-                }
+            HStack(spacing: 4) {
+                Text(viewModel.activeFilterCount > 0 ? "Filters (\(viewModel.activeFilterCount))" : "Filters")
+                    .font(.bodyMedium)
+                    .foregroundColor(.nearBlack)
             }
-            .foregroundColor(.sageWhite)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
-                Capsule()
-                    .fill(viewModel.activeFilterCount > 0 ? Color.luxeGold.opacity(0.15) : Color.modaicsSurface)
-            )
-            .overlay(
-                Capsule()
-                    .stroke(viewModel.activeFilterCount > 0 ? Color.luxeGold : Color.modaicsSurfaceHighlight, lineWidth: 1)
-            )
         }
     }
     
@@ -353,46 +429,47 @@ struct DiscoverScrollOffsetPreferenceKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
-// MARK: - Category Tab Pill
-struct CategoryTabPill: View {
+// MARK: - Category Tab (Editorial Style)
+struct CategoryTab: View {
     let category: DiscoverCategory
     let isSelected: Bool
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: category.icon).font(.system(size: 14))
-                Text(category.rawValue.uppercased()).font(.forestCaptionSmall)
+            VStack(spacing: 4) {
+                Text(category.rawValue)
+                    .font(.bodyMedium)
+                    .foregroundColor(isSelected ? .nearBlack : .warmCharcoal)
+                
+                // Underline indicator
+                Rectangle()
+                    .fill(isSelected ? Color.nearBlack : Color.clear)
+                    .frame(height: 1)
             }
-            .foregroundColor(isSelected ? .modaicsBackground : .sageMuted)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(Capsule().fill(isSelected ? Color.luxeGold : Color.modaicsSurface))
-            .overlay(Capsule().stroke(isSelected ? Color.clear : Color.modaicsSurfaceHighlight, lineWidth: 1))
         }
         .buttonStyle(PlainButtonStyle())
     }
 }
 
-// MARK: - Subcategory Pill
-struct SubcategoryPill: View {
+// MARK: - Subcategory Tab (Editorial Style)
+struct SubcategoryTab: View {
     let title: String
-    let icon: String
     let isSelected: Bool
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: icon).font(.system(size: 12))
-                Text(title).font(.forestCaptionSmall)
+            VStack(spacing: 4) {
+                Text(title)
+                    .font(.bodyMedium)
+                    .foregroundColor(isSelected ? .nearBlack : .warmCharcoal)
+                
+                // Underline indicator
+                Rectangle()
+                    .fill(isSelected ? Color.nearBlack : Color.clear)
+                    .frame(height: 1)
             }
-            .foregroundColor(isSelected ? .modaicsBackground : .sageWhite)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Capsule().fill(isSelected ? Color.luxeGold : Color.modaicsSurface))
-            .overlay(Capsule().stroke(isSelected ? Color.clear : Color.modaicsSurfaceHighlight, lineWidth: 1))
         }
         .buttonStyle(PlainButtonStyle())
     }
