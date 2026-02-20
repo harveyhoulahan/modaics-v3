@@ -145,16 +145,16 @@ extension ClothingDetector {
         )
         
         let boxView = UIView(frame: rect)
-        boxView.layer.borderColor = UIColor.luxeGold.cgColor
+        boxView.layer.borderColor = UIColor(red: 0.851, green: 0.741, blue: 0.420, alpha: 1.0).cgColor
         boxView.layer.borderWidth = 2
-        boxView.backgroundColor = UIColor.luxeGold.withAlphaComponent(0.1)
+        boxView.backgroundColor = UIColor(red: 0.851, green: 0.741, blue: 0.420, alpha: 0.1)
         
         // Add label
         let label = UILabel()
         label.text = "\(detection.category.displayName) (\(Int(detection.confidence * 100))%)"
         label.font = .systemFont(ofSize: 12, weight: .bold)
-        label.textColor = .modaicsBackground
-        label.backgroundColor = .luxeGold
+        label.textColor = UIColor(red: 0.039, green: 0.078, blue: 0.059, alpha: 1.0)
+        label.backgroundColor = UIColor(red: 0.851, green: 0.741, blue: 0.420, alpha: 1.0)
         label.sizeToFit()
         label.frame.origin = CGPoint(x: 0, y: -label.frame.height)
         boxView.addSubview(label)
