@@ -396,10 +396,10 @@ public final class CreateViewModel: ObservableObject {
                 AIMaterial(name: $0, percentage: 100, isSustainable: false) 
             } ?? [],
             colors: [],
-            estimatedPrice: Decimal(50),
+            estimatedPrice: 50.0,
             sustainabilityScore: 50,
-            suggestions: onDevice.category != nil ? ["Detected as \(onDevice.category!)"] : [],
-            confidence: onDevice.categoryConfidence
+            confidence: Double(onDevice.categoryConfidence),
+            suggestions: onDevice.category != nil ? ["Detected as \(onDevice.category!)"] : []
         )
     }
     
@@ -416,10 +416,10 @@ public final class CreateViewModel: ObservableObject {
                 ) 
             },
             colors: server.color.map { $0.label },
-            estimatedPrice: Decimal(server.estimatedPrice.max),
+            estimatedPrice: server.estimatedPrice.max,
             sustainabilityScore: server.sustainabilityScore,
-            suggestions: server.suggestions,
-            confidence: server.category.first?.confidence ?? 0.5
+            confidence: Double(server.category.first?.confidence ?? 0.5),
+            suggestions: server.suggestions
         )
     }
     
@@ -429,7 +429,7 @@ public final class CreateViewModel: ObservableObject {
         case "B": return .likeNew
         case "C": return .good
         case "D": return .fair
-        case "F": return .vintage
+        case "F": return .excellent
         default: return .good
         }
     }
