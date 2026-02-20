@@ -393,7 +393,7 @@ public final class CreateViewModel: ObservableObject {
             category: mapCategory(onDevice.category),
             condition: .good,
             materials: onDevice.labelInfo?.material.map { 
-                AIMaterial(name: $0, percentage: 100, isSustainable: false) 
+                [AIMaterial(name: $0, percentage: 100, isSustainable: false)]
             } ?? [],
             colors: [],
             estimatedPrice: 50.0,
