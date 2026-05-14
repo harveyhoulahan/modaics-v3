@@ -28,11 +28,10 @@ public struct SocialFeedView: View {
                         // Melbourne editorial card
                         if selectedFilter == .forYou {
                             DSEditorialCard(
-                                variant: .dark,
                                 headline: "Melbourne",
                                 subheadline: "Sustainable Fashion Hub",
                                 ctaLabel: "Explore hub",
-                                action: {}
+                                variant: .dark
                             )
                             .padding(.horizontal, 20)
                         }
