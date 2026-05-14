@@ -1,136 +1,30 @@
 import SwiftUI
 
-// MARK: - Modaics Editorial Design System
-/// Fashion editorial aesthetic: serif headlines, aged brass accents, brutalist minimalism
-/// Deep forest greens kept as brand identity, gold → aged brass
+// MARK: - Colors.swift
+// All canonical colour tokens now live in DesignSystem/Tokens.swift.
+// This file is retained only to avoid breaking project file references.
+// Do NOT add new colours here. Use Tokens.swift.
 
-public extension Color {
-    
-    // MARK: - Backgrounds (Dark Mode - keep existing)
-    static let modaicsBackground = Color(hex: "0A140F")          // deeper green-black
-    static let modaicsBackgroundSecondary = Color(hex: "0F1F17") // stronger green
-    static let modaicsBackgroundTertiary = Color(hex: "152920")  // even greener
-    static let modaicsElevated = Color(hex: "1C3328")            // elevated surfaces
-    
-    // MARK: - Light Mode Backgrounds (NEW)
-    static let warmOffWhite = Color(red: 0.980, green: 0.976, blue: 0.965)    // #FAF9F6
-    static let ivory = Color(red: 0.941, green: 0.929, blue: 0.898)           // #F0EDE5
-    static let cream = Color(red: 0.961, green: 0.953, blue: 0.929)           // #F5F3ED
-    
-    // MARK: - Surfaces (charcoal with STRONG green tint)
-    static let modaicsSurface = Color(hex: "162B21")             // greener surface
-    static let modaicsSurfaceHighlight = Color(hex: "1F3D2E")    // stronger green highlight
-    
-    // MARK: - Primary Greens (forest green - ENHANCED)
-    static let modaicsPrimary = Color(hex: "0A2A1A")             // deeper forest
-    static let modaicsForest = Color(hex: "0D3D26")              // stronger forest green
-    static let modaicsRacingGreen = Color(hex: "145233")         // brighter racing green
-    static let modaicsEmerald = Color(hex: "1E6B45")             // more vibrant emerald
-    
-    // MARK: - Secondary Greens (moss / olive - ENHANCED)
-    static let modaicsMoss = Color(hex: "3D5C1F")                // richer moss
-    static let modaicsOlive = Color(hex: "5A7A35")               // greener olive
-    static let modaicsSage = Color(hex: "7A9A5A")                // more vibrant sage
-    static let modaicsFern = Color(hex: "4A9A5A")                // brighter fern
-    
-    // MARK: - Legacy Green Aliases (for backward compatibility)
-    static var forestDeep: Color { .modaicsPrimary }
-    static var forestRich: Color { .modaicsForest }
-    static var forestMid: Color { .modaicsRacingGreen }
-    static var forestSoft: Color { .modaicsEmerald }
-    
-    // MARK: - Editorial Palette (NEW - replaces gold family)
-    /// Primary accent — replaces luxeGold. Warm aged brass, like a vintage belt buckle.
-    static let agedBrass = Color(red: 0.784, green: 0.541, blue: 0.396)       // #C88A65
-    
-    /// Lighter brass for subtle highlights
-    static let agedBrassLight = Color(red: 0.831, green: 0.647, blue: 0.455)  // #D4A574
-    
-    /// Darker bronze for small icon accents
-    static let burnishedBronze = Color(red: 0.604, green: 0.482, blue: 0.216) // #9A7B37
-    
-    /// Warm divider line colour — replaces gold borders
-    static let warmDivider = Color(red: 0.831, green: 0.812, blue: 0.780)     // #D4CFC7
-    
-    /// Near-black for CTAs and primary text — never pure #000000
-    static let nearBlack = Color(red: 0.102, green: 0.102, blue: 0.102)       // #1A1A1A
-    
-    /// Warm charcoal for secondary text
-    static let warmCharcoal = Color(red: 0.290, green: 0.290, blue: 0.271)    // #4A4A45
-    
-    /// Inactive tab / muted UI elements
-    static let mutedGray = Color(red: 0.604, green: 0.604, blue: 0.604)       // #9A9A9A
-    
-    // MARK: - Legacy Gold → Brass Bridge
-    static var luxeGold: Color { .agedBrass }
-    static var luxeGoldBright: Color { .agedBrassLight }
-    static var luxeGoldDeep: Color { .burnishedBronze }
-    static var goldText: Color { .agedBrass }
-    static var brassText: Color { .agedBrass }
-    
-    // MARK: - Chrome / Metallic
-    static let modaicsChrome = Color(hex: "C4C4C4")
-    static let modaicsAluminum = Color(hex: "A8A8A8")
-    static let modaicsPlatinum = Color(hex: "E8E8E8")
-    static let modaicsGunmetal = Color(hex: "6B7280")
-    
-    // MARK: - Text
-    static let sageWhite = Color(hex: "F5F7F3")                  // slightly green-tinted white
-    static let sageMuted = Color(hex: "B8C9B0")                  // green-tinted muted
-    static let sageSubtle = Color(hex: "7A8B72")                 // green-tinted subtle
-    
-    // Text colors for light backgrounds
-    static var modaicsTextPrimary: Color { .nearBlack }
-    static var modaicsTextSecondary: Color { .warmCharcoal }
-    static var modaicsTextTertiary: Color { .mutedGray }
-    
-    // MARK: - Semantic (ENHANCED greens)
-    static let modaicsEco = Color(hex: "3DDC84")                 // brighter eco green
-    static let emerald = Color(hex: "2DD47A")                    // more vibrant emerald
-    static let natureTeal = Color(hex: "2D9CDB")                 // water/teal accent
-    static let modaicsWarning = Color(hex: "F59E0B")
-    static let modaicsError = Color(hex: "EF4444")
-    
-    // MARK: - Background Gradient
-    static var forestBackground: LinearGradient {
-        LinearGradient(
-            colors: [.modaicsBackground, .modaicsBackgroundSecondary],
-            startPoint: .top,
-            endPoint: .bottom
-        )
+// MARK: - Text style helpers (used by legacy views)
+public extension Text {
+    func brandNameStyle() -> some View {
+        self
+            .font(.labelS)
+            .tracking(1.5)
+            .textCase(.uppercase)
     }
-    
-    // MARK: - Editorial Shimmer (neutral warm, no gold tint)
-    static let editorialShimmer = LinearGradient(
-        colors: [.clear, .warmDivider.opacity(0.4), .warmDivider.opacity(0.6), .warmDivider.opacity(0.4), .clear],
-        startPoint: .leading,
-        endPoint: .trailing
-    )
 }
 
-// MARK: - Hex Initializer
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
+// MARK: - Placeholder overlay helper (used by DiscoverView search bar)
+public extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .leading,
+        @ViewBuilder placeholder: () -> Content
+    ) -> some View {
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
         }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
     }
 }

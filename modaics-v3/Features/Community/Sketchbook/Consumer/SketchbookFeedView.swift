@@ -63,7 +63,7 @@ public struct SketchbookFeedView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("FEATURED SKETCHBOOKS")
-                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.luxeGold)
                 
                 Spacer()
@@ -71,7 +71,7 @@ public struct SketchbookFeedView: View {
                 Button("SEE ALL") {
                     // Show all sketchbooks
                 }
-                .font(.system(size: 11, design: .monospaced))
+                .font(.system(size: 11))
                 .foregroundColor(.sageMuted)
             }
             
@@ -104,13 +104,13 @@ struct FeaturedSketchbookCard: View {
                         .frame(width: 80, height: 80)
                     
                     Text(sketchbook.title?.prefix(1) ?? "S")
-                        .font(.system(size: 32, weight: .bold, design: .monospaced))
+                        .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.luxeGold)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(sketchbook.title ?? "Sketchbook")
-                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.sageWhite)
                         .lineLimit(1)
                     
@@ -118,7 +118,7 @@ struct FeaturedSketchbookCard: View {
                         Image(systemName: "person.fill")
                             .font(.system(size: 10))
                         Text("\(sketchbook.memberCount)")
-                            .font(.system(size: 11, design: .monospaced))
+                            .font(.system(size: 11))
                     }
                     .foregroundColor(.sageMuted)
                 }
@@ -128,7 +128,7 @@ struct FeaturedSketchbookCard: View {
                     Image(systemName: sketchbook.accessPolicy == .public_access ? "globe" : "lock.fill")
                         .font(.system(size: 8))
                     Text(sketchbook.accessPolicy.displayName.uppercased())
-                        .font(.system(size: 9, design: .monospaced))
+                        .font(.system(size: 9))
                 }
                 .foregroundColor(sketchbook.accessPolicy == .public_access ? .modaicsEco : .luxeGold)
                 .padding(.horizontal, 8)
@@ -179,17 +179,17 @@ struct ModaicsSketchbookCard: View {
                             .frame(width: 44, height: 44)
                         
                         Text(post.authorDisplayName?.prefix(1) ?? "B")
-                            .font(.system(size: 18, weight: .bold, design: .monospaced))
+                            .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.luxeGold)
                     }
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(post.authorDisplayName?.uppercased() ?? "BRAND")
-                            .font(.system(size: 13, weight: .bold, design: .monospaced))
+                            .font(.system(size: 13, weight: .bold))
                             .foregroundColor(.sageWhite)
                         
                         Text(post.postType.displayName.uppercased())
-                            .font(.system(size: 10, design: .monospaced))
+                            .font(.system(size: 10))
                             .foregroundColor(Color(hex: post.postType.color))
                     }
                     
@@ -201,7 +201,7 @@ struct ModaicsSketchbookCard: View {
                             Image(systemName: "lock.fill")
                                 .font(.system(size: 10))
                             Text("MEMBERS")
-                                .font(.system(size: 9, design: .monospaced))
+                                .font(.system(size: 9))
                         }
                         .foregroundColor(.luxeGold)
                         .padding(.horizontal, 8)
@@ -215,13 +215,13 @@ struct ModaicsSketchbookCard: View {
                 // Content
                 VStack(alignment: .leading, spacing: 12) {
                     Text(post.title)
-                        .font(.system(size: 16, weight: .semibold, design: .monospaced))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.sageWhite)
                         .lineLimit(2)
                     
                     if let body = post.body {
                         Text(body)
-                            .font(.system(size: 13, design: .monospaced))
+                            .font(.system(size: 13))
                             .foregroundColor(.sageMuted)
                             .lineLimit(3)
                     }
@@ -255,7 +255,7 @@ struct ModaicsSketchbookCard: View {
                                 .foregroundColor(isReacted ? .luxeGold : .sageMuted)
                             
                             Text("\(post.reactionCount + (isReacted ? 1 : 0))")
-                                .font(.system(size: 12, design: .monospaced))
+                                .font(.system(size: 12))
                                 .foregroundColor(.sageMuted)
                         }
                         .frame(maxWidth: .infinity)
@@ -271,7 +271,7 @@ struct ModaicsSketchbookCard: View {
                                 .foregroundColor(.sageMuted)
                             
                             Text("\(post.commentCount)")
-                                .font(.system(size: 12, design: .monospaced))
+                                .font(.system(size: 12))
                                 .foregroundColor(.sageMuted)
                         }
                         .frame(maxWidth: .infinity)
@@ -307,7 +307,7 @@ struct ModaicsSketchbookCard: View {
     private func pollSection(question: String, options: [PollOption]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(question)
-                .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.sageWhite)
             
             ForEach(options) { option in
@@ -320,7 +320,7 @@ struct ModaicsSketchbookCard: View {
                 }) {
                     HStack {
                         Text(option.text)
-                            .font(.system(size: 12, design: .monospaced))
+                            .font(.system(size: 12))
                             .foregroundColor(.sageWhite)
                         
                         Spacer()
@@ -330,7 +330,7 @@ struct ModaicsSketchbookCard: View {
                             let percentage = total > 0 ? Int(Double(option.voteCount) / Double(total) * 100) : 0
                             
                             Text("\(percentage)%")
-                                .font(.system(size: 11, design: .monospaced))
+                                .font(.system(size: 11))
                                 .foregroundColor(selectedOption == option.id ? .luxeGold : .sageMuted)
                         }
                     }
@@ -374,18 +374,18 @@ struct ModaicsSketchbookCard: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("DROP IN")
-                    .font(.system(size: 10, design: .monospaced))
+                    .font(.system(size: 10))
                     .foregroundColor(.sageMuted)
                 
                 Text("2 DAYS 14 HOURS")
-                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.luxeGold)
             }
             
             Spacer()
             
             Text("REMIND ME")
-                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .font(.system(size: 10, weight: .bold))
                 .foregroundColor(.modaicsBackground)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
@@ -408,18 +408,18 @@ struct ModaicsSketchbookCard: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("EVENT")
-                    .font(.system(size: 10, design: .monospaced))
+                    .font(.system(size: 10))
                     .foregroundColor(.sageMuted)
                 
                 Text("MAR 15 · 7:00 PM")
-                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.modaicsEco)
             }
             
             Spacer()
             
             Text("RSVP")
-                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .font(.system(size: 10, weight: .bold))
                 .foregroundColor(.modaicsBackground)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
@@ -452,17 +452,17 @@ struct SketchbookPostDetailSheet: View {
                                 .frame(width: 50, height: 50)
                             
                             Text(post.authorDisplayName?.prefix(1) ?? "B")
-                                .font(.system(size: 24, weight: .bold, design: .monospaced))
+                                .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.luxeGold)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(post.authorDisplayName?.uppercased() ?? "BRAND")
-                                .font(.system(size: 15, weight: .bold, design: .monospaced))
+                                .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(.sageWhite)
                             
                             Text(post.postType.displayName.uppercased())
-                                .font(.system(size: 12, design: .monospaced))
+                                .font(.system(size: 12))
                                 .foregroundColor(Color(hex: post.postType.color))
                         }
                         
@@ -473,12 +473,12 @@ struct SketchbookPostDetailSheet: View {
                     // Content
                     VStack(alignment: .leading, spacing: 16) {
                         Text(post.title)
-                            .font(.system(size: 20, weight: .bold, design: .monospaced))
+                            .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.sageWhite)
                         
                         if let body = post.body {
                             Text(body)
-                                .font(.system(size: 15, design: .monospaced))
+                                .font(.system(size: 15))
                                 .foregroundColor(.sageWhite)
                                 .lineSpacing(4)
                         }
@@ -526,7 +526,7 @@ struct BrandSketchbookDetailSheet: View {
                     // Posts
                     VStack(alignment: .leading, spacing: 16) {
                         Text("LATEST POSTS")
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.luxeGold)
                             .padding(.horizontal, 20)
                         
@@ -568,11 +568,11 @@ struct BrandSketchbookDetailSheet: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Join the Sketchbook")
-                        .font(.system(size: 16, weight: .bold, design: .monospaced))
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.sageWhite)
                     
                     Text("Get exclusive access to drops, events, and behind-the-scenes content")
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(.system(size: 12))
                         .foregroundColor(.sageMuted)
                 }
                 
@@ -581,7 +581,7 @@ struct BrandSketchbookDetailSheet: View {
             
             Button(action: { showingJoinConfirmation = true }) {
                 Text(joinButtonTitle)
-                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.modaicsBackground)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)

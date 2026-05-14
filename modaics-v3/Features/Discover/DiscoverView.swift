@@ -183,13 +183,17 @@ public struct DiscoverView: View {
             
             Button(action: { viewModel.showVisualSearch = true }) {
                 Image(systemName: "camera")
-                    .font(.system(size: 18))
-                    .foregroundColor(.warmCharcoal)
+                    .font(.system(size: 18, weight: .light))
+                    .foregroundColor(.inkPrimary)
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.ivory)
+        .background(Color.canvasSecond)
+        .overlay(
+            RoundedRectangle(cornerRadius: 2)
+                .stroke(Color.hairline, lineWidth: 0.5)
+        )
         .clipShape(RoundedRectangle(cornerRadius: 2))
     }
     
@@ -301,22 +305,27 @@ public struct DiscoverView: View {
     }
     
     private var resultsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], spacing: 20) {
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)],
+            spacing: 24
+        ) {
             ForEach(viewModel.items) { item in
-                ItemCard(
-                    item: item,
-                    onLikeTapped: { viewModel.toggleLike(for: item) },
-                    onCardTapped: { }
+                DSItemCard(
+                    brand: item.brand,
+                    name: item.name,
+                    price: item.price.map { Decimal($0) }
                 )
+                .onTapGesture { /* navigate to detail */ }
             }
         }
     }
-    
+
     private var shimmerGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], spacing: 20) {
-            ForEach(0..<6, id: \.self) { _ in
-                ItemCard(title: "Loading...", subtitle: nil, isLoading: true)
-            }
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)],
+            spacing: 24
+        ) {
+            ForEach(0..<6, id: \.self) { _ in DSItemCardSkeleton() }
         }
     }
     
@@ -370,30 +379,18 @@ public struct DiscoverView: View {
     }
     
     private var viewModeToggle: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 24) {
             ForEach([EventViewMode.list, EventViewMode.map], id: \.self) { mode in
-                Button(action: {
+                UnderlineFilter(
+                    mode == .list ? "List" : "Map",
+                    isSelected: viewModel.eventViewMode == mode,
+                    useBrass: true
+                ) {
                     withAnimation(.easeInOut(duration: 0.2)) { viewModel.eventViewMode = mode }
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: mode == .list ? "list.bullet" : "map")
-                            .font(.system(size: 14))
-                        Text(mode == .list ? "List" : "Map")
-                            .font(.uiLabelSmall)
-                    }
-                    .foregroundColor(viewModel.eventViewMode == mode ? .warmOffWhite : .nearBlack)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(viewModel.eventViewMode == mode ? Color.nearBlack : Color.ivory)
                 }
             }
+            Spacer()
         }
-        .background(Color.ivory)
-        .clipShape(RoundedRectangle(cornerRadius: 2))
-        .overlay(
-            RoundedRectangle(cornerRadius: 2)
-                .stroke(Color.warmDivider, lineWidth: 1)
-        )
     }
     
     private var filterButton: some View {
@@ -409,16 +406,18 @@ public struct DiscoverView: View {
     }
     
     private var eventsListView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             ForEach(viewModel.filteredEvents) { event in
-                EventListCard(event: event, onTap: {
-                    viewModel.selectedEvent = event
-                    viewModel.showEventDetail = true
-                })
+                DSEventCard(event: event)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
+                    .onTapGesture {
+                        viewModel.selectedEvent = event
+                        viewModel.showEventDetail = true
+                    }
             }
             Color.clear.frame(height: 20)
         }
-        .padding(.horizontal, 20)
         .padding(.top, 4)
     }
 }
@@ -429,49 +428,25 @@ struct DiscoverScrollOffsetPreferenceKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
-// MARK: - Category Tab (Editorial Style)
+// MARK: - Category Tab (Underline Filter)
 struct CategoryTab: View {
     let category: DiscoverCategory
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Text(category.rawValue)
-                    .font(.bodyMedium)
-                    .foregroundColor(isSelected ? .nearBlack : .warmCharcoal)
-                
-                // Underline indicator
-                Rectangle()
-                    .fill(isSelected ? Color.nearBlack : Color.clear)
-                    .frame(height: 1)
-            }
-        }
-        .buttonStyle(PlainButtonStyle())
+        UnderlineFilter(category.rawValue, isSelected: isSelected, useBrass: true, action: action)
     }
 }
 
-// MARK: - Subcategory Tab (Editorial Style)
+// MARK: - Subcategory Tab (Underline Filter)
 struct SubcategoryTab: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Text(title)
-                    .font(.bodyMedium)
-                    .foregroundColor(isSelected ? .nearBlack : .warmCharcoal)
-                
-                // Underline indicator
-                Rectangle()
-                    .fill(isSelected ? Color.nearBlack : Color.clear)
-                    .frame(height: 1)
-            }
-        }
-        .buttonStyle(PlainButtonStyle())
+        UnderlineFilter(title, isSelected: isSelected, useBrass: true, action: action)
     }
 }
 

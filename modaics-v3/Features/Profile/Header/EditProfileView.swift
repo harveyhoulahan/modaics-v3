@@ -91,7 +91,7 @@ public struct EditProfileView: View {
                             )
                             .overlay(
                                 Text(String(viewModel.editForm.displayName.prefix(1).uppercased()))
-                                    .font(.system(size: 40, weight: .bold, design: .monospaced))
+                                    .font(.system(size: 40, weight: .bold))
                                     .foregroundColor(.sageWhite)
                             )
                     }

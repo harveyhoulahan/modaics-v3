@@ -19,7 +19,7 @@ public struct UnifiedCreateView: View {
     
     public var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
+            Color.canvas.ignoresSafeArea()
             
             ScrollView(showsIndicators: false) {
                 // Scroll offset tracker
@@ -108,30 +108,27 @@ public struct UnifiedCreateView: View {
     private var createHeader: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text("CREATE")
-                    .font(.forestDisplaySmall)
-                    .foregroundColor(.sageWhite)
-                    .tracking(2)
-                
+                Text("Create")
+                    .font(.displayL)
+                    .foregroundColor(.inkPrimary)
+
                 Spacer()
-                
-                // Help button
+
                 Button(action: {}) {
                     Image(systemName: "questionmark.circle")
-                        .font(.system(size: 20))
-                        .foregroundColor(.sageMuted)
+                        .font(.system(size: 20, weight: .light))
+                        .foregroundColor(.inkMuted)
                 }
             }
-            
-            Text("List a piece or let AI do it")
-                .font(.forestCaptionMedium)
-                .foregroundColor(.sageMuted)
+
+            Text("List a piece. We'll handle the rest.")
+                .font(.bodyM)
+                .foregroundColor(.inkSecondary)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
         .padding(.bottom, 12)
-        .background(Color.modaicsBackground)
-        // Collapse animation
+        .background(Color.canvas)
         .frame(height: headerHeight * (1 - headerCollapseProgress * 0.5))
         .opacity(1 - headerCollapseProgress)
         .clipped()
@@ -160,18 +157,18 @@ struct TheStudioCard: View {
                     .foregroundColor(.nearBlack)
                 
                 // Subtitle
-                Text("Snap a photo, we'll handle the details")
-                    .font(.bodyMedium)
-                    .foregroundColor(.warmCharcoal)
+                Text("Snap a photo. We'll fill in the details.")
+                    .font(.bodyM)
+                    .foregroundColor(.inkSecondary)
                     .multilineTextAlignment(.leading)
             }
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.ivory)
+            .background(Color.canvasSecond)
             .cornerRadius(2)
             .overlay(
                 RoundedRectangle(cornerRadius: 2)
-                    .stroke(Color.warmDivider, lineWidth: 0.5)
+                    .stroke(Color.hairline, lineWidth: 0.5)
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -225,16 +222,12 @@ struct ManualDivider: View {
 // MARK: - Listing Mode Section
 struct ListingModeSection: View {
     @ObservedObject var viewModel: CreateViewModel
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(
-                title: "LISTING MODE",
-                icon: "tag.fill",
-                subtitle: "Choose how you want to list this item"
-            )
-            
-            VStack(spacing: 8) {
+            SectionLabel("How would you like to list this?")
+
+            VStack(spacing: 0) {
                 ForEach(ListingMode.allCases) { mode in
                     ListingModeButton(
                         mode: mode,
@@ -244,35 +237,27 @@ struct ListingModeSection: View {
                             viewModel.form.listingMode = mode
                         }
                     }
+                    if mode != ListingMode.allCases.last {
+                        Rectangle().fill(Color.hairline).frame(height: 0.5)
+                    }
                 }
             }
-            
-            // Dynamic price fields based on mode
+            .overlay(
+                RoundedRectangle(cornerRadius: 2)
+                    .stroke(Color.hairline, lineWidth: 0.5)
+            )
+
             if viewModel.form.listingMode == .sell {
                 HStack(spacing: 16) {
-                    PriceField(
-                        title: "Listing Price",
-                        placeholder: "0.00",
-                        text: $viewModel.form.listingPrice,
-                        isRequired: true
-                    )
-                    
-                    PriceField(
-                        title: "Original Price",
-                        placeholder: "0.00",
-                        text: $viewModel.form.originalPrice,
-                        isRequired: false
-                    )
+                    PriceField(title: "Listing price", placeholder: "0.00",
+                               text: $viewModel.form.listingPrice, isRequired: true)
+                    PriceField(title: "Original price", placeholder: "0.00",
+                               text: $viewModel.form.originalPrice, isRequired: false)
                 }
             } else if viewModel.form.listingMode == .rent {
-                PriceField(
-                    title: "Daily Rate",
-                    placeholder: "0.00",
-                    text: $viewModel.form.listingPrice,
-                    isRequired: true
-                )
+                PriceField(title: "Daily rate", placeholder: "0.00",
+                           text: $viewModel.form.listingPrice, isRequired: true)
             }
-            // Swap mode shows no price fields
         }
     }
 }
@@ -322,27 +307,14 @@ struct ListingModeButton: View {
 // MARK: - Basic Info Section
 struct BasicInfoSection: View {
     @ObservedObject var viewModel: CreateViewModel
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader(
-                title: "BASIC INFO",
-                icon: "doc.text.fill"
-            )
-            
-            FormField(
-                title: "Title",
-                placeholder: "e.g., Vintage Leather Jacket",
-                text: $viewModel.form.title,
-                isRequired: true
-            )
-            
-            FormField(
-                title: "Brand",
-                placeholder: "e.g., Gucci, Nike, Vintage",
-                text: $viewModel.form.brandName,
-                isRequired: false
-            )
+            SectionLabel("Basic info")
+            FormField(title: "Title", placeholder: "e.g., Vintage Leather Jacket",
+                      text: $viewModel.form.title, isRequired: true)
+            FormField(title: "Brand", placeholder: "e.g., Gucci, Nike, Vintage",
+                      text: $viewModel.form.brandName, isRequired: false)
         }
     }
 }
@@ -350,27 +322,21 @@ struct BasicInfoSection: View {
 // MARK: - Details Section
 struct DetailsSection: View {
     @ObservedObject var viewModel: CreateViewModel
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SectionHeader(
-                title: "DETAILS",
-                icon: "slider.horizontal.3"
-            )
-            
-            // Category Grid
+            SectionLabel("Details")
+
+            // Category
             VStack(alignment: .leading, spacing: 12) {
-                Text("CATEGORY")
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(.sageMuted)
-                    .tracking(1)
-                
+                Text("Category")
+                    .font(.labelM)
+                    .foregroundColor(.inkSecondary)
+
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                     ForEach(Category.allCases) { category in
-                        CategoryPill(
-                            category: category,
-                            isSelected: viewModel.form.category == category
-                        ) {
+                        CategoryPill(category: category,
+                                     isSelected: viewModel.form.category == category) {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 viewModel.form.category = category
                             }
@@ -378,21 +344,18 @@ struct DetailsSection: View {
                     }
                 }
             }
-            
-            // Size Section
+
+            // Size
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 4) {
-                    Text("SIZE")
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.sageMuted)
-                        .tracking(1)
+                    Text("Size")
+                        .font(.labelM)
+                        .foregroundColor(.inkSecondary)
                     Text("*")
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.luxeGold)
+                        .font(.labelM)
+                        .foregroundColor(.brass)
                 }
-                
                 HStack(spacing: 12) {
-                    // Size system picker
                     Menu {
                         ForEach(ModaicsSizeSystem.allCases, id: \.self) { system in
                             Button(system.rawValue.uppercased()) {
@@ -402,44 +365,38 @@ struct DetailsSection: View {
                     } label: {
                         HStack(spacing: 4) {
                             Text(viewModel.form.sizeSystem.rawValue.uppercased())
-                                .font(.forestCaptionMedium)
+                                .font(.labelM)
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 10))
+                                .font(.system(size: 10, weight: .light))
                         }
-                        .foregroundColor(.sageWhite)
+                        .foregroundColor(.inkPrimary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
-                        .background(Color.modaicsSurface)
-                        .cornerRadius(8)
+                        .background(Color.canvasSecond)
+                        .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color.hairline, lineWidth: 0.5))
+                        .clipShape(RoundedRectangle(cornerRadius: 2))
                     }
-                    
-                    // Size input
+
                     TextField("e.g., M, 8, 38", text: $viewModel.form.sizeLabel)
-                        .font(.forestBodyMedium)
-                        .foregroundColor(.sageWhite)
+                        .font(.bodyM)
+                        .foregroundColor(.inkPrimary)
                         .padding(14)
-                        .background(Color.modaicsSurface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
-                        )
-                        .cornerRadius(8)
+                        .background(Color.canvasSecond)
+                        .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color.hairline, lineWidth: 0.5))
+                        .clipShape(RoundedRectangle(cornerRadius: 2))
                 }
             }
-            
-            // Condition Grid
+
+            // Condition
             VStack(alignment: .leading, spacing: 12) {
-                Text("CONDITION")
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(.sageMuted)
-                    .tracking(1)
-                
+                Text("Condition")
+                    .font(.labelM)
+                    .foregroundColor(.inkSecondary)
+
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                     ForEach(Condition.allCases) { condition in
-                        ConditionPill(
-                            condition: condition,
-                            isSelected: viewModel.form.condition == condition
-                        ) {
+                        ConditionPill(condition: condition,
+                                      isSelected: viewModel.form.condition == condition) {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 viewModel.form.condition = condition
                                 viewModel.calculateSustainabilityScore()
@@ -452,51 +409,65 @@ struct DetailsSection: View {
     }
 }
 
-// MARK: - Category Pill
+// MARK: - Category Pill (light editorial)
 struct CategoryPill: View {
     let category: Category
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            Text(category.displayName.uppercased())
-                .font(.forestCaptionSmall)
-                .tracking(0.5)
-                .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(isSelected ? Color.clear : Color.modaicsSurfaceHighlight, lineWidth: 1)
-                )
+            HStack {
+                Text(category.displayName)
+                    .font(.bodyS)
+                    .foregroundColor(isSelected ? .inkPrimary : .inkSecondary)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.brass)
+                }
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
+            .background(isSelected ? Color.canvasSecond : Color.canvas)
+            .overlay(
+                RoundedRectangle(cornerRadius: 2)
+                    .stroke(isSelected ? Color.brass : Color.hairline, lineWidth: isSelected ? 1 : 0.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 2))
         }
         .buttonStyle(PlainButtonStyle())
     }
 }
 
-// MARK: - Condition Pill
+// MARK: - Condition Pill (light editorial)
 struct ConditionPill: View {
     let condition: Condition
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            Text(condition.displayName.uppercased())
-                .font(.forestCaptionSmall)
-                .tracking(0.5)
-                .foregroundColor(isSelected ? Color.modaicsBackground : Color.sageWhite)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(isSelected ? Color.luxeGold : Color.modaicsSurface)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(isSelected ? Color.clear : Color.modaicsSurfaceHighlight, lineWidth: 1)
-                )
+            HStack {
+                Text(condition.displayName)
+                    .font(.bodyS)
+                    .foregroundColor(isSelected ? .inkPrimary : .inkSecondary)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.brass)
+                }
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
+            .background(isSelected ? Color.canvasSecond : Color.canvas)
+            .overlay(
+                RoundedRectangle(cornerRadius: 2)
+                    .stroke(isSelected ? Color.brass : Color.hairline, lineWidth: isSelected ? 1 : 0.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 2))
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -505,18 +476,13 @@ struct ConditionPill: View {
 // MARK: - Description Section
 struct DescriptionSection: View {
     @ObservedObject var viewModel: CreateViewModel
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(
-                title: "DESCRIPTION",
-                icon: "text.alignleft",
-                subtitle: "Describe your item's features, fit, and style"
-            )
-            
+            SectionLabel("Description")
             TextAreaField(
                 title: "Description",
-                placeholder: "Tell buyers about your item...",
+                placeholder: "Describe your item's features, fit, and style...",
                 text: $viewModel.form.description,
                 minHeight: 120,
                 isRequired: true
@@ -525,127 +491,116 @@ struct DescriptionSection: View {
     }
 }
 
-// MARK: - Garment Story Section (with book icon)
+// MARK: - Garment Story Section
 struct GarmentStorySection: View {
     @ObservedObject var viewModel: CreateViewModel
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(
-                title: "GARMENT STORY",
-                icon: "book.fill",
-                subtitle: "Where did you get this piece? What's its history? (Optional)"
-            )
-            
+            SectionLabel("Garment story")
+            Text("Where did you get this piece? What's its history? (Optional)")
+                .font(.bodyS)
+                .foregroundColor(.inkSecondary)
+
             TextEditor(text: $viewModel.form.garmentStory)
-                .font(.forestBodyMedium)
-                .foregroundColor(.sageWhite)
+                .font(.bodyM)
+                .foregroundColor(.inkPrimary)
                 .frame(minHeight: 100)
-                .padding(8)
-                .background(Color.modaicsSurface)
+                .padding(12)
+                .background(Color.canvasSecond)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 2)
+                        .stroke(Color.hairline, lineWidth: 0.5)
                 )
-                .cornerRadius(8)
+                .clipShape(RoundedRectangle(cornerRadius: 2))
         }
     }
 }
 
-// MARK: - Sustainability Section
+// MARK: - Sustainability Section (no gauge, no score number)
 struct SustainabilitySection: View {
     @ObservedObject var viewModel: CreateViewModel
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SectionHeader(
-                title: "SUSTAINABILITY",
-                icon: "leaf.fill",
-                subtitle: "Help buyers understand the environmental impact"
-            )
-            
-            // Score display
-            SustainabilityScoreCard(score: viewModel.sustainabilityScore)
-            
-            // Materials
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("MATERIALS")
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.sageMuted)
-                        .tracking(1)
-                    
-                    Spacer()
-                    
-                    Button(action: { viewModel.addMaterial() }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus")
-                            Text("ADD")
-                        }
-                        .font(.forestCaptionSmall)
-                        .foregroundColor(.luxeGold)
-                    }
-                }
-                
-                if viewModel.form.materials.isEmpty {
-                    Text("No materials added. Add materials to improve your sustainability score.")
-                        .font(.forestCaptionSmall)
-                        .foregroundColor(.sageMuted)
-                        .padding(.vertical, 20)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.modaicsSurface.opacity(0.5))
-                        .cornerRadius(8)
-                } else {
-                    ForEach($viewModel.form.materials) { $material in
-                        MaterialEntryRow(
-                            material: $material,
-                            onDelete: {
-                                if let index = viewModel.form.materials.firstIndex(where: { $0.id == material.id }) {
-                                    viewModel.removeMaterial(at: index)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-            
-            // Recycled toggle
+            SectionLabel("Sustainability")
+
+            Text("Higher transparency improves your story's reach.")
+                .font(.bodyS)
+                .foregroundColor(.inkSecondary)
+
+            // Toggle: Recycled / upcycled
             Toggle(isOn: $viewModel.form.isRecycled) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("RECYCLED / UPCYCLED")
-                        .font(.forestCaptionMedium)
-                        .foregroundColor(.sageWhite)
-                    Text("This item contains recycled materials")
-                        .font(.forestCaptionSmall)
-                        .foregroundColor(.sageMuted)
-                }
+                Text("Material is recycled / upcycled")
+                    .font(.bodyM)
+                    .foregroundColor(.inkPrimary)
             }
-            .toggleStyle(SwitchToggleStyle(tint: Color.modaicsEco))
-            .padding(16)
-            .background(Color.modaicsSurface)
-            .cornerRadius(12)
+            .toggleStyle(SwitchToggleStyle(tint: Color.sage))
+            .padding(.vertical, 14)
+            .padding(.horizontal, 16)
+            .background(Color.canvasSecond)
+            .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color.hairline, lineWidth: 0.5))
+            .clipShape(RoundedRectangle(cornerRadius: 2))
             .onChange(of: viewModel.form.isRecycled) { _, _ in
                 viewModel.calculateSustainabilityScore()
             }
-            
-            // Certifications
-            VStack(alignment: .leading, spacing: 12) {
-                Text("CERTIFICATIONS")
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(.sageMuted)
-                    .tracking(1)
-                
-                FlowLayout(spacing: 8) {
-                    ForEach(ModaicsCertification.allCases, id: \.self) { cert in
-                        CertificationChip(
-                            certification: cert,
-                            isSelected: viewModel.form.certifications.contains(cert)
-                        ) {
-                            viewModel.toggleCertification(cert)
+
+            // Toggle: Has certifications (expands to single-select list)
+            VStack(spacing: 0) {
+                Toggle(isOn: $viewModel.form.hasCertification) {
+                    Text("Has certifications")
+                        .font(.bodyM)
+                        .foregroundColor(.inkPrimary)
+                }
+                .toggleStyle(SwitchToggleStyle(tint: Color.sage))
+                .padding(.vertical, 14)
+                .padding(.horizontal, 16)
+
+                if viewModel.form.hasCertification {
+                    Rectangle().fill(Color.hairline).frame(height: 0.5)
+
+                    VStack(spacing: 0) {
+                        ForEach(ModaicsCertification.allCases, id: \.self) { cert in
+                            Button(action: { viewModel.selectCertification(cert) }) {
+                                HStack {
+                                    Text(cert.displayName)
+                                        .font(.bodyM)
+                                        .foregroundColor(.inkPrimary)
+                                    Spacer()
+                                    if viewModel.form.certifications.contains(cert) {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 14, weight: .regular))
+                                            .foregroundColor(.brass)
+                                    }
+                                }
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 16)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            if cert != ModaicsCertification.allCases.last {
+                                Rectangle().fill(Color.hairline).frame(height: 0.5)
+                                    .padding(.leading, 16)
+                            }
                         }
                     }
                 }
             }
+            .background(Color.canvasSecond)
+            .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color.hairline, lineWidth: 0.5))
+            .clipShape(RoundedRectangle(cornerRadius: 2))
+
+            // Toggle: Includes care notes
+            Toggle(isOn: $viewModel.form.hasCareNotes) {
+                Text("Includes care notes")
+                    .font(.bodyM)
+                    .foregroundColor(.inkPrimary)
+            }
+            .toggleStyle(SwitchToggleStyle(tint: Color.sage))
+            .padding(.vertical, 14)
+            .padding(.horizontal, 16)
+            .background(Color.canvasSecond)
+            .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color.hairline, lineWidth: 0.5))
+            .clipShape(RoundedRectangle(cornerRadius: 2))
         }
     }
 }
@@ -688,10 +643,10 @@ struct SustainabilityScoreCard: View {
                 
                 VStack(spacing: 0) {
                     Text("\(score)")
-                        .font(.system(size: 24, weight: .bold, design: .monospaced))
+                        .font(.system(size: 24, weight: .bold))
                         .foregroundColor(color)
                     Text("/100")
-                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .font(.system(size: 9, weight: .medium))
                         .foregroundColor(.sageMuted)
                 }
             }
@@ -834,7 +789,7 @@ struct CertificationChip: View {
 struct SubmitSection: View {
     @ObservedObject var viewModel: CreateViewModel
     let action: () -> Void
-    
+
     var isValid: Bool {
         !viewModel.form.title.isEmpty &&
         !viewModel.form.description.isEmpty &&
@@ -844,63 +799,32 @@ struct SubmitSection: View {
         !viewModel.form.sizeLabel.isEmpty &&
         (viewModel.form.listingMode == .swap || !viewModel.form.listingPrice.isEmpty)
     }
-    
+
     var body: some View {
-        VStack(spacing: 16) {
-            // Validation errors
+        VStack(spacing: 12) {
             if !viewModel.validationErrors.isEmpty && !isValid {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 6) {
                     ForEach(viewModel.validationErrors, id: \.self) { error in
-                        HStack(spacing: 8) {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .font(.system(size: 14))
-                                .foregroundColor(.modaicsError)
-                            Text(error.localizedDescription)
-                                .font(.forestCaptionSmall)
-                                .foregroundColor(.modaicsError)
-                        }
+                        Text(error.localizedDescription)
+                            .font(.bodyS)
+                            .foregroundColor(.semanticError)
                     }
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.modaicsError.opacity(0.1))
-                .cornerRadius(8)
+                .background(Color.semanticError.opacity(0.08))
+                .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color.semanticError.opacity(0.3), lineWidth: 0.5))
+                .clipShape(RoundedRectangle(cornerRadius: 2))
             }
-            
-            // Submit button
-            Button(action: {
+
+            PrimaryCTA(
+                "Create listing",
+                isLoading: viewModel.isSubmitting,
+                isEnabled: isValid
+            ) {
                 viewModel.validate()
-                if isValid {
-                    action()
-                }
-            }) {
-                if viewModel.isSubmitting {
-                    HStack(spacing: 8) {
-                        ProgressView()
-                            .tint(.modaicsBackground)
-                        Text("SUBMITTING...")
-                            .font(.forestBodyMedium)
-                            .foregroundColor(.modaicsBackground)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(Color.luxeGold)
-                    .cornerRadius(12)
-                } else {
-                    HStack(spacing: 8) {
-                        Image(systemName: "checkmark.circle.fill")
-                        Text("CREATE LISTING")
-                            .font(.forestBodyMedium)
-                            .tracking(1)
-                    }
-                    .foregroundColor(isValid ? .modaicsBackground : .sageMuted)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(isValid ? Color.luxeGold : Color.modaicsSurface)
-                    .cornerRadius(12)
-                }
+                if isValid { action() }
             }
-            .disabled(!isValid || viewModel.isSubmitting)
         }
     }
 }

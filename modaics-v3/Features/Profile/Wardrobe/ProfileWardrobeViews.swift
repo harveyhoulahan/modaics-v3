@@ -178,7 +178,7 @@ public struct WardrobeItemCard: View {
                             .frame(width: 6, height: 6)
                         
                         Text(statusText)
-                            .font(.system(size: 9, design: .monospaced))
+                            .font(.system(size: 9))
                             .foregroundColor(.sageMuted)
                     }
                 }

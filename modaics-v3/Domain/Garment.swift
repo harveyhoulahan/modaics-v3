@@ -277,4 +277,17 @@ public enum ModaicsCertification: String, Codable, CaseIterable, Hashable {
     case bCorp = "b_corp"
     case gots = "gots"
     case oekoTex = "oeko_tex"
+
+    public var displayName: String {
+        switch self {
+        case .organic:      return "Organic"
+        case .fairTrade:    return "Fair trade"
+        case .recycled:     return "Recycled"
+        case .vegan:        return "Vegan"
+        case .carbonNeutral: return "Carbon neutral"
+        case .bCorp:        return "B Corp"
+        case .gots:         return "GOTS"
+        case .oekoTex:      return "Oeko-Tex"
+        }
+    }
 }

@@ -36,28 +36,20 @@ public struct SustainabilityDashboardView: View {
     
     // MARK: - Impact Dashboard
     private var impactDashboard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Header - serif title
+        VStack(alignment: .leading, spacing: 12) {
             Text("Your impact")
                 .font(.editorialSmall)
                 .foregroundColor(.sageWhite)
-            
-            // Simple text metrics - NO emerald gradient icons
-            HStack(spacing: 24) {
-                ImpactMetric(value: "\(viewModel.ecoPoints)", label: "Eco points")
-                ImpactMetric(value: "\(Int(viewModel.carbonSavedKg))kg", label: "CO₂ saved")
-                ImpactMetric(value: "\(viewModel.itemsCirculated)", label: "Circulated")
-            }
-            
-            // View Full Report Button
+
+            // Single summary line (replaces 3-column stat cards)
+            Text("\(viewModel.ecoPoints) points · \(Int(viewModel.carbonSavedKg)) kg CO₂ saved · \(viewModel.itemsCirculated) pieces circulated")
+                .font(.bodyM)
+                .foregroundColor(.sageMuted)
+
             Button(action: { showFullReport = true }) {
-                HStack(spacing: 6) {
-                    Image(systemName: "chart.bar")
-                        .font(.system(size: 14))
-                    Text("View full report")
-                        .font(.bodyText(12, weight: .medium))
-                }
-                .foregroundColor(.agedBrass)
+                Text("View full report")
+                    .font(.bodyS)
+                    .foregroundColor(.brass)
             }
             .padding(.top, 4)
         }
@@ -83,19 +75,23 @@ public struct SustainabilityDashboardView: View {
                 .background(Color.warmDivider)
             
             // How to Earn
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text("How to earn")
-                    .font(.bodyText(12, weight: .medium))
-                    .foregroundColor(.agedBrass)
-                
-                VStack(spacing: 10) {
-                    EcoPointRow(icon: "arrow.left.arrow.right", text: "Items swapped", points: "+50 pts")
-                    EcoPointRow(icon: "dollarsign.circle", text: "Second-hand buy", points: "+25 pts")
-                    EcoPointRow(icon: "calendar", text: "Event attendance", points: "+75 pts")
-                    EcoPointRow(icon: "star.fill", text: "Sustainability badge", points: "+100 pts")
-                    EcoPointRow(icon: "camera.fill", text: "Garment story", points: "+30 pts")
-                    EcoPointRow(icon: "gift.fill", text: "Donation", points: "+40 pts")
-                }
+                    .font(.bodyS)
+                    .foregroundColor(.brass)
+                    .padding(.bottom, 10)
+
+                EcoPointRow(text: "Items swapped",       points: "+50")
+                Rectangle().fill(Color.sageWhite.opacity(0.08)).frame(height: 0.5)
+                EcoPointRow(text: "Second-hand buy",     points: "+25")
+                Rectangle().fill(Color.sageWhite.opacity(0.08)).frame(height: 0.5)
+                EcoPointRow(text: "Event attendance",    points: "+75")
+                Rectangle().fill(Color.sageWhite.opacity(0.08)).frame(height: 0.5)
+                EcoPointRow(text: "Sustainability badge", points: "+100")
+                Rectangle().fill(Color.sageWhite.opacity(0.08)).frame(height: 0.5)
+                EcoPointRow(text: "Garment story",       points: "+30")
+                Rectangle().fill(Color.sageWhite.opacity(0.08)).frame(height: 0.5)
+                EcoPointRow(text: "Donation",            points: "+40")
             }
         }
     }
@@ -133,31 +129,22 @@ public struct SustainabilityDashboardView: View {
     }
 }
 
-// MARK: - Eco Point Row
+// MARK: - Eco Point Row (no icon, hairline dividers handled by caller)
 private struct EcoPointRow: View {
-    let icon: String
     let text: String
     let points: String
-    
+
     var body: some View {
         HStack {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 14))
-                    .foregroundColor(.agedBrass)
-                    .frame(width: 20)
-                
-                Text(text)
-                    .font(.bodyText(13))
-                    .foregroundColor(.sageWhite)
-            }
-            
+            Text(text)
+                .font(.bodyM)
+                .foregroundColor(.sageWhite)
             Spacer()
-            
             Text(points)
-                .font(.bodyText(12, weight: .medium))
-                .foregroundColor(.agedBrass)
+                .font(.labelS)
+                .foregroundColor(.brass)
         }
+        .padding(.vertical, 10)
     }
 }
 

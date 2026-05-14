@@ -27,35 +27,34 @@ class AppState: ObservableObject {
 
 // MARK: - Tab Enumeration
 enum Tab: String, CaseIterable, Identifiable {
-    case home = "Home"
-    case discover = "Discover"
-    case create = "Create"
+    case home      = "Home"
+    case discover  = "Discover"
+    case create    = "Create"
     case community = "Community"
-    case profile = "Wardrobe"
-    
+    case profile   = "Profile"   // was "Wardrobe" — now correctly routes to ProfileView
+
     var id: String { rawValue }
-    
-    var label: String {
-        return rawValue  // Sentence case, not ALL CAPS
-    }
-    
+
+    /// Sentence case — no ALL CAPS
+    var label: String { rawValue }
+
     var icon: String {
         switch self {
-        case .home: return "house.fill"
-        case .discover: return "magnifyingglass"
-        case .create: return "plus.circle.fill"
+        case .home:      return "house.fill"
+        case .discover:  return "magnifyingglass"
+        case .create:    return "plus.circle.fill"
         case .community: return "person.3.fill"
-        case .profile: return "square.grid.2x2"
+        case .profile:   return "square.grid.2x2.fill"
         }
     }
-    
+
     var inactiveIcon: String {
         switch self {
-        case .home: return "house"
-        case .discover: return "magnifyingglass"
-        case .create: return "plus.circle"
+        case .home:      return "house"
+        case .discover:  return "magnifyingglass"
+        case .create:    return "plus.circle"
         case .community: return "person.3"
-        case .profile: return "square.grid.2x2"
+        case .profile:   return "square.grid.2x2"
         }
     }
 }

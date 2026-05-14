@@ -149,7 +149,7 @@ struct ImageThumbnail: View {
             // Hero badge
             if isHero {
                 Text("HERO")
-                    .font(.system(size: 8, weight: .bold, design: .monospaced))
+                    .font(.system(size: 8, weight: .bold))
                     .foregroundColor(.modaicsBackground)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)

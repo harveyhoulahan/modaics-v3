@@ -67,27 +67,20 @@ public struct ProfileHeaderView: View {
         .frame(height: 140)
         .clipped()
         .overlay(alignment: .topTrailing) {
-            // Action buttons
-            HStack(spacing: 12) {
+            // Flat icon buttons — no disc background
+            HStack(spacing: 16) {
                 Button(action: { viewModel.showSettings = true }) {
                     Image(systemName: "gear")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.nearBlack)
-                        .frame(width: 36, height: 36)
-                        .background(Color.ivory.opacity(0.9))
-                        .clipShape(Circle())
+                        .font(.system(size: 18, weight: .light))
+                        .foregroundColor(.sageWhite)
                 }
-                
                 Button(action: { viewModel.isEditing = true }) {
                     Image(systemName: "pencil")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.nearBlack)
-                        .frame(width: 36, height: 36)
-                        .background(Color.ivory.opacity(0.9))
-                        .clipShape(Circle())
+                        .font(.system(size: 18, weight: .light))
+                        .foregroundColor(.sageWhite)
                 }
             }
-            .padding(12)
+            .padding(16)
         }
         .overlay(alignment: .bottomLeading) {
             // Avatar

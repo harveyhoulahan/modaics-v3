@@ -246,17 +246,17 @@ public struct BrandSketchbookPublicView: View {
                         .frame(width: 40, height: 40)
                     
                     Text(post.authorDisplayName?.prefix(1) ?? "B")
-                        .font(.system(size: 18, weight: .bold, design: .monospaced))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.luxeGold)
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(post.authorDisplayName?.uppercased() ?? "BRAND")
-                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.sageWhite)
                     
                     Text(post.postType.displayName.uppercased())
-                        .font(.system(size: 10, design: .monospaced))
+                        .font(.system(size: 10))
                         .foregroundColor(Color(hex: post.postType.color))
                 }
                 

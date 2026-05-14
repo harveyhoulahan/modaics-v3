@@ -153,7 +153,7 @@ struct HorizontalImageThumbnail: View {
                 VStack {
                     HStack {
                         Text("COVER")
-                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .font(.system(size: 9, weight: .bold))
                             .foregroundColor(.modaicsBackground)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)

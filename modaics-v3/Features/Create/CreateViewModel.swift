@@ -68,6 +68,8 @@ public struct CreateFormState {
     // Materials & Sustainability
     var materials: [MaterialEntry] = []
     var isRecycled: Bool = false
+    var hasCertification: Bool = false
+    var hasCareNotes: Bool = false
     var certifications: [ModaicsCertification] = []
     
     // Size
@@ -314,6 +316,11 @@ public final class CreateViewModel: ObservableObject {
             form.certifications.append(certification)
         }
         calculateSustainabilityScore()
+    }
+
+    /// Single-select version used by the new sustainability section
+    public func selectCertification(_ certification: ModaicsCertification) {
+        toggleCertification(certification)
     }
     
     // MARK: - Sustainability Score

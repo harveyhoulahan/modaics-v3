@@ -21,14 +21,14 @@ struct ModaicsApp: App {
         // Navigation bar appearance - transparent with dark green styling
         let navBarAppearance = UINavigationBarAppearance()
         navBarAppearance.configureWithTransparentBackground()
-        navBarAppearance.backgroundColor = UIColor(Color.modaicsBackground)
+        navBarAppearance.backgroundColor = UIColor(Color.canvas)
         navBarAppearance.titleTextAttributes = [
-            .foregroundColor: UIColor(Color.sageWhite),
-            .font: UIFont.monospacedSystemFont(ofSize: 17, weight: .medium)
+            .foregroundColor: UIColor(Color.inkPrimary),
+            .font: UIFont.systemFont(ofSize: 17, weight: .medium)
         ]
         navBarAppearance.largeTitleTextAttributes = [
-            .foregroundColor: UIColor(Color.sageWhite),
-            .font: UIFont.monospacedSystemFont(ofSize: 34, weight: .bold)
+            .foregroundColor: UIColor(Color.inkPrimary),
+            .font: UIFont.systemFont(ofSize: 34, weight: .semibold)
         ]
         
         UINavigationBar.appearance().standardAppearance = navBarAppearance

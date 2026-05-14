@@ -436,7 +436,7 @@ private struct MembershipUpgradeView: View {
                                 "Priority matching",
                                 "Advanced analytics",
                                 "Custom wardrobe insights",
-                                "AI styling suggestions"
+                                "Style suggestions"
                             ],
                             isSelected: selectedTier == .premium,
                             isCurrent: viewModel.user.tier == .premium

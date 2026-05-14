@@ -1,335 +1,178 @@
 import SwiftUI
 
 // MARK: - CommunityPostCard
-/// Simplified community post card with editorial aesthetic
+/// Editorial community post card — canvas base, no OOTD pills, no emoji icons
 public struct CommunityPostCard: View {
     let post: CommunityPost
     let onLikeTapped: () -> Void
     let onCommentTapped: () -> Void
     let onShareTapped: () -> Void
     let onBookmarkTapped: () -> Void
-    let onUserTapped: (() -> Void)?
-    let onImageTapped: ((Int) -> Void)?
-    let onMoreTapped: (() -> Void)?
-    
-    @State private var currentImageIndex: Int = 0
+
+    @State private var isLiked: Bool
     @State private var showFullCaption: Bool = false
-    @State private var isLiked: Bool = false
-    @State private var likeScale: CGFloat = 1.0
-    
+
     public init(
         post: CommunityPost,
         onLikeTapped: @escaping () -> Void,
         onCommentTapped: @escaping () -> Void,
         onShareTapped: @escaping () -> Void,
-        onBookmarkTapped: @escaping () -> Void,
-        onUserTapped: (() -> Void)? = nil,
-        onImageTapped: ((Int) -> Void)? = nil,
-        onMoreTapped: (() -> Void)? = nil
+        onBookmarkTapped: @escaping () -> Void
     ) {
         self.post = post
         self.onLikeTapped = onLikeTapped
         self.onCommentTapped = onCommentTapped
         self.onShareTapped = onShareTapped
         self.onBookmarkTapped = onBookmarkTapped
-        self.onUserTapped = onUserTapped
-        self.onImageTapped = onImageTapped
-        self.onMoreTapped = onMoreTapped
         _isLiked = State(initialValue: post.isLiked)
     }
-    
+
     public var body: some View {
-        VStack(spacing: 0) {
-            // Simplified header
-            headerBar
-            
-            // Image grid
-            if !post.imageURLs.isEmpty {
-                editorialImageGrid
-                    .frame(maxHeight: 320)
-                    .clipped()
-            }
-            
-            // Story/Caption section
-            storySection
-                .frame(maxHeight: 200, alignment: .top)
-            
-            // Simplified sustainability info
-            if post.postType == .thriftFind || post.postType == .ecoTip {
-                sustainabilityInfo
-            }
-            
-            // Simplified action bar
-            actionBar
+        VStack(alignment: .leading, spacing: 0) {
+            postHeader
+            if !post.imageURLs.isEmpty { imageGrid }
+            captionBlock
+            engagementLine
+            Rectangle().fill(Color.hairline).frame(height: 0.5)
         }
-        .background(Color.modaicsSurface)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.warmDivider, lineWidth: 0.5)
-        )
-        .cornerRadius(12)
+        .background(Color.canvas)
     }
-    
-    // MARK: - Header Bar
-    private var headerBar: some View {
-        HStack(spacing: 0) {
-            // Left: User info - simplified
-            HStack(spacing: 12) {
-                // Avatar
-                ZStack {
-                    Circle()
-                        .fill(Color.modaicsSurfaceHighlight)
-                        .frame(width: 40, height: 40)
-                    
-                    Text(post.username.prefix(1).uppercased())
-                        .font(.bodyText(16, weight: .medium))
-                        .foregroundColor(.sageWhite)
-                }
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(post.username)
-                        .font(.bodyText(14, weight: .medium))
-                        .foregroundColor(.sageWhite)
-                    
-                    Text(post.formattedTime)
-                        .font(.bodyText(11))
-                        .foregroundColor(.sageMuted)
-                }
+
+    // MARK: — Header: avatar + username + timestamp
+    private var postHeader: some View {
+        HStack(spacing: 10) {
+            // Avatar 32pt
+            ZStack {
+                Circle()
+                    .fill(Color.canvasSecond)
+                    .frame(width: 32, height: 32)
+                Text(post.username.prefix(1).uppercased())
+                    .font(.labelS)
+                    .foregroundColor(.inkSecondary)
             }
-            
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(post.username)
+                    .font(.labelS)
+                    .foregroundColor(.inkPrimary)
+                Text(post.formattedTime)
+                    .font(.bodyS)
+                    .foregroundColor(.inkMuted)
+            }
+
             Spacer()
-            
-            // Right: Post type as text label (NOT coloured pill)
-            Text(post.postType.rawValue)
-                .font(.bodyText(11, weight: .medium))
-                .foregroundColor(.agedBrass)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color.modaicsBackground)
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
     }
-    
-    // MARK: - Editorial Image Grid
-    private var editorialImageGrid: some View {
+
+    // MARK: — Image grid (1:1 cells, 8pt gutter)
+    private var imageGrid: some View {
         Group {
             if post.imageURLs.count == 1 {
-                singleImageView(url: post.imageURLs[0])
-                    .frame(height: 280)
-                    .clipped()
-            } else if post.imageURLs.count == 2 {
-                HStack(spacing: 2) {
-                    ForEach(0..<2, id: \.self) { index in
-                        singleImageView(url: post.imageURLs[index])
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 200)
-                            .clipped()
-                    }
-                }
+                imageCell(post.imageURLs[0])
+                    .aspectRatio(4/5, contentMode: .fit)
             } else {
-                VStack(spacing: 2) {
-                    HStack(spacing: 2) {
-                        ForEach(0..<min(2, post.imageURLs.count), id: \.self) { index in
-                            singleImageView(url: post.imageURLs[index])
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 140)
-                                .clipped()
-                        }
-                    }
-                    if post.imageURLs.count > 2 {
-                        HStack(spacing: 2) {
-                            ForEach(2..<min(4, post.imageURLs.count), id: \.self) { index in
-                                singleImageView(url: post.imageURLs[index])
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 140)
-                                    .clipped()
-                                    .overlay(
-                                        post.imageURLs.count > 4 && index == 3 ?
-                                        ZStack {
-                                            Color.black.opacity(0.5)
-                                            Text("+\(post.imageURLs.count - 4)")
-                                                .font(.bodyText(16, weight: .medium))
-                                                .foregroundColor(.white)
-                                        }
-                                        : nil
-                                    )
+                LazyVGrid(
+                    columns: [GridItem(.flexible(), spacing: 2), GridItem(.flexible(), spacing: 2)],
+                    spacing: 2
+                ) {
+                    ForEach(post.imageURLs.prefix(4).indices, id: \.self) { idx in
+                        imageCell(post.imageURLs[idx])
+                            .aspectRatio(1, contentMode: .fit)
+                            .overlay {
+                                if idx == 3 && post.imageURLs.count > 4 {
+                                    Color.black.opacity(0.45)
+                                    Text("+\(post.imageURLs.count - 4)")
+                                        .font(.displayS)
+                                        .foregroundColor(.white)
+                                }
                             }
-                        }
                     }
                 }
             }
         }
+        .clipped()
     }
-    
-    private func singleImageView(url: String) -> some View {
-        Group {
-            if let imageURL = URL(string: url) {
-                AsyncImage(url: imageURL) { phase in
-                    switch phase {
-                    case .empty:
-                        Rectangle()
-                            .fill(Color.modaicsSurfaceHighlight)
-                            .overlay(
-                                ProgressView()
-                                    .tint(Color.agedBrass)
-                            )
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    case .failure:
-                        Rectangle()
-                            .fill(Color.modaicsSurfaceHighlight)
-                            .overlay(
-                                Image(systemName: "photo")
-                                    .font(.system(size: 30))
-                                    .foregroundColor(.sageMuted)
-                            )
-                    @unknown default:
-                        EmptyView()
-                    }
-                }
+
+    private func imageCell(_ url: String) -> some View {
+        AsyncImage(url: URL(string: url)) { phase in
+            switch phase {
+            case .success(let img):
+                img.resizable().scaledToFill()
+            default:
+                Color.canvasSecond
+                    .overlay(Image(systemName: "photo").foregroundColor(.inkMuted))
             }
         }
+        .clipped()
     }
-    
-    // MARK: - Story Section
-    private var storySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Caption
+
+    // MARK: — Caption
+    private var captionBlock: some View {
+        VStack(alignment: .leading, spacing: 8) {
             Text(post.caption)
-                .font(.bodyText(14))
-                .foregroundColor(.sageWhite)
-                .lineLimit(showFullCaption ? 8 : 3)
-            
-            if post.caption.count > 150 {
-                Button(action: { withAnimation { showFullCaption.toggle() } }) {
-                    Text(showFullCaption ? "Less" : "Read more")
-                        .font(.bodyText(11, weight: .medium))
-                        .foregroundColor(.agedBrass)
-                }
-            }
-            
-            // Tags - simplified, no excessive styling
-            if !post.tags.isEmpty {
-                FlowLayout(spacing: 8) {
-                    ForEach(post.tags.prefix(6), id: \.self) { tag in
-                        Text("#\(tag)")
-                            .font(.bodyText(11))
-                            .foregroundColor(.sageMuted)
+                .font(.bodyM)
+                .foregroundColor(.inkPrimary)
+                .lineLimit(showFullCaption ? nil : 3)
+
+            if post.caption.count > 120 {
+                Button(showFullCaption ? "Less" : "More") {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        showFullCaption.toggle()
                     }
                 }
-            }
-            
-            // Location
-            if let location = post.location {
-                HStack(spacing: 6) {
-                    Image(systemName: "mappin.and.ellipse")
-                        .font(.system(size: 10))
-                        .foregroundColor(.agedBrass)
-                    Text(location)
-                        .font(.bodyText(11))
-                        .foregroundColor(.sageMuted)
-                }
+                .font(.bodyS)
+                .foregroundColor(.brass)
             }
         }
-        .padding(16)
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
     }
-    
-    // MARK: - Sustainability Info (simplified)
-    private var sustainabilityInfo: some View {
+
+    // MARK: — Engagement line: "12 likes · 3 comments"
+    private var engagementLine: some View {
         HStack(spacing: 16) {
-            HStack(spacing: 4) {
-                Image(systemName: "leaf.fill")
-                    .font(.system(size: 12))
-                    .foregroundColor(.agedBrass)
-                Text("CO₂ saved: 2.4kg")
-                    .font(.bodyText(11))
-                    .foregroundColor(.agedBrass)
-            }
-            
-            HStack(spacing: 4) {
-                Image(systemName: "drop.fill")
-                    .font(.system(size: 12))
-                    .foregroundColor(.agedBrass)
-                Text("Water: 1,800L")
-                    .font(.bodyText(11))
-                    .foregroundColor(.agedBrass)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-    }
-    
-    // MARK: - Action Bar (simplified)
-    private var actionBar: some View {
-        HStack(spacing: 0) {
-            // Like button
-            Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                    isLiked.toggle()
-                    likeScale = 1.3
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    withAnimation { likeScale = 1.0 }
-                }
-                onLikeTapped()
-            }) {
-                HStack(spacing: 6) {
+            let likeCount = post.likes + (isLiked ? 1 : 0)
+            Text("\(likeCount) like\(likeCount == 1 ? "" : "s") · \(post.comments.count) comment\(post.comments.count == 1 ? "" : "s")")
+                .font(.bodyS)
+                .foregroundColor(.inkMuted)
+
+            Spacer()
+
+            // Compact action row
+            HStack(spacing: 20) {
+                Button(action: {
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) { isLiked.toggle() }
+                    onLikeTapped()
+                }) {
                     Image(systemName: isLiked ? "heart.fill" : "heart")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(isLiked ? .agedBrass : .sageMuted)
-                        .scaleEffect(likeScale)
-                    
-                    Text("\(post.likes + (isLiked ? 1 : 0))")
-                        .font(.bodyText(12))
-                        .foregroundColor(.sageMuted)
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(isLiked ? .brass : .inkMuted)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-            }
-            
-            Divider()
-                .background(Color.warmDivider)
-            
-            // Comment button
-            Button(action: onCommentTapped) {
-                HStack(spacing: 6) {
-                    Image(systemName: "text.bubble")
-                        .font(.system(size: 16))
-                        .foregroundColor(.sageMuted)
-                    
-                    Text("\(post.comments.count)")
-                        .font(.bodyText(12))
-                        .foregroundColor(.sageMuted)
+
+                Button(action: onCommentTapped) {
+                    Image(systemName: "bubble.left")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(.inkMuted)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-            }
-            
-            Divider()
-                .background(Color.warmDivider)
-            
-            // Share button
-            Button(action: onShareTapped) {
-                Image(systemName: "arrow.up.forward")
-                    .font(.system(size: 16))
-                    .foregroundColor(.sageMuted)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-            }
-            
-            Divider()
-                .background(Color.warmDivider)
-            
-            // Bookmark button
-            Button(action: onBookmarkTapped) {
-                Image(systemName: post.isBookmarked ? "bookmark.fill" : "bookmark")
-                    .font(.system(size: 16))
-                    .foregroundColor(post.isBookmarked ? .agedBrass : .sageMuted)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+
+                Button(action: onShareTapped) {
+                    Image(systemName: "arrow.up.forward")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(.inkMuted)
+                }
+
+                Button(action: onBookmarkTapped) {
+                    Image(systemName: post.isBookmarked ? "bookmark.fill" : "bookmark")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(post.isBookmarked ? .brass : .inkMuted)
+                }
             }
         }
-        .background(Color.modaicsBackground)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 16)
     }
 }

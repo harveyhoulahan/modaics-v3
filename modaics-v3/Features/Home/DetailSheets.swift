@@ -4,362 +4,210 @@ import SwiftUI
 struct ItemDetailSheet: View {
     let item: ModaicsGarment
     @Environment(\.dismiss) private var dismiss
-    
+    @State private var isSaved: Bool = false
+
     var body: some View {
         NavigationView {
             ZStack {
-                Color.modaicsBackground.ignoresSafeArea()
-                
+                Color.canvas.ignoresSafeArea()
+
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        // Image
-                        imageSection
-                        
-                        // Content
-                        VStack(alignment: .leading, spacing: 20) {
-                            // Title & Brand
-                            titleSection
-                            
-                            // Price & Exchange Type
-                            priceSection
-                            
-                            // Condition & Size
-                            detailsSection
-                            
-                            // Story/Description
+                    VStack(alignment: .leading, spacing: 0) {
+                        // Full-bleed hero image — no corner radius
+                        heroImage
+
+                        VStack(alignment: .leading, spacing: 24) {
+                            // Brand + title + price
+                            titleBlock
+
+                            Rectangle().fill(Color.hairline).frame(height: 0.5)
+
+                            // Condition + size (two-column, no pills)
+                            conditionSizeRow
+
+                            Rectangle().fill(Color.hairline).frame(height: 0.5)
+
+                            // Story
                             if !item.description.isEmpty {
-                                storySection
+                                storyBlock
                             }
-                            
-                            // Actions
-                            actionsSection
-                            
-                            Spacer(minLength: 40)
+
+                            // CTAs
+                            actionBlock
+
+                            Spacer(minLength: 60)
                         }
-                        .padding(20)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
                     }
                 }
             }
-            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(.sageMuted)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .light))
+                            .foregroundColor(.inkPrimary)
                     }
                 }
             }
         }
     }
-    
-    // MARK: - Image Section
-    private var imageSection: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 0)
-                .fill(Color.modaicsSurface)
-                .frame(height: 400)
-            
-            Image(systemName: "photo")
-                .font(.system(size: 80))
-                .foregroundColor(.sageSubtle)
+
+    // MARK: — Full-bleed hero
+    private var heroImage: some View {
+        ZStack(alignment: .topTrailing) {
+            GeometryReader { geo in
+                Color.canvasSecond
+                    .frame(width: geo.size.width, height: geo.size.width * 1.25)
+                    .overlay(
+                        Image(systemName: "photo")
+                            .font(.system(size: 48, weight: .ultraLight))
+                            .foregroundColor(.inkMuted)
+                    )
+            }
+            .frame(height: UIScreen.main.bounds.width * 1.25)
+
+            // Save link — top-right of image
+            Button(action: { isSaved.toggle() }) {
+                Text(isSaved ? "Saved" : "Save")
+                    .font(.labelS)
+                    .foregroundColor(isSaved ? .brass : .inkSecondary)
+                    .underline()
+            }
+            .padding(16)
         }
     }
-    
-    // MARK: - Title Section
-    private var titleSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+
+    // MARK: — Title block
+    private var titleBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
             Text((item.brand?.name ?? "Unknown").uppercased())
-                .font(.forestCaptionLarge)
-                .foregroundColor(.luxeGold)
-                .tracking(2)
-            
+                .font(.labelS)
+                .foregroundColor(.brass)
+                .kerning(1.5)
+
             Text(item.title)
-                .font(.forestDisplaySmall)
-                .foregroundColor(.sageWhite)
-            
-            Text(item.category.rawValue.capitalized)
-                .font(.forestBodyMedium)
-                .foregroundColor(.sageMuted)
-        }
-    }
-    
-    // MARK: - Price Section
-    private var priceSection: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            if let listingPrice = item.listingPrice {
-                Text("\(listingPrice, format: .currency(code: "USD"))")
-                    .font(.forestDisplaySmall)
-                    .foregroundColor(.luxeGold)
-                
-                if let originalPrice = item.originalPrice, originalPrice > listingPrice {
-                    Text("\(originalPrice, format: .currency(code: "USD"))")
-                        .font(.forestBodyLarge)
-                        .foregroundColor(.sageMuted)
-                        .strikethrough()
-                }
-            }
-            
-            Spacer()
-            
-            // Exchange type badge
-            Text(exchangeTypeText)
-                .font(.forestCaptionMedium)
-                .foregroundColor(.modaicsBackground)
-                .tracking(1)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Capsule().fill(Color.modaicsFern))
-        }
-    }
-    
-    private var exchangeTypeText: String {
-        switch item.exchangeType {
-        case .sell: return "FOR SALE"
-        case .trade: return "FOR TRADE"
-        case .sellOrTrade: return "SALE OR TRADE"
-        case .none: return ""
-        }
-    }
-    
-    // MARK: - Details Section
-    private var detailsSection: some View {
-        HStack(spacing: 16) {
-            DetailPill(icon: "star.fill", text: item.condition.displayName)
-            DetailPill(icon: "ruler", text: item.size.label)
-            
-            if let era = item.era {
-                DetailPill(icon: "clock", text: era.rawValue)
+                .font(.displayL)
+                .foregroundColor(.inkPrimary)
+
+            if let price = item.listingPrice {
+                Text(price, format: .currency(code: "AUD"))
+                    .font(.displayM)
+                    .foregroundColor(.brass)
             }
         }
     }
-    
-    // MARK: - Story Section
-    private var storySection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("THE STORY")
-                .font(.forestCaptionMedium)
-                .foregroundColor(.sageMuted)
-                .tracking(1)
-            
+
+    // MARK: — Condition + Size (no pill bubbles)
+    private var conditionSizeRow: some View {
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Condition")
+                    .font(.labelS)
+                    .foregroundColor(.inkMuted)
+                Text(item.condition.displayName)
+                    .font(.bodyM)
+                    .foregroundColor(.inkPrimary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Size")
+                    .font(.labelS)
+                    .foregroundColor(.inkMuted)
+                Text(item.size.label)
+                    .font(.bodyM)
+                    .foregroundColor(.inkPrimary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, 4)
+    }
+
+    // MARK: — Story block
+    private var storyBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionLabel("Story")
             Text(item.description)
-                .font(.forestBodyMedium)
-                .foregroundColor(.sageWhite)
+                .font(.bodyM)
+                .foregroundColor(.inkPrimary)
                 .lineSpacing(4)
         }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.modaicsSurface)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
-        )
     }
-    
-    // MARK: - Actions Section
-    private var actionsSection: some View {
+
+    // MARK: — Action block
+    private var actionBlock: some View {
         VStack(spacing: 12) {
-            Button(action: {}) {
-                HStack {
-                    Image(systemName: "message.fill")
-                    Text("MESSAGE SELLER")
-                        .tracking(1)
-                }
-                .font(.forestBodyMedium)
-                .foregroundColor(.modaicsBackground)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.luxeGold)
-                .cornerRadius(12)
-            }
-            
-            Button(action: {}) {
-                HStack {
-                    Image(systemName: "heart")
-                    Text("SAVE FOR LATER")
-                        .tracking(1)
-                }
-                .font(.forestBodyMedium)
-                .foregroundColor(.sageWhite)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.modaicsSurface)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.luxeGold.opacity(0.5), lineWidth: 1)
-                )
-                .cornerRadius(12)
-            }
+            PrimaryCTA("Buy now") {}
+            GhostCTA("Make offer") {}
         }
     }
 }
 
-// MARK: - Detail Pill
-struct DetailPill: View {
-    let icon: String
-    let text: String
-    
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 12))
-            Text(text.uppercased())
-                .font(.forestCaptionSmall)
-                .tracking(1)
-        }
-        .foregroundColor(.modaicsFern)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(
-            Capsule()
-                .fill(Color.modaicsFern.opacity(0.15))
-        )
-        .overlay(
-            Capsule()
-                .stroke(Color.modaicsFern.opacity(0.3), lineWidth: 1)
-        )
-    }
-}
-
-// MARK: - Legacy Event Detail Sheet (for Home page)
+// MARK: - Legacy Event Detail Sheet
 struct LegacyEventDetailSheet: View {
     let event: ModaicsEvent
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationView {
             ZStack {
-                Color.modaicsBackground.ignoresSafeArea()
-                
+                Color.canvas.ignoresSafeArea()
+
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
-                        // Date header
-                        dateHeader
-                        
-                        // Title
+                    VStack(alignment: .leading, spacing: 24) {
+                        // Date + title
                         VStack(alignment: .leading, spacing: 8) {
+                            Text("\(event.day) \(event.month)")
+                                .font(.labelS)
+                                .foregroundColor(.brass)
+                                .kerning(1.5)
+
                             Text(event.title)
-                                .font(.forestDisplaySmall)
-                                .foregroundColor(.sageWhite)
-                            
+                                .font(.displayL)
+                                .foregroundColor(.inkPrimary)
+
                             Text(event.location)
-                                .font(.forestBodyLarge)
-                                .foregroundColor(.sageMuted)
+                                .font(.bodyM)
+                                .foregroundColor(.inkSecondary)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        // Attendees
-                        HStack(spacing: 8) {
-                            Image(systemName: "person.2.fill")
-                                .foregroundColor(.modaicsFern)
-                            Text("\(event.attendees) people attending")
-                                .font(.forestBodyMedium)
-                                .foregroundColor(.sageWhite)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        // Description placeholder
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("ABOUT THIS EVENT")
-                                .font(.forestCaptionMedium)
-                                .foregroundColor(.sageMuted)
-                                .tracking(1)
-                            
-                            Text("Join us for an amazing fashion event featuring vintage finds, sustainable brands, and community connection.")
-                                .font(.forestBodyMedium)
-                                .foregroundColor(.sageWhite)
-                                .lineSpacing(4)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        // Actions
+
+                        Rectangle().fill(Color.hairline).frame(height: 0.5)
+
+                        Text("\(event.attendees) attending")
+                            .font(.bodyM)
+                            .foregroundColor(.inkMuted)
+
+                        SectionLabel("About this event")
+                        Text("Join us for an amazing fashion event featuring vintage finds, sustainable brands, and community connection.")
+                            .font(.bodyM)
+                            .foregroundColor(.inkPrimary)
+                            .lineSpacing(4)
+
                         VStack(spacing: 12) {
-                            Button(action: {}) {
-                                HStack {
-                                    Image(systemName: "checkmark.circle.fill")
-                                    Text("ATTEND EVENT")
-                                        .tracking(1)
-                                }
-                                .font(.forestBodyMedium)
-                                .foregroundColor(.modaicsBackground)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(Color.luxeGold)
-                                .cornerRadius(12)
-                            }
-                            
-                            Button(action: {}) {
-                                HStack {
-                                    Image(systemName: "square.and.arrow.up")
-                                    Text("SHARE EVENT")
-                                        .tracking(1)
-                                }
-                                .font(.forestBodyMedium)
-                                .foregroundColor(.sageWhite)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(Color.modaicsSurface)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.modaicsSurfaceHighlight, lineWidth: 0.5)
-                                )
-                                .cornerRadius(12)
-                            }
+                            PrimaryCTA("Attend event") {}
+                            GhostCTA("Share event") {}
                         }
-                        .padding(.top, 20)
-                        
-                        Spacer(minLength: 40)
+                        .padding(.top, 12)
+
+                        Spacer(minLength: 60)
                     }
-                    .padding(20)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
                 }
             }
-            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(.sageMuted)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .light))
+                            .foregroundColor(.inkPrimary)
                     }
                 }
             }
-        }
-    }
-    
-    private var dateHeader: some View {
-        HStack(spacing: 20) {
-            VStack(spacing: 4) {
-                Text(event.day)
-                    .font(.forestDisplayMedium)
-                    .foregroundColor(.luxeGold)
-                Text(event.month)
-                    .font(.forestHeadlineMedium)
-                    .foregroundColor(.sageMuted)
-            }
-            .frame(width: 80, height: 80)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.modaicsSurface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.luxeGold.opacity(0.3), lineWidth: 2)
-                    )
-            )
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Save the date")
-                    .font(.forestCaptionMedium)
-                    .foregroundColor(.sageMuted)
-                Text("Starts at 10:00 AM")
-                    .font(.forestBodyLarge)
-                    .foregroundColor(.sageWhite)
-            }
-            
-            Spacer()
         }
     }
 }
@@ -367,22 +215,6 @@ struct LegacyEventDetailSheet: View {
 // MARK: - Preview
 struct ItemDetailSheet_Previews: PreviewProvider {
     static var previews: some View {
-        ItemDetailSheet(
-            item: MockData.vintageDenimJacket
-        )
-    }
-}
-
-struct LegacyEventDetailSheet_Previews: PreviewProvider {
-    static var previews: some View {
-        LegacyEventDetailSheet(
-            event: ModaicsEvent(
-                title: "Vintage Market",
-                location: "Bondi Beach, Sydney",
-                day: "15",
-                month: "MAR",
-                attendees: 234
-            )
-        )
+        ItemDetailSheet(item: MockData.vintageDenimJacket)
     }
 }

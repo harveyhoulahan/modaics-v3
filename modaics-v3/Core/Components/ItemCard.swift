@@ -150,7 +150,7 @@ struct SustainabilityBadge: View {
             Image(systemName: "leaf.fill")
                 .font(.system(size: 8))
             Text("\(score)")
-                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .font(.system(size: 10, weight: .bold))
         }
         .foregroundColor(.modaicsBackground)
         .padding(.horizontal, 6)

@@ -189,88 +189,70 @@ struct AuthView: View {
 // MARK: - Main App View with Custom Tab Bar
 struct MainAppView: View {
     @EnvironmentObject var appState: AppState
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Tab Content
             Group {
                 switch appState.selectedTab {
-                case .home:
-                    HomeView()
-                case .discover:
-                    DiscoverView()
-                case .create:
-                    UnifiedCreateView()
-                case .community:
-                    CommunityView()
-                case .profile:
-                    WardrobeView()
+                case .home:      HomeView()
+                case .discover:  DiscoverView()
+                case .create:    UnifiedCreateView()
+                case .community: CommunityView()
+                case .profile:   ProfileView()   // Profile tab → ProfileView (not WardrobeView)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
-            // Custom Tab Bar
+
             CustomTabBar(selectedTab: $appState.selectedTab)
         }
         .ignoresSafeArea(.keyboard)
     }
 }
 
-// MARK: - Custom Tab Bar (Editorial Style)
+// MARK: - Custom Tab Bar (Editorial)
 struct CustomTabBar: View {
     @Binding var selectedTab: Tab
-    
+
     var body: some View {
         VStack(spacing: 0) {
-            // Thin top border
+            // 0.5pt hairline divider
             Rectangle()
-                .fill(Color.warmDivider)
+                .fill(Color.hairline)
                 .frame(height: 0.5)
-            
+
             HStack(spacing: 0) {
                 ForEach(Tab.allCases) { tab in
-                    TabButton(
-                        tab: tab,
-                        isSelected: selectedTab == tab,
-                        action: { selectedTab = tab }
-                    )
+                    TabButton(tab: tab, isSelected: selectedTab == tab) {
+                        selectedTab = tab
+                    }
                 }
             }
             .frame(height: 55)
-            .background(Color.warmOffWhite)
+            .background(Color.canvas)
         }
     }
 }
 
-// MARK: - Tab Button (Editorial Style)
+// MARK: - Tab Button (Editorial)
 struct TabButton: View {
     let tab: Tab
     let isSelected: Bool
     let action: () -> Void
-    @State private var scale: CGFloat = 1.0
-    
+
     var body: some View {
-        Button(action: {
-            withAnimation(.editorialSpring) {
-                scale = 0.9
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.editorialSpring) {
-                    scale = 1.0
-                }
-            }
-            action()
-        }) {
+        Button(action: action) {
             VStack(spacing: 4) {
                 Image(systemName: isSelected ? tab.icon : tab.inactiveIcon)
-                    .font(.system(size: tab == .create ? 24 : 20, weight: .regular))
-                    .foregroundColor(isSelected ? .nearBlack : .mutedGray)
-                    .scaleEffect(scale)
-                
+                    .font(.system(
+                        size: tab == .create ? 24 : 20,
+                        weight: isSelected ? .regular : .light
+                    ))
+                    .foregroundColor(isSelected ? .inkPrimary : .inkMuted)
+
                 if tab != .create {
                     Text(tab.label)
-                        .font(.tabLabel)
-                        .foregroundColor(isSelected ? .nearBlack : .mutedGray)
+                        .font(.labelS)
+                        .foregroundColor(isSelected ? .inkPrimary : .inkMuted)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -28,64 +28,40 @@ public struct ProfileView: View {
     
     public var body: some View {
         ZStack {
-            Color.modaicsBackground.ignoresSafeArea()
-            
+            Color.forest.ignoresSafeArea()
+
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
-                    // Profile Header
                     ProfileHeaderView(viewModel: headerVM)
-                    
-                    // Sustainability Dashboard
                     SustainabilityDashboardView(viewModel: sustainabilityVM)
-                    
-                    // Segment Selector
                     segmentSelector
-                    
-                    // Content based on selected segment
                     contentArea
-                    
                     Spacer(minLength: 100)
                 }
                 .padding(.top, 16)
             }
         }
     }
-    
-    // MARK: - Segment Selector
+
+    // MARK: - Segment Selector (underline tabs on forest surface)
     private var segmentSelector: some View {
-        HStack(spacing: 0) {
-            ForEach(ProfileSegment.allCases) { segment in
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        selectedSegment = segment
+        VStack(spacing: 0) {
+            HStack(spacing: 24) {
+                ForEach(ProfileSegment.allCases) { segment in
+                    UnderlineFilter(segment.rawValue,
+                                    isSelected: selectedSegment == segment,
+                                    activeColor: .brass,
+                                    inactiveColor: .sageMuted) {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            selectedSegment = segment
+                        }
                     }
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: segment.icon)
-                            .font(.system(size: 14))
-                        
-                        Text(segment.rawValue.uppercased())
-                            .font(.forestCaptionSmall)
-                    }
-                    .foregroundColor(selectedSegment == segment ? .sageWhite : .sageMuted)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(
-                        selectedSegment == segment
-                        ? Color.luxeGold
-                        : Color.modaicsSurface
-                    )
                 }
-                .buttonStyle(PlainButtonStyle())
+                Spacer()
             }
+            .padding(.horizontal, 20)
+            Rectangle().fill(Color.sageWhite.opacity(0.12)).frame(height: 0.5)
         }
-        .background(Color.modaicsSurface)
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.modaicsSurfaceHighlight, lineWidth: 1)
-        )
-        .padding(.horizontal, 20)
     }
     
     // MARK: - Content Area
