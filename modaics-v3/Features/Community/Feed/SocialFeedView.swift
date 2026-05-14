@@ -1,14 +1,5 @@
 import SwiftUI
 
-// MARK: - Feed Filter
-public enum FeedFilter: String, CaseIterable, Identifiable {
-    case forYou     = "For you"
-    case following  = "Following"
-    case trending   = "Trending"
-    case challenges = "Challenges"
-    public var id: String { rawValue }
-}
-
 // MARK: - SocialFeedView
 public struct SocialFeedView: View {
     @StateObject var viewModel: FeedViewModel
