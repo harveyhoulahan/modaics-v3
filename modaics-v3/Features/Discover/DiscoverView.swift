@@ -313,7 +313,7 @@ public struct DiscoverView: View {
                 DSItemCard(
                     brand: item.brand,
                     name: item.name,
-                    price: item.price.map { Decimal($0) }
+                    price: Decimal(item.price)
                 )
                 .onTapGesture { /* navigate to detail */ }
             }
