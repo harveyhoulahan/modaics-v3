@@ -81,9 +81,9 @@ public struct WardrobeView: View {
                 ) {
                     ForEach(viewModel.garments) { garment in
                         DSItemCard(
-                            brand: garment.brand ?? "Unknown",
+                            brand: garment.brand?.name ?? "Unknown",
                             name: garment.title,
-                            price: garment.askingPrice.map { "$\(Int($0))" }
+                            price: garment.listingPrice
                         )
                         .onTapGesture { selectedGarment = garment }
                         .contextMenu {

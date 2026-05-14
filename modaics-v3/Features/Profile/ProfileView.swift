@@ -50,8 +50,7 @@ public struct ProfileView: View {
                 ForEach(ProfileSegment.allCases) { segment in
                     UnderlineFilter(segment.rawValue,
                                     isSelected: selectedSegment == segment,
-                                    activeColor: .brass,
-                                    inactiveColor: .sageMuted) {
+                                    useBrass: true) {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             selectedSegment = segment
                         }

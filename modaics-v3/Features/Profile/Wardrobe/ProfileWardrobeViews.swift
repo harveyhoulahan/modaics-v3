@@ -431,6 +431,30 @@ private struct ActivityRow: View {
     }
 }
 
+// MARK: - Empty State View (shared utility)
+struct EmptyStateView: View {
+    let icon: String
+    let title: String
+    let message: String
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 40, weight: .ultraLight))
+                .foregroundColor(.inkMuted)
+            Text(title)
+                .font(.displayS)
+                .foregroundColor(.inkPrimary)
+                .multilineTextAlignment(.center)
+            Text(message)
+                .font(.bodyM)
+                .foregroundColor(.inkMuted)
+                .multilineTextAlignment(.center)
+        }
+        .padding(32)
+    }
+}
+
 // MARK: - Preview
 struct ProfileWardrobeContentView_Previews: PreviewProvider {
     static var previews: some View {
