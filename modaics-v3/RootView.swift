@@ -57,10 +57,8 @@ struct OnboardingView: View {
                 Spacer()
                 
                 VStack(spacing: 16) {
-                    Text("modaics")
-                        .font(.editorialDisplayMedium(36))
-                        .foregroundColor(.nearBlack)
-                    
+                    ShimmerWordmark()
+
                     Text("Every piece, a story")
                         .font(.bodyMedium)
                         .foregroundColor(.warmCharcoal)
@@ -100,6 +98,36 @@ struct OnboardingView: View {
             }
             .padding()
         }
+    }
+}
+
+// MARK: - Shimmer Wordmark
+/// "modaics" in forest green with a travelling light shimmer
+struct ShimmerWordmark: View {
+    @State private var phase: CGFloat = -1.0
+
+    var body: some View {
+        Text("modaics")
+            .font(.editorialDisplayMedium(36))
+            .foregroundStyle(
+                LinearGradient(
+                    stops: [
+                        .init(color: .hunter,                   location: max(0, phase - 0.25)),
+                        .init(color: Color(hex: "A8C5A0"),      location: phase),
+                        .init(color: .hunter,                   location: min(1, phase + 0.25))
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .onAppear {
+                withAnimation(
+                    .easeInOut(duration: 2.2)
+                    .repeatForever(autoreverses: false)
+                ) {
+                    phase = 1.4
+                }
+            }
     }
 }
 
