@@ -73,7 +73,7 @@ struct ItemDetailSheet: View {
             Button(action: { isSaved.toggle() }) {
                 Text(isSaved ? "Saved" : "Save")
                     .font(.labelS)
-                    .foregroundColor(isSaved ? .brass : .inkSecondary)
+                    .foregroundColor(isSaved ? .hunter : .inkSecondary)
                     .underline()
             }
             .padding(16)
@@ -85,7 +85,7 @@ struct ItemDetailSheet: View {
         VStack(alignment: .leading, spacing: 6) {
             Text((item.brand?.name ?? "Unknown").uppercased())
                 .font(.labelS)
-                .foregroundColor(.brass)
+                .foregroundColor(.hunter)
                 .kerning(1.5)
 
             Text(item.title)
@@ -95,7 +95,7 @@ struct ItemDetailSheet: View {
             if let price = item.listingPrice {
                 Text(price, format: .currency(code: "AUD"))
                     .font(.displayM)
-                    .foregroundColor(.brass)
+                    .foregroundColor(.hunter)
             }
         }
     }
@@ -162,7 +162,7 @@ struct LegacyEventDetailSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("\(event.day) \(event.month)")
                                 .font(.labelS)
-                                .foregroundColor(.brass)
+                                .foregroundColor(.hunter)
                                 .kerning(1.5)
 
                             Text(event.title)

@@ -68,7 +68,7 @@ public struct DSItemCard: View {
                     .font(.labelS)
                     .tracking(1.5)
                     .textCase(.uppercase)
-                    .foregroundColor(.inkSecondary)
+                    .foregroundColor(.hunter)
                     .lineLimit(1)
             }
             Text(name)
@@ -78,7 +78,7 @@ public struct DSItemCard: View {
             if let price = price {
                 Text("$\(NSDecimalNumber(decimal: price).intValue)")
                     .font(.price)
-                    .foregroundColor(.brass)
+                    .foregroundColor(.hunter)
             }
         }
     }
