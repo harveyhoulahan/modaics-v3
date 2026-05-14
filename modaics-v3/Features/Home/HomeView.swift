@@ -216,37 +216,6 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Legacy EventDetailSheet wrapper (for Home's ModaicsEvent type)
-struct LegacyEventDetailSheet: View {
-    let event: ModaicsEvent
-    @Environment(\.dismiss) private var dismiss
-    var body: some View {
-        VStack(spacing: 20) {
-            HStack {
-                Spacer()
-                Button(action: { dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 18, weight: .light))
-                        .foregroundColor(.inkPrimary)
-                }
-            }
-            .padding()
-
-            Text(event.title)
-                .font(.displayL)
-                .foregroundColor(.inkPrimary)
-                .padding(.horizontal, 20)
-
-            Text(event.location)
-                .font(.bodyM)
-                .foregroundColor(.inkSecondary)
-
-            Spacer()
-        }
-        .background(Color.canvas)
-    }
-}
-
 // MARK: - Preview
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
